@@ -1,18 +1,16 @@
 package com.cwallet.CHAMPWallet.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = "roles")
 @Entity(name="users")
+@Builder
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,11 +22,16 @@ public class UserEntity {
     private String password;
     private boolean isActive = false;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name="users_roles",
             joinColumns = {@JoinColumn(name="user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name="role_id", referencedColumnName = "id")}
     )
-    private List<Role> roles;
+    @ToString.Exclude
+    private List<Role> roles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @ToString.Exclude
+    private List<Verification> verifications = new ArrayList<>();
 }

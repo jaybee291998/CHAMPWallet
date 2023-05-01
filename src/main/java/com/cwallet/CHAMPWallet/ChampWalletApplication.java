@@ -1,5 +1,7 @@
 package com.cwallet.CHAMPWallet;
 
+import com.cwallet.CHAMPWallet.models.Verification;
+import com.cwallet.CHAMPWallet.repository.VerificationRepository;
 import com.cwallet.CHAMPWallet.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,13 +10,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @SpringBootApplication
 public class ChampWalletApplication {
 	private static EmailService emailSender;
+	private static VerificationRepository verificationRepository;
 	@Autowired
-	public ChampWalletApplication(EmailService emailSender){
+	public ChampWalletApplication(EmailService emailSender, VerificationRepository verificationRepository){
 		this.emailSender = emailSender;
+		this.verificationRepository = verificationRepository;
 	}
 
 	public static void main(String[] args) {
@@ -28,6 +34,13 @@ public class ChampWalletApplication {
 		System.out.println("IP of my system is := "+IP.getHostAddress());
 		emailSender.sendSimpleMessage("jaybee291998@gmail.com", "test"+IP.getHostAddress(), "this is a test");
 		System.out.println("Email Sent");*/
+		LocalDateTime end = LocalDateTime.now();
+		LocalDateTime start = end.minusMinutes(15);
+
+		System.out.println("Start: " + start);
+		System.out.print("End: " + end);
+		List<Verification> verifications = verificationRepository.findLatestTimestampByAccountID(start, end, 5);
+		verifications.stream().forEach(System.out::println);
 	}
 
 }

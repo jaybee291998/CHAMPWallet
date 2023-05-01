@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,5 +21,5 @@ public class Role {
     @Column(unique = true)
     private String name;
     @ManyToMany(mappedBy = "roles")
-    private List<UserEntity> users;
+    private List<UserEntity> users = new ArrayList<>();
 }

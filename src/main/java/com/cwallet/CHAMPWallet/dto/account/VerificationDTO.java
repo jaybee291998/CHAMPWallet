@@ -1,10 +1,8 @@
-package com.cwallet.CHAMPWallet.dto;
+package com.cwallet.CHAMPWallet.dto.account;
 
-import com.cwallet.CHAMPWallet.models.UserEntity;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data

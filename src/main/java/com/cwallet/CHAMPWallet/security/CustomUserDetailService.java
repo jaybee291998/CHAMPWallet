@@ -1,7 +1,7 @@
 package com.cwallet.CHAMPWallet.security;
 
-import com.cwallet.CHAMPWallet.models.UserEntity;
-import com.cwallet.CHAMPWallet.repository.UserRepository;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.repository.account.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

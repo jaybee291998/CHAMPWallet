@@ -1,15 +1,14 @@
-package com.cwallet.CHAMPWallet.controller;
+package com.cwallet.CHAMPWallet.controller.account;
 
-import com.cwallet.CHAMPWallet.bean.PasswordResetForm;
-import com.cwallet.CHAMPWallet.bean.RegistrationForm;
-import com.cwallet.CHAMPWallet.dto.UserEntityDTO;
-import com.cwallet.CHAMPWallet.exception.EmailNotUniqueException;
-import com.cwallet.CHAMPWallet.exception.UserNameNotUniqueException;
-import com.cwallet.CHAMPWallet.models.UserEntity;
+import com.cwallet.CHAMPWallet.bean.account.PasswordResetForm;
+import com.cwallet.CHAMPWallet.bean.account.RegistrationForm;
+import com.cwallet.CHAMPWallet.dto.account.UserEntityDTO;
+import com.cwallet.CHAMPWallet.exception.account.EmailNotSentException;
+import com.cwallet.CHAMPWallet.exception.account.EmailNotUniqueException;
+import com.cwallet.CHAMPWallet.exception.account.UserNameNotUniqueException;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
-import com.cwallet.CHAMPWallet.service.UserService;
+import com.cwallet.CHAMPWallet.service.account.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,10 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.jws.WebParam;
-import javax.persistence.GeneratedValue;
 import javax.validation.Valid;
-import java.awt.image.BufferedImage;
 
 @Controller
 public class UserController {
@@ -64,6 +60,8 @@ public class UserController {
             model.addAttribute("registrationFrom", registrationForm);
             model.addAttribute("emailError", "Email Already exist");
             return "users-registration";
+        } catch (EmailNotSentException e) {
+            return "redirect:/login?emailnotsent=email not sent";
         }
         return "redirect:/login";
     }

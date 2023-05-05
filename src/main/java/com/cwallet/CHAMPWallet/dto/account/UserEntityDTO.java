@@ -1,12 +1,11 @@
-package com.cwallet.CHAMPWallet.dto;
+package com.cwallet.CHAMPWallet.dto.account;
 
-import com.cwallet.CHAMPWallet.models.Role;
+import com.cwallet.CHAMPWallet.models.account.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.util.List;
 @Data
 @AllArgsConstructor

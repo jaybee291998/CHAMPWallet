@@ -1,26 +1,30 @@
-package com.cwallet.CHAMPWallet.service.impl;
+package com.cwallet.CHAMPWallet.service.impl.account;
 
-import com.cwallet.CHAMPWallet.dto.UserEntityDTO;
-import com.cwallet.CHAMPWallet.dto.VerificationDTO;
-import com.cwallet.CHAMPWallet.exception.EmailNotUniqueException;
-import com.cwallet.CHAMPWallet.exception.UserNameNotUniqueException;
-import com.cwallet.CHAMPWallet.models.Role;
-import com.cwallet.CHAMPWallet.models.UserEntity;
-import com.cwallet.CHAMPWallet.repository.RoleRepository;
-import com.cwallet.CHAMPWallet.repository.UserRepository;
-import com.cwallet.CHAMPWallet.service.UserService;
-import com.cwallet.CHAMPWallet.service.VerificationService;
+import com.cwallet.CHAMPWallet.dto.account.UserEntityDTO;
+import com.cwallet.CHAMPWallet.dto.account.VerificationDTO;
+import com.cwallet.CHAMPWallet.exception.account.EmailNotSentException;
+import com.cwallet.CHAMPWallet.exception.account.EmailNotUniqueException;
+import com.cwallet.CHAMPWallet.exception.account.UserNameNotUniqueException;
+import com.cwallet.CHAMPWallet.models.account.Role;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.models.account.Wallet;
+import com.cwallet.CHAMPWallet.repository.account.RoleRepository;
+import com.cwallet.CHAMPWallet.repository.account.UserRepository;
+import com.cwallet.CHAMPWallet.repository.account.WalletRepository;
+import com.cwallet.CHAMPWallet.service.account.UserService;
+import com.cwallet.CHAMPWallet.service.account.VerificationService;
 import com.cwallet.CHAMPWallet.utils.EmailService;
-import org.apache.catalina.User;
+import com.sun.mail.util.MailConnectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import static com.cwallet.CHAMPWallet.mappers.UserMapper.mapToUser;
+import static com.cwallet.CHAMPWallet.mappers.account.UserMapper.mapToUser;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,6 +33,10 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     private VerificationService verificationService;
     private EmailService emailService;
+
+    private InetAddress IP= null;
+    @Autowired
+    private WalletRepository walletRepository;
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder,
                            VerificationService verificationService, EmailService emailService){
@@ -37,11 +45,16 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.verificationService = verificationService;
         this.emailService = emailService;
+        try {
+            IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     @Override
-    public void save(UserEntityDTO userDto) throws UserNameNotUniqueException, EmailNotUniqueException {
+    public void save(UserEntityDTO userDto) throws UserNameNotUniqueException, EmailNotUniqueException, EmailNotSentException {
         UserEntity userEntity = userRepository.findByUsername(userDto.getUsername());
         if(userEntity != null) {
             throw new UserNameNotUniqueException("Usrename not nunique");
@@ -54,18 +67,18 @@ public class UserServiceImpl implements UserService {
         userDto.setRoles(Arrays.asList(role));
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         UserEntity user = mapToUser(userDto);
-        userRepository.save(user);
+        UserEntity newUser = userRepository.save(user);
+        Wallet newWallet = Wallet.builder()
+                .balance(0)
+                .user(newUser)
+                .build();
+        walletRepository.save(newWallet);
         String code = verificationService.generateCode();
         VerificationDTO verificationDTO = VerificationDTO.builder()
                 .verification_code(code)
                 .user(user)
                 .build();
-        InetAddress IP= null;
-        try {
-            IP = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
+
         StringBuilder message = new StringBuilder();
         String username = user.getUsername();
         String verificationCode = verificationDTO.getVerification_code();
@@ -75,19 +88,19 @@ public class UserServiceImpl implements UserService {
         message.append(String.format("If you didnt request this password reset please ignore this email"));
         message.append(String.format("To reset you password please click on this link: \n"));
         message.append(activationLink);
-        emailService.sendSimpleMessage(user.getEmail(), "password reset", message.toString());
+        try {
+            emailService.sendSimpleMessage(user.getEmail(), "password reset", message.toString());
+        } catch(ConnectException e){
+            e.printStackTrace();
+            throw new EmailNotSentException("Email not sent");
+        }
+
         System.out.println(message.toString());
         verificationService.saveVerificationCode(verificationDTO);
     }
 
     @Override
     public void requestPasswordReset(String email) {
-        InetAddress IP= null;
-        try {
-            IP = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
         UserEntity user = userRepository.findByEmail(email);
         VerificationDTO verificationDTO = verificationService.requestVerification(user);
         StringBuilder message = new StringBuilder();
@@ -99,7 +112,11 @@ public class UserServiceImpl implements UserService {
         message.append(String.format("If you didnt request this password reset please ignore this email"));
         message.append(String.format("To reset you password please click on this link: \n"));
         message.append(activationLink);
-        emailService.sendSimpleMessage(email, "password reset", message.toString());
+        try {
+            emailService.sendSimpleMessage(email, "password reset", message.toString());
+        } catch (ConnectException e) {
+            throw new RuntimeException(e);
+        }
         verificationService.saveVerificationCode(verificationDTO);
         System.out.println(message.toString());
     }

@@ -1,6 +1,6 @@
-package com.cwallet.CHAMPWallet.repository;
+package com.cwallet.CHAMPWallet.repository.account;
 
-import com.cwallet.CHAMPWallet.models.UserEntity;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {

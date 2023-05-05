@@ -1,4 +1,4 @@
-package com.cwallet.CHAMPWallet.bean;
+package com.cwallet.CHAMPWallet.bean.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

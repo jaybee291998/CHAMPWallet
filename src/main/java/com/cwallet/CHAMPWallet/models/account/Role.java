@@ -1,4 +1,4 @@
-package com.cwallet.CHAMPWallet.models;
+package com.cwallet.CHAMPWallet.models.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

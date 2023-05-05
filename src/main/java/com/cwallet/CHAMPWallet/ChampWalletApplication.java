@@ -1,15 +1,12 @@
 package com.cwallet.CHAMPWallet;
 
-import com.cwallet.CHAMPWallet.models.Verification;
-import com.cwallet.CHAMPWallet.repository.VerificationRepository;
+import com.cwallet.CHAMPWallet.models.account.Verification;
+import com.cwallet.CHAMPWallet.repository.account.VerificationRepository;
 import com.cwallet.CHAMPWallet.utils.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.List;
 

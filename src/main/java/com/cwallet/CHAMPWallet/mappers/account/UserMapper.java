@@ -1,7 +1,7 @@
-package com.cwallet.CHAMPWallet.mappers;
+package com.cwallet.CHAMPWallet.mappers.account;
 
-import com.cwallet.CHAMPWallet.dto.UserEntityDTO;
-import com.cwallet.CHAMPWallet.models.UserEntity;
+import com.cwallet.CHAMPWallet.dto.account.UserEntityDTO;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
 
 public class UserMapper {
     public static UserEntity mapToUser(UserEntityDTO userEntityDTO) {

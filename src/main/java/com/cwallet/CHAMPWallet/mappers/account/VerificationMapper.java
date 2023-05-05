@@ -1,7 +1,7 @@
-package com.cwallet.CHAMPWallet.mappers;
+package com.cwallet.CHAMPWallet.mappers.account;
 
-import com.cwallet.CHAMPWallet.dto.VerificationDTO;
-import com.cwallet.CHAMPWallet.models.Verification;
+import com.cwallet.CHAMPWallet.dto.account.VerificationDTO;
+import com.cwallet.CHAMPWallet.models.account.Verification;
 
 public class VerificationMapper {
     public static Verification mapToVerification(VerificationDTO verificationDTO) {

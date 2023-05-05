@@ -1,14 +1,14 @@
-package com.cwallet.CHAMPWallet.service.impl;
+package com.cwallet.CHAMPWallet.service.impl.account;
 import java.util.Random;
-import com.cwallet.CHAMPWallet.dto.UserEntityDTO;
-import com.cwallet.CHAMPWallet.dto.VerificationDTO;
-import com.cwallet.CHAMPWallet.models.UserEntity;
-import com.cwallet.CHAMPWallet.models.Verification;
-import com.cwallet.CHAMPWallet.repository.VerificationRepository;
-import com.cwallet.CHAMPWallet.service.VerificationService;
+
+import com.cwallet.CHAMPWallet.dto.account.VerificationDTO;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.models.account.Verification;
+import com.cwallet.CHAMPWallet.repository.account.VerificationRepository;
+import com.cwallet.CHAMPWallet.service.account.VerificationService;
 import org.springframework.stereotype.Service;
 
-import static com.cwallet.CHAMPWallet.mappers.VerificationMapper.mapToVerification;
+import static com.cwallet.CHAMPWallet.mappers.account.VerificationMapper.mapToVerification;
 @Service
 public class VerificationImpl implements VerificationService {
     private VerificationRepository verificationRepository;

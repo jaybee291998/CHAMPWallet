@@ -1,4 +1,4 @@
-package com.cwallet.CHAMPWallet.models;
+package com.cwallet.CHAMPWallet.models.account;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

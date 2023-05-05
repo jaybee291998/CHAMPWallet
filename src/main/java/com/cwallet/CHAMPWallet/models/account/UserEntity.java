@@ -1,4 +1,4 @@
-package com.cwallet.CHAMPWallet.models;
+package com.cwallet.CHAMPWallet.models.account;
 
 import lombok.*;
 
@@ -34,4 +34,7 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     private List<Verification> verifications = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user")
+    private Wallet wallet;
 }

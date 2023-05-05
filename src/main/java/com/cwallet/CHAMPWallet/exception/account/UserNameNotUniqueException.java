@@ -1,4 +1,4 @@
-package com.cwallet.CHAMPWallet.exception;
+package com.cwallet.CHAMPWallet.exception.account;
 
 public class UserNameNotUniqueException extends Exception{
     public UserNameNotUniqueException(String s) {

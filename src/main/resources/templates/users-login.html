@@ -19,6 +19,10 @@
       <div th:if="${param.logout}" class="alert alert-success">
         <p>You have been logged out</p>
       </div>
+
+      <div th:if="${param.emailnotsent}" class="alert alert-success">
+        <p th:text="${param.emailnotsent}"></p>
+      </div>
       <form role="form" method="post" th:action="@{/login}">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="form-group">

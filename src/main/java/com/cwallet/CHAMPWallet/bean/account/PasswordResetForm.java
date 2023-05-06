@@ -15,5 +15,10 @@ import javax.validation.constraints.Size;
 public class PasswordResetForm {
     @NotNull
     @Size(min=5, max=255)
-    private String email;
+    private String password;
+    @NotNull
+    @Size(min=5, max=255)
+    private String confirmPassword;
+    private String activationCode;
+    private long accountID;
 }

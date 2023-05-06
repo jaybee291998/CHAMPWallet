@@ -32,6 +32,9 @@
       <div th:if="${param.resetpassword}" class="alert alert-success">
         <p>Reset Password link has been successfully sent</p>
       </div>
+      <div th:if="${param.resetpasswordsuccess}" class="alert alert-success">
+        <p th:text="${param.resetpasswordsuccess}"></p>
+      </div>
       <form role="form" method="post" th:action="@{/login}">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="form-group">

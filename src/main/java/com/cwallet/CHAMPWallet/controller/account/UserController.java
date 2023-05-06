@@ -92,7 +92,7 @@ public class UserController {
     @GetMapping("/password-reset")
     public String getRequestPasswordresetForm(Model model) {
         model.addAttribute("passwordResetForm", new EmailForm());
-        return "password-reset";
+        return "request-password-reset";
     }
 
     @PostMapping("/password-reset")
@@ -100,7 +100,7 @@ public class UserController {
                                       BindingResult result, Model model) {
         if(result.hasErrors()){
             model.addAttribute("passwordResetForm", emailForm);
-            return "password-reset";
+            return "request-password-reset";
         }
         try {
             userService.requestPasswordReset(emailForm.getEmail());
@@ -149,7 +149,7 @@ public class UserController {
 
     @GetMapping("/activate-account")
     public String activateAccount(@RequestParam String activation, @RequestParam String account, Model model) {
-        if(activation == null || account == null) {
+        if((activation == null || activation.equals("")) || (account == null || account.equals(""))) {
             model.addAttribute("errorMessage", "Invalid activation link");
             return "activation";
         }
@@ -167,6 +167,52 @@ public class UserController {
         } catch (AccountAlreadyActivatedException e) {
             model.addAttribute("errorMessage", "Your account is already activated");
             return "activation";
+        } catch (VerificationAlreadyUsedException e) {
+            model.addAttribute("errorMessage", "verification already used");
+            return "activation";
+        }
+    }
+
+    @GetMapping("/reset-password")
+    public String getResetPasswordForm(@RequestParam String activation, @RequestParam String account, Model model) {
+        if((activation == null || activation.equals("")) || (account == null || account.equals(""))) {
+            model.addAttribute("errorMessage", "Invalid reset link");
+            return "password-reset";
+        }
+        PasswordResetForm resetForm = PasswordResetForm.builder()
+                .activationCode(activation)
+                .accountID(Long.valueOf(account))
+                .build();
+
+        model.addAttribute("passwordResetForm", resetForm);
+        return "password-reset";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@Valid @ModelAttribute("passwordResetForm") PasswordResetForm resetForm, BindingResult bindingResult, Model model) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("passwordResetForm", resetForm);
+            return "redirect:/reset-password?invalidlink=invalid reset link";
+        }
+
+        if(resetForm.getActivationCode() == null || resetForm.getActivationCode().equals("")) {
+            model.addAttribute("passwordResetForm", resetForm);
+            model.addAttribute("errorMessage", "No activation code given");
+            return "password-reset";
+        }
+        try {
+            boolean isSuccess = verificationService.resetPassword(resetForm.getActivationCode(), resetForm.getAccountID(), resetForm.getPassword());
+            if(isSuccess) {
+                return "redirect:/login?resetpasswordsuccess=Password reset was successfully";
+            }
+            model.addAttribute("errorMessage", "Invalid activation link");
+            return "password-reset";
+        } catch (NoSuchAccountException e) {
+            model.addAttribute("errorMessage", "No such account");
+            return "password-reset";
+        } catch (VerificationAlreadyUsedException e) {
+            model.addAttribute("errorMessage", "The verification link is already used");
+            return "password-reset";
         }
     }
 }

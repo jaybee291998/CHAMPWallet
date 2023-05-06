@@ -12,5 +12,5 @@ public interface VerificationRepository extends JpaRepository<Verification, Long
            value = "SELECT * FROM verification WHERE timestamp BETWEEN :startDate AND :endDate AND account_id=:accountID ORDER BY timestamp DESC OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY",
            nativeQuery = true
    )
-    List<Verification> findLatestTimestampByAccountID(LocalDateTime startDate, LocalDateTime endDate, long accountID);
+    Verification findLatestTimestampByAccountID(LocalDateTime startDate, LocalDateTime endDate, long accountID);
 }

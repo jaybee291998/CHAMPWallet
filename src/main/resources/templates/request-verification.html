@@ -6,7 +6,7 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>User Registration</title>
+    <title>Request Verification Link</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
@@ -16,7 +16,7 @@
             <div th:if="${errorMessage}" class="alert alert-danger">
                 <p th:text="${errorMessage}"></p>
             </div>
-            <form role="form" method="post" th:action="@{/password-reset}" th:object="${passwordResetForm}">
+            <form role="form" method="post" th:action="@{/request-verification}" th:object="${emailForm}">
                 <div class="form-group">
                     <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
                     <label for="email">Email</label>
@@ -33,7 +33,7 @@
                        th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
                     <small id="contentHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
                 </div>
-                <button type="submit" class="btn btn-primary">Request Password Reset</button>
+                <button type="submit" class="btn btn-primary">Request Verification Link</button>
             </form>
         </div>
     </section>

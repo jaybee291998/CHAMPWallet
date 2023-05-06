@@ -31,13 +31,13 @@ public class ChampWalletApplication {
 		System.out.println("IP of my system is := "+IP.getHostAddress());
 		emailSender.sendSimpleMessage("jaybee291998@gmail.com", "test"+IP.getHostAddress(), "this is a test");
 		System.out.println("Email Sent");*/
-		LocalDateTime end = LocalDateTime.now();
-		LocalDateTime start = end.minusMinutes(15);
-
-		System.out.println("Start: " + start);
-		System.out.print("End: " + end);
-		List<Verification> verifications = verificationRepository.findLatestTimestampByAccountID(start, end, 5);
-		verifications.stream().forEach(System.out::println);
+//		LocalDateTime end = LocalDateTime.now();
+//		LocalDateTime start = end.minusMinutes(15);
+//
+//		System.out.println("Start: " + start);
+//		System.out.print("End: " + end);
+//		List<Verification> verifications = verificationRepository.findLatestTimestampByAccountID(start, end, 5);
+//		verifications.stream().forEach(System.out::println);
 	}
 
 }

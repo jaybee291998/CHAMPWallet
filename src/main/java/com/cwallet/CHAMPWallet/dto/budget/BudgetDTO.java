@@ -19,6 +19,7 @@ public class BudgetDTO {
     private long id;
     private String name;
     private String description;
+    private double balance;
     private boolean isEnabled;
     private LocalDateTime creationTime;
     private Wallet wallet;

@@ -13,6 +13,9 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
+            <div th:if="${param.failedtosave}" class="alert alert-danger">
+                <p th:text="${param.failedtosave}"></p>
+            </div>
             <form role="form" method="post" th:action="@{/users/budget/create}" th:object="${budgetForm}">
                 <div class="form-group">
                     <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
@@ -31,18 +34,17 @@
                 <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
-                    <input
+                    <textarea
                             type="text"
                             class="form-control"
                             id="description"
                             placeholder="Enter Description"
                             name="description"
                             th:field="*{description}"
-                    >
+                    ></textarea>
                     <p th:if="${#fields.hasErrors('description')}"
                        th:errorss="*{description}" class="text-danger"></p>
                 </div>
-
                 <button type="submit" id="submit" class="btn btn-primary">Create budget</button>
             </form>
         </div>

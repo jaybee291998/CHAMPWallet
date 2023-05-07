@@ -22,6 +22,7 @@ public class Budget {
     @Column(length = 2048)
     private String description;
     private boolean isEnabled;
+    private double balance;
     @CreationTimestamp
     private LocalDateTime creationTime;
     @ManyToOne

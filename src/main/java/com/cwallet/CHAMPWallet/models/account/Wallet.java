@@ -1,6 +1,6 @@
 package com.cwallet.CHAMPWallet.models.account;
 
-import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
+import com.cwallet.CHAMPWallet.models.expenseType.ExpenseType;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 

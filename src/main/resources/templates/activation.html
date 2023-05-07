@@ -6,17 +6,21 @@
 >
 <head>
   <meta charset="UTF-8">
-  <title>User Registration</title>
+  <title>Account Activation</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
   <!-- Page Content-->
   <section layout:fragment="body" class="py-5">
-    <div class="container">
-      <h1 th:text="${user}">Welcome: </h1>
-      <h2 th:text="${walletBalance}"></h2>
+    <div th:if="${errorMessage}">
+      <p th:text="${errorMessage}" class="alert alert-danger"></p>
     </div>
-
+    <div>
+      <h2 th:text="${activation}"></h2>
+      <h2 th:text="${account}"></h2>
+      <h2 th:if="${verificationDTO}" th:text="${verificationDTO.timestamp}"></h2>
+      <h3>Wallet Balance</h3>
+    </div>
   </section>
 </main>
 <!-- Footer-->

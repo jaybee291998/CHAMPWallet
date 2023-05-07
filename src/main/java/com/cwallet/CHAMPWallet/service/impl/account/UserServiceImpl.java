@@ -2,9 +2,7 @@ package com.cwallet.CHAMPWallet.service.impl.account;
 
 import com.cwallet.CHAMPWallet.dto.account.UserEntityDTO;
 import com.cwallet.CHAMPWallet.dto.account.VerificationDTO;
-import com.cwallet.CHAMPWallet.exception.account.EmailNotSentException;
-import com.cwallet.CHAMPWallet.exception.account.EmailNotUniqueException;
-import com.cwallet.CHAMPWallet.exception.account.UserNameNotUniqueException;
+import com.cwallet.CHAMPWallet.exception.account.*;
 import com.cwallet.CHAMPWallet.models.account.Role;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
@@ -19,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.SendFailedException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -78,46 +77,75 @@ public class UserServiceImpl implements UserService {
                 .verification_code(code)
                 .user(user)
                 .build();
+        String message = getActivationMessage(user.getUsername(), String.valueOf(user.getId()), verificationDTO.getVerification_code(), IP.toString());
 
-        StringBuilder message = new StringBuilder();
-        String username = user.getUsername();
-        String verificationCode = verificationDTO.getVerification_code();
-        String activationLink = String.format("%s:8080?activation=%s", IP, verificationCode);
-        message.append(String.format("Dear %s;\n", username));
-        message.append(String.format("We received a request to reset your password for your account.\n"));
-        message.append(String.format("If you didnt request this password reset please ignore this email"));
-        message.append(String.format("To reset you password please click on this link: \n"));
-        message.append(activationLink);
         try {
-            emailService.sendSimpleMessage(user.getEmail(), "password reset", message.toString());
-        } catch(ConnectException e){
+            emailService.sendSimpleMessage(user.getEmail(), "Account Activation", message);
+        } catch(SendFailedException e){
             e.printStackTrace();
             throw new EmailNotSentException("Email not sent");
         }
-
-        System.out.println(message.toString());
         verificationService.saveVerificationCode(verificationDTO);
     }
 
     @Override
-    public void requestPasswordReset(String email) {
+    public void requestPasswordReset(String email) throws NoSuchAccountException, SendFailedException {
+        if(email == null || email.equals("")) throw new IllegalArgumentException("Email must not be null or empty");
         UserEntity user = userRepository.findByEmail(email);
+        if(user == null) throw new NoSuchAccountException(String.format("Account with email: %s doesnt exsit", email));
+
         VerificationDTO verificationDTO = verificationService.requestVerification(user);
-        StringBuilder message = new StringBuilder();
         String username = user.getUsername();
         String verificationCode = verificationDTO.getVerification_code();
-        String activationLink = String.format("%s:8080?activation=%s", IP, verificationCode);
-        message.append(String.format("Dear %s;\n", username));
-        message.append(String.format("We received a request to reset your password for your account.\n"));
-        message.append(String.format("If you didnt request this password reset please ignore this email"));
-        message.append(String.format("To reset you password please click on this link: \n"));
-        message.append(activationLink);
+        String message = getPasswordResetMessage(username, String.valueOf(user.getId()), verificationCode, IP.toString());
+
         try {
-            emailService.sendSimpleMessage(email, "password reset", message.toString());
-        } catch (ConnectException e) {
-            throw new RuntimeException(e);
+            emailService.sendSimpleMessage(email, "Password Reset", message);
+            verificationService.saveVerificationCode(verificationDTO);
+        } catch (SendFailedException e) {
+            throw new SendFailedException("Failed to send email");
+        }
+    }
+
+    @Override
+    public void requestVerificationCode(String email) throws NoSuchAccountException, AccountAlreadyActivatedException, EmailNotSentException {
+        if(email == null || email.equals("")) throw new IllegalArgumentException("Email must not be null or empty");
+        UserEntity user = userRepository.findByEmail(email);
+        if(user == null) throw new NoSuchAccountException(String.format("Account with email: %s doesnt exsit", email));
+        if(user.isActive()) throw new AccountAlreadyActivatedException("Account already activated");
+
+        VerificationDTO verificationDTO = verificationService.requestVerification(user);
+        String username = user.getUsername();
+        String verificationCode = verificationDTO.getVerification_code();
+        String message = getActivationMessage(username, String.valueOf(user.getId()), verificationCode, IP.toString());
+
+        try {
+            emailService.sendSimpleMessage(email, "Account Activation", message);
+        } catch (SendFailedException e) {
+            throw new EmailNotSentException("Email not sent");
         }
         verificationService.saveVerificationCode(verificationDTO);
-        System.out.println(message.toString());
+    }
+
+    private static String getActivationMessage(String username, String accountID, String verificationCode, String ipAddress) {
+        StringBuilder message = new StringBuilder();
+        String activationLink = String.format("%s:8080/activate-account?activation=%s&account=%s", ipAddress, verificationCode, accountID);
+        message.append(String.format("Dear %s;\n", username));
+        message.append("You have successfully registered to CHAMP Wallet.\n");
+        message.append("Please verify your account by following the instruction.\n");
+        message.append("To verify your account please click on this link: \n");
+        message.append(activationLink);
+        return  message.toString();
+    }
+
+    private static String getPasswordResetMessage(String username, String accountID, String verificationCode, String ipAddress) {
+        StringBuilder message = new StringBuilder();
+        String activationLink = String.format("%s:8080/reset-password?activation=%s&account=%s", ipAddress, verificationCode, accountID);
+        message.append(String.format("Dear %s;\n", username));
+        message.append("We received a request to reset your password for your account.\n");
+        message.append("If you didn't request this password reset please ignore this email.\n");
+        message.append("To reset you password please click on this link: \n");
+        message.append(activationLink);
+        return  message.toString();
     }
 }

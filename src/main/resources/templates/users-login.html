@@ -23,6 +23,18 @@
       <div th:if="${param.emailnotsent}" class="alert alert-success">
         <p th:text="${param.emailnotsent}"></p>
       </div>
+      <div th:if="${param.activationsuccess}" class="alert alert-success">
+        <p th:text="${param.activationsuccess}"></p>
+      </div>
+      <div th:if="${param.requestverification}" class="alert alert-success">
+        <p>Verification link has been sent successfully</p>
+      </div>
+      <div th:if="${param.resetpassword}" class="alert alert-success">
+        <p>Reset Password link has been successfully sent</p>
+      </div>
+      <div th:if="${param.resetpasswordsuccess}" class="alert alert-success">
+        <p th:text="${param.resetpasswordsuccess}"></p>
+      </div>
       <form role="form" method="post" th:action="@{/login}">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <div class="form-group">
@@ -51,6 +63,8 @@
         </div>
         <button type="submit" value="Log in" class="btn btn-primary">Login</button>
       </form>
+      <a th:href="@{/request-verification}">Request Verification</a><br>
+      <a th:href="@{/password-reset}">Request Password Reset</a>
     </div>
   </section>
 </main>

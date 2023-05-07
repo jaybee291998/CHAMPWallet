@@ -33,6 +33,7 @@ public class UserEntity {
     @ToString.Exclude
     private List<Verification> verifications = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToOne(mappedBy = "user")
     private Wallet wallet;
 }

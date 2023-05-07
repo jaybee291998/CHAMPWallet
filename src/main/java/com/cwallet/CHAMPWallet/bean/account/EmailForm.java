@@ -12,13 +12,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PasswordResetForm {
+public class EmailForm {
     @NotNull
     @Size(min=5, max=255)
-    private String password;
-    @NotNull
-    @Size(min=5, max=255)
-    private String confirmPassword;
-    private String activationCode;
-    private long accountID;
+    private String email;
 }

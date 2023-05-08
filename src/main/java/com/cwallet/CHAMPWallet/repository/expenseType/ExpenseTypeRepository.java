@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ExpenseTypeRepository extends JpaRepository<ExpenseType, Long> {
 
-    @Query("SELECT * FROM ExpenseType WHERE walletId = :walletId")
+    @Query("SELECT e FROM ExpenseType e WHERE walletId = :walletId")
     ExpenseType findById(@Param("walletId") String walletId);
 }

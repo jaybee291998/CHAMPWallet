@@ -2,12 +2,14 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -44,9 +46,10 @@ public class ExpenseTypeController {
     }
 
     //New
-    @GetMapping("/users/expense-type/expense-list")
+    @GetMapping("/users/expense-type/list")
     public String expenseTypeDetail(Model model){
-        model.addAttribute("expenseTypeList", getExpenseTypeForm(model));
+//        List<ExpenseType> expenseTypeList = expenseTypeService.findAll();
+//        model.addAttribute("expenseTypeList", getExpenseTypeForm());
         return "expense-type-list";
     }
 }

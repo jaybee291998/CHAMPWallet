@@ -36,10 +36,7 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
     }
 
     @Override
-    public List<IncomeType> findAll() {
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        Wallet newWallet = loggedInUser.getWallet();
-
+    public List<IncomeType> findAllIncomeType() {
         return incomeTypeRepository.findAll();
     }
 }

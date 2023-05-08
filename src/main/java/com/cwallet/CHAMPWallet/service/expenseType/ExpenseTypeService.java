@@ -7,5 +7,4 @@ import java.util.List;
 public interface ExpenseTypeService {
     void save(ExpenseTypeDto expenseTypeDto);
 
-    List<ExpenseType> findAll(ExpenseTypeDto expenseTypeDto);
 }

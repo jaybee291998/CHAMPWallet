@@ -42,4 +42,11 @@ public class ExpenseTypeController {
 
         return "redirect:/users/home";
     }
+
+    //New
+    @GetMapping("/users/expense-type/expense-list")
+    public String expenseTypeDetail(Model model){
+        model.addAttribute("expenseTypeList", getExpenseTypeForm(model));
+        return "expense-type-list";
+    }
 }

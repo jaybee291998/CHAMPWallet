@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 @Builder
 public class BudgetForm {
     @NotNull
-    @Size(min=5, max=255)
+    @Size(min=5, max=64)
     private String name;
     @NotNull
     @Size(min=5, max=2048)

@@ -5,22 +5,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name="income_type")
-public class IncomeType {
+@Entity(name="income")
+@Builder
+public class Income {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private String name;
+    private Long id;
     @Column(length = 2048)
     private String description;
+    private Double amount;
+    @CreationTimestamp
+    private LocalDateTime timestamp;
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
+    private String sourceOfIncome;
 }

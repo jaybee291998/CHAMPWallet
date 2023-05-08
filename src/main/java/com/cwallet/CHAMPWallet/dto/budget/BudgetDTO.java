@@ -1,10 +1,7 @@
 package com.cwallet.CHAMPWallet.dto.budget;
 
 import com.cwallet.CHAMPWallet.models.account.Wallet;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -22,5 +19,6 @@ public class BudgetDTO {
     private double balance;
     private boolean isEnabled;
     private LocalDateTime creationTime;
+    @ToString.Exclude
     private Wallet wallet;
 }

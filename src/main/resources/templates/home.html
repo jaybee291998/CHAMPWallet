@@ -13,8 +13,12 @@
   <!-- Page Content-->
   <section layout:fragment="body" class="py-5">
     <div class="container">
+      <div th:if="${param.budgetsavesuccess}" class="alert alert-success">
+        <p th:text="${param.budgetsavesuccess}"></p>
+      </div>
       <h1 th:text="${user}">Welcome: </h1>
       <h2 th:text="${walletBalance}"></h2>
+      <a th:href="@{/users/budget/create}">Create budget</a>
     </div>
 
   </section>

@@ -2,6 +2,8 @@ package com.cwallet.CHAMPWallet.controller.budget;
 
 import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,11 +15,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.jws.WebParam;
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class BudgetController {
     @Autowired
     private BudgetService budgetService;
+    @Autowired
+    private SecurityUtil securityUtil;
 
     @GetMapping("/users/budget/create")
     public String getBudgetForm(Model model) {
@@ -39,10 +44,24 @@ public class BudgetController {
 
         boolean success = budgetService.save(budgetDTO);
         if(success) {
-            return "redirect:/users/home?budgetsavesuccess=budget saved succesfully";
+            return "redirect:/users/budget/list";
         } else {
             model.addAttribute("budgetForm", budgetForm);
             return "redirect:/users/budget/create?failedtosave=failed to save the budget";
         }
+    }
+
+    @GetMapping("/users/budget/list")
+    public String getUsersBudget(Model model) {
+        List<BudgetDTO> userBudgets = budgetService.getAllUserBudget();
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        double allocatedBalance = userBudgets.stream().reduce(0D, (subtotal, element) -> subtotal + element.getBalance(), Double::sum);
+        double unallocatedBalance = loggedInUser.getWallet().getBalance();
+        model.addAttribute("userBudgets", userBudgets);
+        model.addAttribute("unallocatedBalance", unallocatedBalance);
+        model.addAttribute("allocatedBalance", allocatedBalance);
+        model.addAttribute("totalBalance", allocatedBalance + unallocatedBalance);
+
+        return "budget/budget-list";
     }
 }

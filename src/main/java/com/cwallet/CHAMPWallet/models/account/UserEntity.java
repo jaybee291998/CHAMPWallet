@@ -1,7 +1,5 @@
 package com.cwallet.CHAMPWallet.models.account;
-
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -25,6 +25,9 @@ public class Income {
     @CreationTimestamp
     private LocalDateTime timestamp;
     @ManyToOne
+    @JoinColumn(name = "income_type_id", nullable = false)
+    private IncomeType incomeType;
+    @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
     private String sourceOfIncome;

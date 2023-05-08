@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -46,8 +43,11 @@ public class ExpenseTypeController {
         return "redirect:/users/home";
     }
 
-//    @GetMapping("/users/expense-type/expense-list")
-//    public String expenseTypeDetail(Model model){
-//        model.addAttribute("")
-//    }
+    @GetMapping("/users/expense-type/expense-list")
+    public String expenseTypeDetail(@RequestParam Model model){
+        model.addAttribute("expenseTypeList", getExpenseTypeForm(model));
+        return "expense-type-list";
+    }
+
+    
 }

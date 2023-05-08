@@ -1,7 +1,7 @@
 package com.cwallet.CHAMPWallet.mappers.expenseType;
 
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
-import com.cwallet.CHAMPWallet.models.expenseType.ExpenseType;
+import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 
 public class ExpenseTypeMapper {
 

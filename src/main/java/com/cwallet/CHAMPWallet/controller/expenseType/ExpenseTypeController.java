@@ -2,7 +2,6 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
-import com.cwallet.CHAMPWallet.models.expenseType.ExpenseType;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,10 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
-import java.time.Clock;
 
 @Controller
 public class ExpenseTypeController {
@@ -46,4 +45,9 @@ public class ExpenseTypeController {
 
         return "redirect:/users/home";
     }
+
+//    @GetMapping("/users/expense-type/expense-list")
+//    public String expenseTypeDetail(Model model){
+//        model.addAttribute("")
+//    }
 }

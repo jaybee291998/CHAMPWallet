@@ -17,4 +17,7 @@ public class AddIncome {
     @NotNull
     @Size(min=5, max=2048)
     private String description;
+    @NotNull
+    private double amount;
+    private
 }

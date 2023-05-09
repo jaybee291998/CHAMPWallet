@@ -2,16 +2,18 @@ package com.cwallet.CHAMPWallet.controller.incomeType;
 
 import com.cwallet.CHAMPWallet.bean.incomeType.IncomeTypeForm;
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import com.cwallet.CHAMPWallet.service.incomeType.IncomeTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+
 @Controller
 public class IncomeTypeController {
     private IncomeTypeService incomeTypeService;
@@ -41,8 +43,12 @@ public class IncomeTypeController {
                 .build();
         incomeTypeService.save(newIncomeType);
 
-        return "redirect:/users/home";
-
-
+        return "redirect:/users/income-type/list";
+    }
+    @GetMapping("/users/income-type/list")
+    public String getAllIncomeType(Model model) {
+        List<IncomeTypeDto> incomeTypeList = incomeTypeService.getAllIncomeType();
+        model.addAttribute("incomeTypeList",incomeTypeList);
+        return "income-type-list";
     }
 }

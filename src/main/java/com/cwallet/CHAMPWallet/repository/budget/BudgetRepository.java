@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
     List<Budget> findByWalletId(Long walletID);
+    Budget findByIdAndWalletId(long budgetID, long walletID);
 }

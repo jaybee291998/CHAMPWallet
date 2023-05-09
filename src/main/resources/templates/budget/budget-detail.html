@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Detail</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <p><b>Name:</b><span th:text="${budget.name}"></span></p>
+            <p><b>Description:</b><span th:text="${budget.description}"></span></p>
+            <hr>
+            <a th:if="${!isExpired && !isUsed}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
+            <a th:if="${!isExpired && !isUsed}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

@@ -1,11 +1,14 @@
 package com.cwallet.CHAMPWallet.service.impl.budget;
 
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.budget.Budget;
 import com.cwallet.CHAMPWallet.repository.budget.BudgetRepository;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,10 @@ public class BudgetServiceImpl implements BudgetService {
     private BudgetRepository budgetRepository;
     @Autowired
     private SecurityUtil securityUtil;
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private ExpenseRepository expenseRepository;
     @Override
     public boolean save(BudgetDTO budgetDTO) {
         Budget budget = mapToBudget(budgetDTO);
@@ -40,5 +47,16 @@ public class BudgetServiceImpl implements BudgetService {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         List<Budget> usersBudget = budgetRepository.findByWalletId(loggedInUser.getWallet().getId());
         return usersBudget.stream().map(budget -> mapToBudgetDTO(budget)).collect(Collectors.toList());
+    }
+
+    @Override
+    public BudgetDTO getSpecificBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
+        if(budget == null) {
+            throw new NoSuchBudgetOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+        BudgetDTO budgetDTO = mapToBudgetDTO(budget);
+        return budgetDTO;
     }
 }

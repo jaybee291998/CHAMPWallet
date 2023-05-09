@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Income Type Details</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+  <!-- Page Content-->
+  <section layout:fragment="body" class="py-5">
+    <div class="container">
+      <h1>Income Type Details</h1>
+
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td th:text="${incomeType.name}"></td>
+          <td th:text="${incomeType.description}"></td>
+        </tr>
+      </table>
+      <a th:href="@{/users/income-type/list}" class="btn btn-success">Back to Income Type List</a>
+      <a th:href="@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
+      <a th:href="@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Edit Income Type</a>
+
+
+    </div>
+  </section>
+</main>
+</body>
+</html>

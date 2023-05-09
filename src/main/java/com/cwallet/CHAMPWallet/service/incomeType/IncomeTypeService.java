@@ -7,5 +7,5 @@ import java.util.List;
 public interface IncomeTypeService {
     void save (IncomeTypeDto incomeTypeDto);
 
-    List<IncomeType> findAll();
+    List<IncomeTypeDto> getAllIncomeType();
 }

@@ -8,4 +8,6 @@ public interface IncomeTypeService {
     void save (IncomeTypeDto incomeTypeDto);
 
     List<IncomeTypeDto> getAllIncomeType();
+
+
 }

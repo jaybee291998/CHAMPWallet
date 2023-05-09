@@ -82,8 +82,14 @@ public class BudgetController {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
         }
         model.addAttribute("budget", budgetDTO);
-        model.addAttribute("isExpired", expirableAndOwnedService.isExpired(budgetDTO));
-        model.addAttribute("isUsed", !expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty() );
+        boolean isExpired = expirableAndOwnedService.isExpired(budgetDTO);
+        if(isExpired) {
+            // if expired
+            model.addAttribute("buttonEnabled", false);
+        } else {
+            // else not expired yet so check if its used
+            model.addAttribute("buttonEnabled", expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty());
+        }
         return "budget/budget-detail";
     }
 }

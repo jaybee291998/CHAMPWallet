@@ -1,12 +1,15 @@
 package com.cwallet.CHAMPWallet.service.expenseType.impl;
 
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,9 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
     private ExpenseTypeRepository expenseTypeRepository;
     @Autowired
     private SecurityUtil securityUtil;
+
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
     @Override
     public boolean save(ExpenseTypeDto expenseTypeDto) {
         ExpenseType expense = mapToExpenseType(expenseTypeDto);
@@ -41,10 +47,15 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
     }
 
     @Override
-    public ExpenseTypeDto getExpenseTypeId(long id) {
+    public ExpenseTypeDto getExpenseTypeId(long id) throws NoSuchExpenseTypeOrNotAuthorized {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
-        return ExpenseTypeMapper.mapToExpenseTypeDto(expenseType);
+
+        if(expenseType == null){
+            throw new NoSuchExpenseTypeOrNotAuthorized("Not authorized or doesn't exist");
+        }
+        ExpenseTypeDto expenseTypeDto = mapToExpenseTypeDto(expenseType);
+        return expenseTypeDto;
     }
 
 

@@ -11,6 +11,7 @@ public class ExpenseTypeMapper {
                 .name(expenseTypeDto.getName())
                 .description(expenseTypeDto.getDescription())
                 .isEnabled(expenseTypeDto.isEnabled())
+                .creationTime(expenseTypeDto.getCreationTime())
                 .wallet(expenseTypeDto.getWallet())
                 .build();
     }
@@ -21,6 +22,7 @@ public class ExpenseTypeMapper {
                 .name(expenseType.getName())
                 .description(expenseType.getDescription())
                 .isEnabled(expenseType.isEnabled())
+                .creationTime(expenseType.getCreationTime())
                 .wallet(expenseType.getWallet())
                 .build();
     }

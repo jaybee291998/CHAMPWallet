@@ -2,10 +2,15 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
+import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
+import com.cwallet.CHAMPWallet.utils.impl.ExpirableAndOwnedServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
@@ -23,6 +28,12 @@ public class ExpenseTypeController {
     private ExpenseTypeService expenseTypeService;
     @Autowired
     private SecurityUtil securityUtil;
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private ExpenseTypeRepository expenseTypeRepository;
+    @Autowired
+    private ExpenseRepository expenseRepository;
 
     @GetMapping("/users/expense-type/create")
     public String getExpenseTypeForm(Model model){
@@ -61,13 +72,21 @@ public class ExpenseTypeController {
 
     @GetMapping("users/expense-type/{id}")
    public String getUsersExpenseTypeId(@PathVariable("id") long id, Model model){
-        ExpenseTypeDto expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
-        if(expenseTypeDto == null){
-            return "redirect:/users/expense-type?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        ExpenseTypeDto expenseTypeDto = null;
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
         }
+        boolean isExpired = expirableAndOwnedService.isExpired(expenseTypeDto);
 
+        if(isExpired){
+            model.addAttribute("buttonEnabled", false);
+        }
+        else{
+            model.addAttribute("buttonEnabled", expenseRepository.findByExpenseTypeId(expenseTypeDto.getId()).isEmpty());
+        }
         model.addAttribute("expenseType", expenseTypeDto);
-
         return "expense-type-details";
     }
 }

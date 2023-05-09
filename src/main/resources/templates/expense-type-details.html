@@ -10,21 +10,14 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
   <!-- Page Content-->
+
   <section layout:fragment="body" class="py-5">
     <div class="container">
-      <h1>Expense Type Details</h1>
-      <table class="table table-striped">
-        <tr>
-          <th>name</th>
-          <th>description</th>
-        </tr>
-          <td th:text="${expenseType.name}"></a></td>
-          <td th:text="${expenseType.description}"></td>
-        </tr>
-      </table>
-      <a th:href="@{users/expense-type/update}" class="btn btn-success">Update</a>
-      <a th:href="@{users/expense-type/update}" class="btn btn-danger">Delete</a>
-      <a th:href="@{users/home}" class="btn btn-success">Home</a>
+      <p><b>Name: </b><span th:text="${expenseType.name}"></span></p>
+      <p><b>Description: </b><span th:text="${expenseType.description}"></span></p>
+      <hr>
+      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/update/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-success">Update</a>
+      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/delete/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-danger">Delete</a>
     </div>
   </section>
 </main>

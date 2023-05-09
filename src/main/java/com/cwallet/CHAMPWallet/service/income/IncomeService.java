@@ -7,5 +7,5 @@ import java.util.List;
 public interface IncomeService {
     boolean save(IncomeDTO incomeDTO,String incomeTypeIDStr);
     List<IncomeDTO> getAllUserIncome();
-    void delete(IncomeDTO incomeDTO);
+//    void delete(Long incomeId);
 }

@@ -52,17 +52,17 @@ public class IncomeController {
         incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         return "redirect:/users/home";
     }
-    @GetMapping("/user/income/delete")
-    public String deleteIncome(@PathVariable("income_id") long incomeId){
-        IncomeDto incomeDto = incomeService.fi;
-        if(Dto == null) return "redirect:/events?nosuchevent=your trying to delete an event that doesnt exist";
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        if(!eventDto.getClub().getCreatedBy().equals(loggedInUser)){
-            return "redirect:/events?unauthorized=your trying to delete an event that's not your";
-        }
-        eventService.deleteEvent(eventId);
-        return "redirect:/events/";
-    }
+//    @GetMapping("/user/income/delete")
+//    public String deleteIncome(@PathVariable("income_id") long incomeId){
+//        IncomeDto incomeDto = incomeService.
+//        if(incomeDto == null) return "redirect:/income?nosuchevent=your trying to delete an income that doesnt exist";
+//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+//        if(!incomeDto.get){
+//            return "redirect:/events?unauthorized=your trying to delete an event that's not your";
+//        }
+//        incomeService.deleteIncome(incomeId);
+//        return "redirect:/users/home";
+//    }
     @GetMapping("/users/income/list")
     public String getUsersBudget(Model model) {
         List<IncomeDTO> userIncome = incomeService.getAllUserIncome();

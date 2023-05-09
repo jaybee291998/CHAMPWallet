@@ -2,8 +2,7 @@
 <html lang="en"
       xmlns:th="https://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+      layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
     <title>Expense Type List</title>
@@ -13,37 +12,22 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
-
-            <form role="form" method="post" th:action="@{/users/expense-type/create}" th:object="${expenseTypeForm}">
-                <div class="form-group">
-                    <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
-                    <label for="name">Name</label>
-                    <input
-                            type="text"
-                            class="form-control"
-                            id="name"
-                            name="name"
-                            th:field="*{name}">
-                    <p th:if="${#fields.hasErrors('name')}"
-                       th:errorss="*{name}" class="text-danger"></p>
-                </div>
-
-                <div class="form-group">
-                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
-                    <label for="description">Description</label>
-                    <textarea
-                            type="text"
-                            class="form-control"
-                            id="description"
-                            name="description"
-                            th:field="*{description}"></textarea>
-                    <p th:if="${#fields.hasErrors('description')}"
-                       th:errorss="*{description}" class="text-danger"></p>
-                </div>
-
-
-                <button type="submit" id="submit" class="btn btn-primary">Update</button>
-            </form>
+            <h1>Expense Type List</h1>
+            <p><b>Name: </b><span th:text="${expenseTypeNames}"></span></p>
+            <p><b>Description: </b><span th:text="${expenseTypeDescriptions}"></span></p>
+            <table class="table table-striped">
+                <tr>
+                    <th>name</th>
+                    <th>description</th>
+                </tr>
+                <tr th:each="expenseType:${usersExpenseType}">
+                    <td th:if="${expenseType.name.length<= 20}"><a th:href="@{/users/expense-type/{expenseTypeID}(expenseTypeID=${expenseType.id})}" th:text="${expenseType.name}"></a></td>
+                    <td th:if="${expenseType.name.length > 20}"><a th:href="@{/users/expense-type/{expenseTypeID}(expenseType=${expenseType.id})}" th:text="${expenseType.name.substring(0, 20) + '...'}"></a></td>
+                    <td th:if="${expenseType.description.length<= 30}" th:text="${expenseType.description}"></td>
+                    <td th:if="${expenseType.description.length > 30}" th:text="${expenseType.description.substring(0, 30) + '...'}"></td>
+                </tr>
+            </table>
+            <a th:href="@{/users/expense-type/create}" class="btn btn-success">Create Expense Type</a>
         </div>
     </section>
 </main>

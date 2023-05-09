@@ -13,6 +13,9 @@ public class IncomeMapper {
                 .amount(incomeDTO.getAmount())
                 .timestamp(incomeDTO.getCreationTime())
                 .wallet(incomeDTO.getWallet())
+                .incomeType(incomeDTO.getIncomeType())
+              //  .wallet(incomeDTO.)
+
                 .build();
     }
 
@@ -24,6 +27,7 @@ public class IncomeMapper {
                 .amount(income.getAmount())
                 .creationTime(income.getTimestamp())
                 .wallet(income.getWallet())
+                .incomeType(income.getIncomeType())
                 .build();
     }
 }

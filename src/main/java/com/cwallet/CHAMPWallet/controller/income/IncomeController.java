@@ -1,6 +1,8 @@
 package com.cwallet.CHAMPWallet.controller.income;
 
+import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.bean.income.IncomeForm;
+import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
 import com.cwallet.CHAMPWallet.dto.income.IncomeDTO;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.income.Income;
@@ -25,6 +27,30 @@ public class IncomeController {
     private IncomeService incomeService;
     @Autowired
     private SecurityUtil securityUtil;
+
+
+    public String getIncomeForm(Model model){
+        model.addAttribute("incomeForm", new IncomeForm());
+        return "income/add-income";
+    }
+
+    @PostMapping("/users/income/create")
+    public String createIncomeForm(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
+                                        BindingResult bindingResult, Model model){
+        if(bindingResult.hasErrors()){
+            System.out.println(incomeForm);
+            model.addAttribute("incomeForm", incomeForm);
+            return "income/add-income";
+        }
+       IncomeDTO newIncome = IncomeDTO.builder()
+               .source(incomeForm.getSource())
+               .amount(incomeForm.getAmount())
+               .description(incomeForm.getDescription())
+                               .build();
+        incomeService.save(newIncome);
+
+        return "redirect:/users/home";
+    }
     @GetMapping("/users/income/list")
     public String getUsersBudget(Model model) {
         List<IncomeDTO> userIncome = incomeService.getAllUserIncome();

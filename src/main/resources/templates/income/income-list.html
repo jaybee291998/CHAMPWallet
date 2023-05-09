@@ -26,7 +26,7 @@
                 <tr th:each="income:${userIncome}">
                     <td th:if="${income.description.length<= 30}" th:text="${income.description}"></td>
                     <td th:if="${income.description.length > 30}" th:text="${income.description.substring(0, 30) + '...'}"></td>
-                    <td th:text="${income.isEnabled}"></td>
+                    <td th:text="${income.incomeType}"></td>
                     <td th:text="${income.amount}"></td>
                     <td th:if="${income.source.length<= 20}" th:text="${income.source}"></td>
                     <td th:if="${income.source.length > 20}" th:text="${income.source.substring(0, 20) + '...'}"></td>
@@ -34,7 +34,7 @@
                 </tr>
             </table>
             <p><b>Total Amount: </b><span th:text="${totalAmount}"></span></p>
-            <a th:href="@{/add-income.html}" class="btn btn-success">Add Income</a>
+            <a th:href="@{/users/income/create}" class="btn btn-success">Add Income</a>
         </div>
     </section>
 </main>

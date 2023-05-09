@@ -1,6 +1,7 @@
 package com.cwallet.CHAMPWallet.dto.income;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
 import lombok.*;
+import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -15,11 +16,11 @@ import java.time.LocalDateTime;
 public class IncomeDTO {
     private long id;
     private String source;
+    private IncomeType incomeType;
     private String description;
-    private double balance;
     private double amount;
-    private boolean isEnabled;
     private LocalDateTime creationTime;
     @ToString.Exclude
     private Wallet wallet;
+
 }

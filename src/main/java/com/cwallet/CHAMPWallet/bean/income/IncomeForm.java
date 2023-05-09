@@ -14,8 +14,12 @@ import javax.validation.constraints.Size;
 public class IncomeForm {
     @NotNull
     @Size(min=5, max=64)
-    private String name;
+    private String source;
     @NotNull
     @Size(min=5, max=2048)
     private String description;
+    @NotNull
+
+    private double amount;
+
 }

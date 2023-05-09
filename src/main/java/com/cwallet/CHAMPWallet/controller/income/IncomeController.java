@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.jws.WebParam;
@@ -31,6 +32,7 @@ public class IncomeController {
 
     public String getIncomeForm(Model model){
         model.addAttribute("incomeForm", new IncomeForm());
+        model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
         return "income/add-income";
     }
 
@@ -47,9 +49,19 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        incomeService.save(newIncome);
-
+        incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         return "redirect:/users/home";
+    }
+    @GetMapping("/user/income/delete")
+    public String deleteIncome(@PathVariable("income_id") long incomeId){
+        IncomeDto incomeDto = incomeService.fi;
+        if(Dto == null) return "redirect:/events?nosuchevent=your trying to delete an event that doesnt exist";
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        if(!eventDto.getClub().getCreatedBy().equals(loggedInUser)){
+            return "redirect:/events?unauthorized=your trying to delete an event that's not your";
+        }
+        eventService.deleteEvent(eventId);
+        return "redirect:/events/";
     }
     @GetMapping("/users/income/list")
     public String getUsersBudget(Model model) {

@@ -13,12 +13,12 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
-<!--            <div th:if="${param.failedtosave}" class="alert alert-danger">-->
-<!--                <p th:text="${param.failedtosave}"></p>-->
-<!--            </div>-->
+            <div th:if="${param.failedtosave}" class="alert alert-danger">
+                <p th:text="${param.failedtosave}"></p>
+            </div>
             <form role="form" method="post" th:action="@{/users/income/create}" th:object="${incomeForm}">
                 <div class="form-group">
-<!--                    <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>-->
+                    <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
                     <label for="source"></label>
                     <input
                             type="text"
@@ -28,11 +28,11 @@
                             name="source"
                             th:field="*{source}"
                     >
-<!--                    <p th:if="${#fields.hasErrors('source')}"-->
-<!--                       th:errors="*{source}" class="text-danger"></p>-->
+                    <p th:if="${#fields.hasErrors('source')}"
+                       th:errors="*{source}" class="text-danger"></p>
                 </div>
                 <div class="form-group">
-<!--                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>-->
+                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
                     <textarea
                             type="text"
@@ -42,11 +42,14 @@
                             name="description"
                             th:field="*{description}"
                     ></textarea>
-<!--                    <p th:if="${#fields.hasErrors('description')}"-->
-<!--                       th:errors="*{description}" class="text-danger"></p>-->
+                    <p th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}" class="text-danger"></p>
                 </div>
-                <select name="income-type" id="incometype">
-                    <option th:></option>
+<!--                <select name="income-type" id="incometype">-->
+<!--                    <option th:></option>-->
+<!--                </select>-->
+                <select name="income-type" id="incometype" th:each="incomeType:${incomeTypes}" th:field="*{incomeTypeID}">
+                    <option th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
                 </select>
                 <div class="form-group">
                     <label for="amount">Amount</label>

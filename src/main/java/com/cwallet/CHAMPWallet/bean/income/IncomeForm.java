@@ -22,4 +22,6 @@ public class IncomeForm {
 
     private double amount;
 
+    private String incomeTypeID;
+
 }

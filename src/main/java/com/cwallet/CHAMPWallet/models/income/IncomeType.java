@@ -5,8 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -20,7 +25,11 @@ public class IncomeType {
     private String name;
     @Column(length = 2048)
     private String description;
+    @CreationTimestamp
+    private LocalDateTime creationTime;
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
+    @OneToMany(mappedBy = "incomeType", cascade = CascadeType.ALL)
+    private List<Income> incomes = new ArrayList<>();
 }

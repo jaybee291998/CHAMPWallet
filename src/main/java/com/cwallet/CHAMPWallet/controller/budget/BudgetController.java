@@ -2,15 +2,20 @@ package com.cwallet.CHAMPWallet.controller.budget;
 
 import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
+import com.cwallet.CHAMPWallet.utils.impl.ExpirableAndOwnedServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.jws.WebParam;
@@ -23,7 +28,10 @@ public class BudgetController {
     private BudgetService budgetService;
     @Autowired
     private SecurityUtil securityUtil;
-
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private ExpenseRepository expenseRepository;
     @GetMapping("/users/budget/create")
     public String getBudgetForm(Model model) {
         model.addAttribute("budgetForm", new BudgetForm());
@@ -63,5 +71,19 @@ public class BudgetController {
         model.addAttribute("totalBalance", allocatedBalance + unallocatedBalance);
 
         return "budget/budget-list";
+    }
+
+    @GetMapping("/users/budget/{budgetID}")
+    public String getSpecificBudget(@PathVariable("budgetID") long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("isExpired", expirableAndOwnedService.isExpired(budgetDTO));
+        model.addAttribute("isUsed", !expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty() );
+        return "budget/budget-detail";
     }
 }

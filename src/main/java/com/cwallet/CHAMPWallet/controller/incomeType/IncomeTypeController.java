@@ -2,8 +2,11 @@ package com.cwallet.CHAMPWallet.controller.incomeType;
 
 import com.cwallet.CHAMPWallet.bean.incomeType.IncomeTypeForm;
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
+import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.incomeType.IncomeTypeService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +21,11 @@ import java.util.List;
 public class IncomeTypeController {
     private IncomeTypeService incomeTypeService;
 
+    @Autowired
+    private SecurityUtil securityUtil;
 
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
     @Autowired
     public IncomeTypeController(IncomeTypeService incomeTypeService){
         this.incomeTypeService = incomeTypeService;
@@ -50,5 +57,18 @@ public class IncomeTypeController {
         List<IncomeTypeDto> incomeTypeList = incomeTypeService.getAllIncomeType();
         model.addAttribute("incomeTypeList",incomeTypeList);
         return "income-type-list";
+    }
+
+    @GetMapping("/users/income-type/{id}")
+    public String getIncomeTypeById(@PathVariable("id") long id, Model model) {
+        IncomeTypeDto incomeTypeDto = null;
+        try {
+            incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        } catch (NoSuchBudgetOrNotAuthorized e){
+            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        }
+        model.addAttribute("incomeType", incomeTypeDto);
+        model.addAttribute("isExpired", expirableAndOwnedService.isExpired(incomeTypeDto));
+        return "income-type-details";
     }
 }

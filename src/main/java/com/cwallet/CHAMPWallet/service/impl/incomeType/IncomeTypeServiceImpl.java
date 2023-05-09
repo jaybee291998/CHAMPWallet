@@ -1,6 +1,7 @@
 package com.cwallet.CHAMPWallet.service.impl.incomeType;
 
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper.mapToIncomeTypeDto;
@@ -23,10 +25,11 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
     private SecurityUtil securityUtil;
 
     @Autowired
-    public IncomeTypeServiceImpl(IncomeTypeRepository incomeTypeRepository, SecurityUtil securityUtil){
+    public IncomeTypeServiceImpl(IncomeTypeRepository incomeTypeRepository, SecurityUtil securityUtil) {
         this.incomeTypeRepository = incomeTypeRepository;
         this.securityUtil = securityUtil;
     }
+
     @Override
     public void save(IncomeTypeDto incomeTypeDto) {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
@@ -43,5 +46,15 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         List<IncomeType> incomeType = incomeTypeRepository.findByWalletId(loggedInUser.getWallet().getId());
         return incomeType.stream().map(IncomeTypeMapper::mapToIncomeTypeDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public IncomeTypeDto getIncomeTypeById(long id) throws NoSuchBudgetOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        IncomeType incomeType = incomeTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
+        if (incomeType == null) {
+            throw new NoSuchBudgetOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+        return mapToIncomeTypeDto(incomeType);
     }
 }

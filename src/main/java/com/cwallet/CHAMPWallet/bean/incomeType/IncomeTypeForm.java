@@ -18,6 +18,6 @@ public class IncomeTypeForm {
     private String name;
 
     @NotNull
-    @Size(min=5, max=255)
+    @Size(min=5, max=2048)
     private String description;
 }

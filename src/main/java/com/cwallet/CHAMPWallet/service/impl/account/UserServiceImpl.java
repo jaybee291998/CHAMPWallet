@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.SendFailedException;
+import javax.transaction.Transactional;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -51,7 +52,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    @Transactional
     @Override
     public void save(UserEntityDTO userDto) throws UserNameNotUniqueException, EmailNotUniqueException, EmailNotSentException {
         UserEntity userEntity = userRepository.findByUsername(userDto.getUsername());

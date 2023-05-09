@@ -11,4 +11,6 @@ public interface BudgetService {
     List<BudgetDTO> getAllUserBudget();
 
     BudgetDTO getSpecificBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized;
+    void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized;
+    boolean isUpdateable(BudgetDTO budgetDTO);
 }

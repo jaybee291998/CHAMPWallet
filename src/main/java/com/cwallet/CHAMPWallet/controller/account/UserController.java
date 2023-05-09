@@ -37,6 +37,9 @@ public class UserController {
 
     @GetMapping("/register")
     public String getRegistrationForm(Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         model.addAttribute("registrationForm", new RegistrationForm());
         return "users-registration";
     }
@@ -44,6 +47,9 @@ public class UserController {
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("registrationForm") RegistrationForm registrationForm,
                                BindingResult result, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         System.out.println(registrationForm);
         if(result.hasErrors()){
             model.addAttribute("registrationForm", registrationForm);
@@ -77,6 +83,9 @@ public class UserController {
 
     @GetMapping("/login")
     public String getLoginForm(Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         model.addAttribute("loginForm", new RegistrationForm());
         return "users-login";
     }
@@ -91,6 +100,9 @@ public class UserController {
 
     @GetMapping("/password-reset")
     public String getRequestPasswordresetForm(Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         model.addAttribute("passwordResetForm", new EmailForm());
         return "request-password-reset";
     }
@@ -98,6 +110,9 @@ public class UserController {
     @PostMapping("/password-reset")
     public String requestPasswordReset(@Valid @ModelAttribute("passwordResetForm") EmailForm emailForm,
                                       BindingResult result, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         if(result.hasErrors()){
             model.addAttribute("passwordResetForm", emailForm);
             return "request-password-reset";
@@ -118,6 +133,9 @@ public class UserController {
 
     @GetMapping("/request-verification")
     public String getRequestVerification(Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         model.addAttribute("emailForm", new EmailForm());
         return "request-verification";
     }
@@ -125,6 +143,9 @@ public class UserController {
     @PostMapping("/request-verification")
     public String requestVerification(@Valid @ModelAttribute("emailForm") EmailForm emailForm,
                                       BindingResult result, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         if(result.hasErrors()){
             model.addAttribute("emailForm", emailForm);
             return "request-verification";
@@ -149,6 +170,9 @@ public class UserController {
 
     @GetMapping("/activate-account")
     public String activateAccount(@RequestParam String activation, @RequestParam String account, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         if((activation == null || activation.equals("")) || (account == null || account.equals(""))) {
             model.addAttribute("errorMessage", "Invalid activation link");
             return "activation";
@@ -175,6 +199,9 @@ public class UserController {
 
     @GetMapping("/reset-password")
     public String getResetPasswordForm(@RequestParam String activation, @RequestParam String account, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         if((activation == null || activation.equals("")) || (account == null || account.equals(""))) {
             model.addAttribute("errorMessage", "Invalid reset link");
             return "password-reset";
@@ -190,6 +217,9 @@ public class UserController {
 
     @PostMapping("/reset-password")
     public String resetPassword(@Valid @ModelAttribute("passwordResetForm") PasswordResetForm resetForm, BindingResult bindingResult, Model model) {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        }
         if(bindingResult.hasErrors()) {
             model.addAttribute("passwordResetForm", resetForm);
             return "redirect:/reset-password?invalidlink=invalid reset link";

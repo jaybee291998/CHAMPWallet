@@ -1,6 +1,7 @@
 package com.cwallet.CHAMPWallet.models.expense;
 
 import com.cwallet.CHAMPWallet.models.account.Wallet;
+import com.cwallet.CHAMPWallet.models.budget.Budget;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,27 +10,27 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name="expense_type")
+@Entity(name = "expense")
 @Builder
-public class ExpenseType {
+public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private String name;
+    private Long id;
     @Column(length = 2048)
     private String description;
-    private boolean isEnabled;
+    @ManyToOne
+    @JoinColumn(name = "expense_type_id", nullable = false)
+    private ExpenseType expenseType;
+    private Double price;
     @CreationTimestamp
     private LocalDateTime creationTime;
     @ManyToOne
-    @JoinColumn(name="wallet_id", nullable=false)
+    @JoinColumn(name="budget_id", nullable = false)
+    private Budget budget;
+    @ManyToOne
+    @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
-    @OneToMany(mappedBy = "expenseType", cascade = CascadeType.ALL)
-    private List<Expense> expenses = new ArrayList<>();
 }

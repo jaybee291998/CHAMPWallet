@@ -11,6 +11,7 @@ public class IncomeTypeMapper {
                 .name(incomeTypeDTO.getName())
                 .description(incomeTypeDTO.getDescription())
                 .wallet(incomeTypeDTO.getWallet())
+                .creationTime(incomeTypeDTO.getCreationTime())
                 .build();
     }
     public static IncomeTypeDto mapToIncomeTypeDto(IncomeType incomeType) {
@@ -19,6 +20,7 @@ public class IncomeTypeMapper {
                 .name(incomeType.getName())
                 .description(incomeType.getDescription())
                 .wallet(incomeType.getWallet())
+                .creationTime(incomeType.getCreationTime())
                 .build();
     }
 }

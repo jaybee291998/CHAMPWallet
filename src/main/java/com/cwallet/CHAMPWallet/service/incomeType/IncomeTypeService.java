@@ -9,5 +9,6 @@ public interface IncomeTypeService {
 
     List<IncomeTypeDto> getAllIncomeType();
 
+    IncomeTypeDto getIncomeTypeById(long id);
 
 }

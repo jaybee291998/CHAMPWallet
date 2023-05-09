@@ -51,4 +51,12 @@ public class IncomeTypeController {
         model.addAttribute("incomeTypeList",incomeTypeList);
         return "income-type-list";
     }
+
+    @GetMapping("/users/income-type/{id}")
+    public String getIncomeTypeById(@PathVariable("id") long id, Model model) {
+        IncomeTypeDto incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        model.addAttribute("incomeType", incomeTypeDto);
+        return "income-type-details";
+    }
+
 }

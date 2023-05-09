@@ -43,11 +43,11 @@ public class IncomeTypeController {
                 .build();
         incomeTypeService.save(newIncomeType);
 
-        return "redirect:/users/home";
+        return "redirect:/users/income-type/list";
     }
-    @RequestMapping("/users/income-type/list")
+    @GetMapping("/users/income-type/list")
     public String getAllIncomeType(Model model) {
-        List<IncomeType> incomeTypeList = incomeTypeService.findAllIncomeType();
+        List<IncomeTypeDto> incomeTypeList = incomeTypeService.getAllIncomeType();
         model.addAttribute("incomeTypeList",incomeTypeList);
         return "income-type-list";
     }

@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper.mapToIncomeTypeDto;
 
 @Service
 public class IncomeTypeServiceImpl implements IncomeTypeService {
@@ -36,7 +39,9 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
     }
 
     @Override
-    public List<IncomeType> findAllIncomeType() {
-        return incomeTypeRepository.findAll();
+    public List<IncomeTypeDto> getAllIncomeType() {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        List<IncomeType> incomeType = incomeTypeRepository.findByWalletId(loggedInUser.getWallet().getId());
+        return incomeType.stream().map(IncomeTypeMapper::mapToIncomeTypeDto).collect(Collectors.toList());
     }
 }

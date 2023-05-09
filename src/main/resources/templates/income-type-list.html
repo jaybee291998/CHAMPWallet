@@ -7,25 +7,31 @@
     <meta charset="UTF-8">
     <title>Income Type List</title>
 </head>
-<body>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
 <h1>Income Types</h1>
 
-<table>
-    <thead>
+            <table class="table table-striped">
     <tr>
         <th>Name</th>
         <th>Description</th>
     </tr>
-    </thead>
-    <tbody>
+
     <tr th:each="incomeType : ${incomeTypeList}">
-        <td th:text="${incomeType.name}"></td>
-        <td th:text="${incomeType.description}"></td>
+        <td th:if="${incomeType.name.length<= 20}"><a th:href="@{/users/income-type/{incomeTypeID}(incomeTypeID=${incomeType.id})}" th:text="${incomeType.name}"></a></td>
+        <td th:if="${incomeType.name.length> 20}"><a th:href="@{/users/income-type/{incomeTypeID}(incomeTypeID=${incomeType.id})}" th:text="${incomeType.name.substring(0, 20) + '...'}"></a></td>
+        <td th:if="${incomeType.description.length<= 30}" th:text="${incomeType.description}"></td>
+        <td th:if="${incomeType.description.length > 30}" th:text="${incomeType.description.substring(0, 30) + '...'}"></td>
     </tr>
-    </tbody>
 </table>
 
-<a th:href="@{/users/home}">Home</a>
+
 <a th:href="@{/users/income-type/create}">Add Income Type</a>
+        </div>
+    </section>
+</main>
 </body>
 </html>

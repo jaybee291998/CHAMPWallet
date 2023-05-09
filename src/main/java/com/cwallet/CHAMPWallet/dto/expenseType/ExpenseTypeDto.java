@@ -3,6 +3,7 @@ package com.cwallet.CHAMPWallet.dto.expenseType;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
 @Builder

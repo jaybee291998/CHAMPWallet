@@ -18,22 +18,24 @@ import static com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper.mapT
 
 @Service
 public class ExpenseTypeServiceImpl implements ExpenseTypeService {
-    private ExpenseTypeRepository expenseTypeRepository;
-    private SecurityUtil securityUtil;
     @Autowired
-    public ExpenseTypeServiceImpl(ExpenseTypeRepository expenseTypeRepository, SecurityUtil securityUtil){
-        this.expenseTypeRepository = expenseTypeRepository;
-        this.securityUtil = securityUtil;
-    }
+    private ExpenseTypeRepository expenseTypeRepository;
+    @Autowired
+    private SecurityUtil securityUtil;
     @Override
-    public void save(ExpenseTypeDto expenseTypeDto) {
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        Wallet newWallet = loggedInUser.getWallet();
+    public boolean save(ExpenseTypeDto expenseTypeDto) {
+
+//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+//        Wallet newWallet = loggedInUser.getWallet();
 
         ExpenseType expense = mapToExpenseType(expenseTypeDto);
-        expense.setWallet(newWallet);
+        expense.setWallet(securityUtil.getLoggedInUser().getWallet());
         expense.setEnabled(true);
-        expenseTypeRepository.save(expense);
+        try{
+            expenseTypeRepository.save(expense);
+        }catch (Exception e){
+           return false;
+        }
     }
     public List<ExpenseTypeDto> getAllUserExpenseType(){
         UserEntity loggedInUser = securityUtil.getLoggedInUser();

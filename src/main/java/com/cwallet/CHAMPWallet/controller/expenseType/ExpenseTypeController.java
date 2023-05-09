@@ -23,15 +23,10 @@ public class ExpenseTypeController {
     @Autowired
     private SecurityUtil securityUtil;
 
-    @Autowired
-    public ExpenseTypeController(ExpenseTypeService expenseTypeService) {
-        this.expenseTypeService = expenseTypeService;
-    }
-
     @GetMapping("/users/expense-type/create")
     public String getExpenseTypeForm(Model model){
         model.addAttribute("expenseTypeForm", new ExpenseTypeForm());
-        return "expense-type/create-expense-type-form";
+        return "create-expense-type-form";
     }
 
     @PostMapping("/users/expense-type/create")
@@ -42,13 +37,17 @@ public class ExpenseTypeController {
             model.addAttribute("expenseTypeForm", expenseTypeForm);
             return "create-expense-type-form";
         }
-        ExpenseTypeDto newExpense = ExpenseTypeDto.builder()
+        ExpenseTypeDto expenseTypeDto = ExpenseTypeDto.builder()
                 .name((expenseTypeForm.getName()))
                 .description(expenseTypeForm.getDescription())
                 .build();
-        expenseTypeService.save(newExpense);
-
-        return "redirect:/users/home";
+        boolean success = expenseTypeService.save(expenseTypeDto);
+        if(success){
+            return "redirect:/users/expense-type/list";
+        } else {
+            model.addAttribute("expenseTypeForm", expenseTypeForm);
+            return "redirect:/users/expense-type/create?failedtosave=failed to save the expense type";
+        }
     }
 
     @GetMapping("/users/expense-type/list")

@@ -19,5 +19,4 @@ public class AddIncome {
     private String description;
     @NotNull
     private double amount;
-    private
 }

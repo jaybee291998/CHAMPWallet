@@ -1,8 +1,8 @@
 package com.cwallet.CHAMPWallet.service.expenseType.impl;
 
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
-import com.cwallet.CHAMPWallet.models.account.Wallet;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
@@ -24,10 +24,6 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
     private SecurityUtil securityUtil;
     @Override
     public boolean save(ExpenseTypeDto expenseTypeDto) {
-
-//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-//        Wallet newWallet = loggedInUser.getWallet();
-
         ExpenseType expense = mapToExpenseType(expenseTypeDto);
         expense.setWallet(securityUtil.getLoggedInUser().getWallet());
         expense.setEnabled(true);
@@ -43,5 +39,13 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
         List<ExpenseType> usersExpenseType = expenseTypeRepository.findByWalletId(loggedInUser.getWallet().getId());
         return usersExpenseType.stream().map(expenseType -> mapToExpenseTypeDto(expenseType)).collect(Collectors.toList());
     }
+
+    @Override
+    public ExpenseTypeDto getExpenseTypeId(long id) {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
+        return ExpenseTypeMapper.mapToExpenseTypeDto(expenseType);
+    }
+
 
 }

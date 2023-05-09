@@ -1,5 +1,6 @@
 package com.cwallet.CHAMPWallet.repository.expenseType;
 
+import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,4 +11,6 @@ import java.util.List;
 public interface ExpenseTypeRepository extends JpaRepository<ExpenseType, Long> {
 
     List<ExpenseType> findByWalletId(Long walletId);
+
+    ExpenseType findByIdAndWalletId(long id, long walletId);
 }

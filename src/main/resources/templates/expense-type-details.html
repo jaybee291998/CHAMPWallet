@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Type List</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+  <!-- Page Content-->
+  <section layout:fragment="body" class="py-5">
+    <div class="container">
+      <h1>Expense Type Details</h1>
+      <table class="table table-striped">
+        <tr>
+          <th>name</th>
+          <th>description</th>
+        </tr>
+          <td th:text="${expenseType.name}"></a></td>
+          <td th:text="${expenseType.description}"></td>
+        </tr>
+      </table>
+      <a th:href="@{users/expense-type/update}" class="btn btn-success">Update</a>
+      <a th:href="@{users/expense-type/update}" class="btn btn-danger">Delete</a>
+      <a th:href="@{users/home}" class="btn btn-success">Home</a>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

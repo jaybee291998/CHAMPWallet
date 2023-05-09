@@ -7,6 +7,7 @@ import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -56,5 +57,17 @@ public class ExpenseTypeController {
 
         model.addAttribute("usersExpenseType", usersExpenseType);
         return "expense-type-list";
+    }
+
+    @GetMapping("users/expense-type/{id}")
+   public String getUsersExpenseTypeId(@PathVariable("id") long id, Model model){
+        ExpenseTypeDto expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+        if(expenseTypeDto == null){
+            return "redirect:/users/expense-type?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        }
+
+        model.addAttribute("expenseType", expenseTypeDto);
+
+        return "expense-type-details";
     }
 }

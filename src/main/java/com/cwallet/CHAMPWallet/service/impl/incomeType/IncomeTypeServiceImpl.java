@@ -50,6 +50,8 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
     public IncomeTypeDto getIncomeTypeById(long id) {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
        IncomeType incomeType = incomeTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
+       if(incomeType == null)
+           throw new
         return IncomeTypeMapper.mapToIncomeTypeDto(incomeType);
     }
 }

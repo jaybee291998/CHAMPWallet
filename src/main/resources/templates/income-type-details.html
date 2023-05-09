@@ -24,10 +24,10 @@
           <td th:text="${incomeType.description}"></td>
         </tr>
       </table>
+      <a th:href="@{/users/income-type/list}" class="btn btn-success">Back to Income Type List</a>
+      <a th:href="@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
+      <a th:href="@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Edit Income Type</a>
 
-      <button th:onclick="|location.href='@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}'|">Edit Income Type</button>
-      <button th:onclick="|if (confirm('Are you sure you want to delete this income type?')) {location.href='@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}'}|">Delete Income Type</button>
-      <button th:onclick="|location.href='@{/users/income-type/list}'|">Back to Income Type List</button>
 
     </div>
   </section>

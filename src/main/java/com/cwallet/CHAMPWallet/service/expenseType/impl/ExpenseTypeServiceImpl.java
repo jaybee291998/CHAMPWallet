@@ -33,6 +33,7 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
         expense.setEnabled(true);
         try{
             expenseTypeRepository.save(expense);
+            return true;
         }catch (Exception e){
            return false;
         }

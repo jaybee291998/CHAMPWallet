@@ -69,6 +69,7 @@ public class IncomeController {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
 model.addAttribute("userIncome",userIncome);
+
 model.addAttribute("totalAmount",totalAmount );
         return "income/income-list";
     }

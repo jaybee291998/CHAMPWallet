@@ -14,6 +14,12 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1>Budget List</h1>
+            <div th:if="${param.nosuchbudgetornauthorized}" class="alert alert-danger">
+                <p th:text="${param.nosuchbudgetornauthorized}"></p>
+            </div>
+            <div th:if="${param.nolongerupdateable}" class="alert alert-danger">
+                <p th:text="${param.nolongerupdateable}"></p>
+            </div>
             <p><b>Unallocated Balance: </b><span th:text="${unallocatedBalance}"></span></p>
             <p><b>Allocated Balance: </b><span th:text="${allocatedBalance}"></span></p>
             <p><b>Total Balance: </b><span th:text="${totalBalance}"></span></p>

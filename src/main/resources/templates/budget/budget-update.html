@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Update Budget</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <div th:if="${param.failedtosave}" class="alert alert-danger">
+                <p th:text="${param.failedtosave}"></p>
+            </div>
+            <form role="form" method="post" th:action="@{/users/budget/update/{budgetID}(budgetID=${budgetForm.id})}" th:object="${budgetForm}">
+                <div class="form-group">
+                    <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
+                    <label for="name">Name</label>
+                    <input
+                            type="text"
+                            class="form-control"
+                            id="name"
+                            placeholder="Enter Name"
+                            name="name"
+                            th:field="*{name}"
+                    >
+                    <p th:if="${#fields.hasErrors('name')}"
+                       th:errors="*{name}" class="text-danger"></p>
+                </div>
+                <div class="form-group">
+                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                    <label for="description">Description</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="description"
+                            placeholder="Enter Description"
+                            name="description"
+                            th:field="*{description}"
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}" class="text-danger"></p>
+                </div>
+                <button type="submit" id="submit" class="btn btn-primary">update budget</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.jws.WebParam;
+//import javax.jws.WebParam;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -49,7 +49,6 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        System.out.println("sadada"+newIncome);
         incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         return "redirect:/users/home";
     }

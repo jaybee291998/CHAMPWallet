@@ -29,7 +29,7 @@ public class IncomeController {
     @Autowired
     private SecurityUtil securityUtil;
 
-
+    @GetMapping("/users/income/create")
     public String getIncomeForm(Model model){
         model.addAttribute("incomeForm", new IncomeForm());
         model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
@@ -49,6 +49,7 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
+        System.out.println("sadada"+newIncome);
         incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         return "redirect:/users/home";
     }

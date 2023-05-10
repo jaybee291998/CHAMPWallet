@@ -48,8 +48,8 @@
 <!--                <select name="income-type" id="incometype">-->
 <!--                    <option th:></option>-->
 <!--                </select>-->
-                <select name="income-type" id="incometype" th:each="incomeType:${incomeTypes}" th:field="*{incomeTypeID}">
-                    <option th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
+                <select name="income-type" id="incometype" th:field="*{incomeTypeID}">
+                    <option th:each="incomeType:${incomeTypes}" th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
                 </select>
                 <div class="form-group">
                     <label for="amount">Amount</label>

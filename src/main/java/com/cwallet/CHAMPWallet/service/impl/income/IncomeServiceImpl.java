@@ -32,10 +32,10 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     public boolean save(IncomeDTO incomeDTO, String incomeTypeIDStr) {
         Long incomeTypeID = Long.valueOf(incomeTypeIDStr);
-        Optional<IncomeType> incomeType = incomeTypeID(incomeTypeID);
+        Optional<IncomeType> incomeType = incomeTypeRepository.findById(incomeTypeID);
        Income income = mapToIncome(incomeDTO);
         income.setWallet(securityUtil.getLoggedInUser().getWallet());
-        income.setIncomeType(incomeType);
+        income.setIncomeType(incomeType.get());
         try {
             incomeRepository.save(income);
             return true;

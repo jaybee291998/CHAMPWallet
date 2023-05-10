@@ -55,14 +55,14 @@ public class IncomeServiceImpl implements IncomeService {
         return usersIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
 
-    @Override
-    public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        Income income= incomeRepository.find(incomeID, loggedInUser.getWallet().getId());
-        if(budget == null) {
-            throw new NoSuchBudgetOrNotAuthorized("Not authorized or doesnt exsit");
-        }
-        BudgetDTO budgetDTO = mapToBudgetDTO(budget);
-        return budgetDTO;
-    }
+//    @Override
+//    public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
+//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+//        Income income= incomeRepository.find(incomeID, loggedInUser.getWallet().getId());
+//        if(budget == null) {
+//            throw new NoSuchBudgetOrNotAuthorized("Not authorized or doesnt exsit");
+//        }
+//        BudgetDTO budgetDTO = mapToBudgetDTO(budget);
+//        return budgetDTO;
+//    }
 }

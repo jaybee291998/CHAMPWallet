@@ -13,4 +13,7 @@ public interface ExpenseTypeService {
     List<ExpenseTypeDto> getAllUserExpenseType();
 
     ExpenseTypeDto getExpenseTypeId(long id) throws NoSuchExpenseTypeOrNotAuthorized;
+
+    //
+    void updateExpenseType(ExpenseTypeDto expenseTypeDto);
 }

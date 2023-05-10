@@ -89,4 +89,57 @@ public class ExpenseTypeController {
         model.addAttribute("expenseType", expenseTypeDto);
         return "expense-type-details";
     }
+
+    //
+//    @GetMapping("users/expense-type/{id}/update")
+//    public String editExpenseTypeDetails(@PathVariable("id") long id, Model model) throws NoSuchExpenseTypeOrNotAuthorized {
+//            ExpenseTypeDto expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+//            UserEntity loggedInUser = securityUtil.getLoggedInUser();
+//            if(expenseTypeDto.getWallet().getId()){
+//
+//            }
+//            return "redirect:/users/expense-type/list";
+//    }
+
+    @GetMapping("users/expense-type/{id}/update")
+    public String editExpenseTypeDetails(@PathVariable("id") long id, Model model) throws NoSuchExpenseTypeOrNotAuthorized {
+        ExpenseTypeDto expenseTypeDto;
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        }
+
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        if (!expenseTypeDto.getWallet().getUser().equals(loggedInUser)) {
+            throw new NoSuchExpenseTypeOrNotAuthorized("You have no rights to either access/use this resource");
+        }
+
+        model.addAttribute("expenseTypeForm", new ExpenseTypeForm());
+        model.addAttribute("expenseType", expenseTypeDto);
+        return "update-expense-type-form";
+    }
+
+    @PostMapping("users/expense-type/{id}/update")
+    public String updateExpenseTypeDetails(@PathVariable("id") long id,
+                                           @Valid @ModelAttribute("expenseTypeForm") ExpenseTypeForm expenseTypeForm,
+                                           BindingResult bindingResult, Model model) throws NoSuchExpenseTypeOrNotAuthorized {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("expenseTypeForm", expenseTypeForm);
+            model.addAttribute("expenseType", expenseTypeService.getExpenseTypeId(id));
+            return "update-expense-type-form";
+        }
+
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        ExpenseTypeDto expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+        if (!expenseTypeDto.getWallet().getUser().equals(loggedInUser)) {
+            throw new NoSuchExpenseTypeOrNotAuthorized("You have no rights to either access/use this resource");
+        }
+
+        expenseTypeDto.setName(expenseTypeForm.getName());
+        expenseTypeDto.setDescription(expenseTypeForm.getDescription());
+
+        expenseTypeService.updateExpenseType(expenseTypeDto);
+        return "redirect:/users/expense-type/list";
+    }
 }

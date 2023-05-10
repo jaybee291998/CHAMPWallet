@@ -1,6 +1,8 @@
 package com.cwallet.CHAMPWallet.service.expenseType;
 
+import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
@@ -15,5 +17,7 @@ public interface ExpenseTypeService {
     ExpenseTypeDto getExpenseTypeId(long id) throws NoSuchExpenseTypeOrNotAuthorized;
 
     //
-    void updateExpenseType(ExpenseTypeDto expenseTypeDto);
+    void updateExpenseType(ExpenseTypeDto expenseTypeDto, long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized;
+
+    boolean isUpdatable(ExpenseTypeDto expenseTypeDto);
 }

@@ -1,10 +1,14 @@
 package com.cwallet.CHAMPWallet.service.expenseType.impl;
 
+import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
+import com.cwallet.CHAMPWallet.models.budget.Budget;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
@@ -29,6 +33,9 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
 
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
+
+    @Autowired
+    private ExpenseRepository expenseRepository;
     @Override
     public boolean save(ExpenseTypeDto expenseTypeDto) {
         ExpenseType expense = mapToExpenseType(expenseTypeDto);
@@ -60,31 +67,27 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
     }
 
     @Override
-    public void updateExpenseType(ExpenseTypeDto expenseTypeDto) {
+    public void updateExpenseType(ExpenseTypeDto expenseTypeDTO, long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized {
+        if(expenseTypeDTO == null) {
+            throw new IllegalArgumentException("expense type dto must not be null");
+        }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        Optional<ExpenseType> expenseTypeOptional = expenseTypeRepository.findById(expenseTypeDto.getId());
-
-        if (!expenseTypeOptional.isPresent()) {
-            try {
-                throw new NoSuchExpenseTypeOrNotAuthorized("Expense type not found");
-            } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-                throw new RuntimeException(e);
-            }
+        ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(expenseTypeId, loggedInUser.getWallet().getId());
+        if(expenseType == null) {
+            throw new NoSuchExpenseTypeOrNotAuthorized("No such expense type or unauthorized");
         }
-
-        ExpenseType expenseType = expenseTypeOptional.get();
-
-        if (!expenseType.getWallet().getUser().equals(loggedInUser)) {
-            try {
-                throw new NoSuchExpenseTypeOrNotAuthorized("You have no rights to either access/use this resource");
-            } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        ExpenseType updatedExpenseType = mapToExpenseType(expenseTypeDto);
-        updatedExpenseType.setWallet(expenseType.getWallet());
-
-        expenseTypeRepository.save(updatedExpenseType);
+        expenseType.setName(expenseTypeDTO.getName());
+        expenseType.setDescription(expenseTypeDTO.getDescription());
+        expenseTypeRepository.save(expenseType);
     }
+    public boolean isUpdatable(ExpenseTypeDto expenseTypeDto){
+        if(expirableAndOwnedService.isExpired(expenseTypeDto)){
+            return  false;
+        }
+        else {
+            return expenseRepository.findByExpenseTypeId(expenseTypeDto.getId()).isEmpty();
+        }
+    }
+
+
 }

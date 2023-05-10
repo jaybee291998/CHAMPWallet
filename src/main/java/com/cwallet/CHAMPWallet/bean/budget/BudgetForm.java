@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Builder
 public class BudgetForm {
+    private long id;
     @NotNull
     @Size(min=5, max=64)
     private String name;

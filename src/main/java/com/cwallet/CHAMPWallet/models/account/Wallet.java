@@ -2,10 +2,7 @@ package com.cwallet.CHAMPWallet.models.account;
 
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -24,10 +21,10 @@ public class Wallet {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="account_id", referencedColumnName = "id")
     private UserEntity user;
-
+    @ToString.Exclude
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.REMOVE)
     private List<ExpenseType> expenseTypes = new ArrayList<>();
-
+    @ToString.Exclude
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.REMOVE)
     private List<IncomeType> incomeTypes = new ArrayList<>();
 

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.CHAMPWallet.mappers.budget.BudgetMapper.mapToBudget;
@@ -58,5 +59,29 @@ public class BudgetServiceImpl implements BudgetService {
         }
         BudgetDTO budgetDTO = mapToBudgetDTO(budget);
         return budgetDTO;
+    }
+
+    @Override
+    public void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized {
+        if(budgetDTO == null) {
+            throw new IllegalArgumentException("budget dto must not be null");
+        }
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
+        if(budget == null) {
+            throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
+        }
+        budget.setName(budgetDTO.getName());
+        budget.setDescription(budgetDTO.getDescription());
+        budgetRepository.save(budget);
+    }
+
+    @Override
+    public boolean isUpdateable(BudgetDTO budgetDTO){
+        if(expirableAndOwnedService.isExpired(budgetDTO)) {
+            return false;
+        } else {
+            return expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty();
+        }
     }
 }

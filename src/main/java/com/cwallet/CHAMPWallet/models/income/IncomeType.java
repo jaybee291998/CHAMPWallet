@@ -1,10 +1,7 @@
 package com.cwallet.CHAMPWallet.models.income;
 
 import com.cwallet.CHAMPWallet.models.account.Wallet;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -27,9 +24,11 @@ public class IncomeType {
     private String description;
     @CreationTimestamp
     private LocalDateTime creationTime;
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
+    @ToString.Exclude
     @OneToMany(mappedBy = "incomeType", cascade = CascadeType.ALL)
     private List<Income> incomes = new ArrayList<>();
 }

@@ -13,11 +13,16 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
-            <p><b>Name:</b><span th:text="${budget.name}"></span></p>
-            <p><b>Description:</b><span th:text="${budget.description}"></span></p>
+            <div>
+                <p><b>Name:</b><span th:text="${budget.name}"></span></p>
+                <p><b>Description:</b><span th:text="${budget.description}"></span></p>
+                <p><b>Creation Time:</b><span th:text="${budget.creationTime}"></span></p>
+            </div>
+
             <hr>
-            <a th:if="${!isExpired && !isUsed}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
-            <a th:if="${!isExpired && !isUsed}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
+            <a th:if="${buttonEnabled}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
+            <a th:if="${buttonEnabled}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
+            <a href="/users/budget/list" class="btn btn-secondary">Go back</a>
         </div>
     </section>
 </main>

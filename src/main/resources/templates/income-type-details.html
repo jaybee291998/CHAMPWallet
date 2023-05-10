@@ -22,11 +22,12 @@
         <tr>
           <td th:text="${incomeType.name}"></td>
           <td th:text="${incomeType.description}"></td>
+          <td th:text="${incomeType.creationTime}"></td>
         </tr>
       </table>
       <a th:href="@{/users/income-type/list}" class="btn btn-success">Back to Income Type List</a>
-      <a th:href="@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
-      <a th:href="@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Edit Income Type</a>
+      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
+      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Edit Income Type</a>
 
 
     </div>

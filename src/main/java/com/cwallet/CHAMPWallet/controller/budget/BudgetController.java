@@ -2,6 +2,7 @@ package com.cwallet.CHAMPWallet.controller.budget;
 
 import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.jws.WebParam;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -138,6 +141,43 @@ public class BudgetController {
         } else {
             return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
         }
+    }
 
+    @GetMapping("/users/budget/delete/{budgetID}")
+    public String deleteConfirmation(@PathVariable("budgetID") long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetService.isUpdateable(budgetDTO)) {
+            model.addAttribute("budget", budgetDTO);
+            return "budget/budget-delete";
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+        }
+    }
+
+    @GetMapping("/users/budget/delete/confirmed/{budgetID}")
+    public String deleteBudget(@PathVariable("budgetID") long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetService.isUpdateable(budgetDTO)) {
+            try {
+                budgetService.deleteBudget(budgetID);
+            } catch (NoSuchBudgetOrNotAuthorized e) {
+                return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+            } catch (BudgetExpiredException e) {
+                return "redirect:/users/budget/list?nolongerupdateable=from service this budget is no longer updateable";
+            }
+            return "redirect:/users/budget/list?budgetdeleted=budget successfully deleted";
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=from controller this budget is no longer updateable";
+        }
     }
 }

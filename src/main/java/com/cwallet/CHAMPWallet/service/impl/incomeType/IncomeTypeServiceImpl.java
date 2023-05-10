@@ -57,4 +57,14 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         }
         return mapToIncomeTypeDto(incomeType);
     }
+
+    @Override
+    public IncomeType getIncomeType(long id) throws NoSuchBudgetOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        IncomeType incomeType = incomeTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
+        if (incomeType == null) {
+            throw new NoSuchBudgetOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+        return incomeType;
+    }
 }

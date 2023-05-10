@@ -13,4 +13,5 @@ public interface BudgetService {
     BudgetDTO getSpecificBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized;
     void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized;
     boolean isUpdateable(BudgetDTO budgetDTO);
+    void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException;
 }

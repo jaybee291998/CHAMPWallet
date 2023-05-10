@@ -2,11 +2,17 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
+import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
+import com.cwallet.CHAMPWallet.utils.impl.ExpirableAndOwnedServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,16 +28,17 @@ public class ExpenseTypeController {
     private ExpenseTypeService expenseTypeService;
     @Autowired
     private SecurityUtil securityUtil;
-
     @Autowired
-    public ExpenseTypeController(ExpenseTypeService expenseTypeService) {
-        this.expenseTypeService = expenseTypeService;
-    }
+    private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private ExpenseTypeRepository expenseTypeRepository;
+    @Autowired
+    private ExpenseRepository expenseRepository;
 
     @GetMapping("/users/expense-type/create")
     public String getExpenseTypeForm(Model model){
         model.addAttribute("expenseTypeForm", new ExpenseTypeForm());
-        return "expense-type/create-expense-type-form";
+        return "create-expense-type-form";
     }
 
     @PostMapping("/users/expense-type/create")
@@ -42,13 +49,17 @@ public class ExpenseTypeController {
             model.addAttribute("expenseTypeForm", expenseTypeForm);
             return "create-expense-type-form";
         }
-        ExpenseTypeDto newExpense = ExpenseTypeDto.builder()
+        ExpenseTypeDto expenseTypeDto = ExpenseTypeDto.builder()
                 .name((expenseTypeForm.getName()))
                 .description(expenseTypeForm.getDescription())
                 .build();
-        expenseTypeService.save(newExpense);
-
-        return "redirect:/users/home";
+        boolean success = expenseTypeService.save(expenseTypeDto);
+        if(success){
+            return "redirect:/users/expense-type/list";
+        } else {
+            model.addAttribute("expenseTypeForm", expenseTypeForm);
+            return "redirect:/users/expense-type/create?failedtosave=failed to save the expense type";
+        }
     }
 
     @GetMapping("/users/expense-type/list")
@@ -57,5 +68,25 @@ public class ExpenseTypeController {
 
         model.addAttribute("usersExpenseType", usersExpenseType);
         return "expense-type-list";
+    }
+
+    @GetMapping("users/expense-type/{id}")
+   public String getUsersExpenseTypeId(@PathVariable("id") long id, Model model){
+        ExpenseTypeDto expenseTypeDto = null;
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        }
+        boolean isExpired = expirableAndOwnedService.isExpired(expenseTypeDto);
+
+        if(isExpired){
+            model.addAttribute("buttonEnabled", false);
+        }
+        else{
+            model.addAttribute("buttonEnabled", expenseRepository.findByExpenseTypeId(expenseTypeDto.getId()).isEmpty());
+        }
+        model.addAttribute("expenseType", expenseTypeDto);
+        return "expense-type-details";
     }
 }

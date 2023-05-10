@@ -13,7 +13,9 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
-
+            <div th:if="${param.failedtosave}" class="alert alert-danger">
+                <p th:text="${param.failedtosave}"></p>
+            </div>
             <form role="form" method="post" th:action="@{/users/expense-type/create}" th:object="${expenseTypeForm}">
                 <div class="form-group">
                     <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>

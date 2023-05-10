@@ -67,8 +67,19 @@ public class IncomeTypeController {
         } catch (NoSuchBudgetOrNotAuthorized e){
             return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
         }
+        boolean isExpired = expirableAndOwnedService.isExpired(incomeTypeDto);
+        IncomeType incomeType = null;
+        try {
+            incomeType = incomeTypeService.getIncomeType(id);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        }
+        if(isExpired) {
+            model.addAttribute("isButtonEnabled", false);
+        } else {
+            model.addAttribute("isButtonEnabled", incomeType.getIncomes().isEmpty());
+        }
         model.addAttribute("incomeType", incomeTypeDto);
-        model.addAttribute("isExpired", expirableAndOwnedService.isExpired(incomeTypeDto));
         return "income-type-details";
     }
 }

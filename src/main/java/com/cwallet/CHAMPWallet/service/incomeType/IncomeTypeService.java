@@ -11,5 +11,6 @@ public interface IncomeTypeService {
     List<IncomeTypeDto> getAllIncomeType();
 
     IncomeTypeDto getIncomeTypeById(long id) throws NoSuchBudgetOrNotAuthorized;
+    IncomeType getIncomeType(long id) throws NoSuchBudgetOrNotAuthorized;
 
 }

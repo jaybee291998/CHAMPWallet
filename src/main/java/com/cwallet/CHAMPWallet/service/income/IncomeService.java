@@ -11,5 +11,5 @@ public interface IncomeService {
     boolean save(IncomeDTO incomeDTO,String incomeTypeIDStr);
     List<IncomeDTO> getAllUserIncome();
 //    void delete(Long incomeId);
-//IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
+IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
 }

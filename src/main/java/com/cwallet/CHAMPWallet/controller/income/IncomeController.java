@@ -1,14 +1,20 @@
 package com.cwallet.CHAMPWallet.controller.income;
 
+import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.bean.income.IncomeForm;
+import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
 import com.cwallet.CHAMPWallet.dto.income.IncomeDTO;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.income.Income;
+import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
 import com.cwallet.CHAMPWallet.service.income.IncomeService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
+import com.cwallet.CHAMPWallet.repository.budget.BudgetRepository;
 
 import javax.jws.WebParam;
 import javax.validation.Valid;
@@ -28,6 +36,10 @@ public class IncomeController {
     private IncomeService incomeService;
     @Autowired
     private SecurityUtil securityUtil;
+    @Autowired
+    private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private BudgetRepository budgetRepository;
 
     @GetMapping("/users/income/create")
     public String getIncomeForm(Model model){
@@ -72,6 +84,75 @@ model.addAttribute("userIncome",userIncome);
 
 model.addAttribute("totalAmount",totalAmount );
         return "income/income-list";
+    }
+    @SneakyThrows
+    @GetMapping("/users/income/{incomeID}")
+    public String getSpecificIncome(@PathVariable("incomeID") long incomeID, Model model) {
+       IncomeDTO incomeDTO = null;
+        try {
+            incomeDTO = incomeService.getSpecificIncome(incomeID);
+        } catch (NoSuchIncomeOrNotAuthorized e) {
+            return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
+        }
+        model.addAttribute("income", incomeDTO);
+        boolean isExpired = expirableAndOwnedService.isExpired(incomeDTO);
+        if(isExpired) {
+            // if expired
+            model.addAttribute("buttonEnabled", false);
+        } else {
+            // else not expired yet so check if its used
+            model.addAttribute("buttonEnabled", budgetRepository.findById(incomeDTO.getId()).isEmpty());
+        }
+        return "income/income-detail";
+    }
+    @GetMapping("/users/income/update/{incomeID}")
+    public String getUpdateIncomeForm(@PathVariable("incomeID") long incomeID, Model model) {
+        IncomeDTO incomeDTO = null;
+        try {
+            incomeDTO = incomeService.getSpecificIncome(incomeID);
+        } catch (NoSuchIncomeOrNotAuthorized e) {
+            return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
+        }
+
+        if(incomeService.) {
+            BudgetForm budgetForm = BudgetForm.builder()
+                    .id(budgetDTO.getId())
+                    .name(budgetDTO.getName())
+                    .description(budgetDTO.getDescription())
+                    .build();
+            model.addAttribute("budgetForm", budgetForm);
+            return "budget/budget-update";
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+        }
+    }
+    @PostMapping("/users/budget/update/{budgetID}")
+    public String updateBudget(@Valid @ModelAttribute("budgetForm") BudgetForm budgetForm,
+                               BindingResult bindingResult,
+                               @PathVariable("budgetID") long budgetID, Model model) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budgetForm", budgetForm);
+            return "budget/budget-update";
+        }
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetService.isUpdateable(budgetDTO)) {
+            budgetDTO.setName(budgetForm.getName());
+            budgetDTO.setDescription(budgetForm.getDescription());
+            try {
+                budgetService.update(budgetDTO, budgetID);
+            } catch (NoSuchBudgetOrNotAuthorized e) {
+                return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+            }
+            return String.format("redirect:/users/budget/%s", budgetID);
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+        }
+
     }
 
 }

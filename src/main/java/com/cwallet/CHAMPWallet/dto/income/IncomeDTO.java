@@ -2,6 +2,7 @@ package com.cwallet.CHAMPWallet.dto.income;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
 import lombok.*;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
+import com.cwallet.CHAMPWallet.utils.ExpirableAndOwned;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 
-public class IncomeDTO {
+public class IncomeDTO implements ExpirableAndOwned {
     private long id;
     private String source;
     private IncomeType incomeType;
@@ -24,5 +25,8 @@ public class IncomeDTO {
     private Wallet wallet;
 
 
-
+    @Override
+    public Wallet getOwner() {
+        return wallet;
+    }
 }

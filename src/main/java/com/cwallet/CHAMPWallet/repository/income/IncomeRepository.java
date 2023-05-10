@@ -9,5 +9,5 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
         List<Income> findByWalletId(Long walletID);
         List<Income> findByIncomeTypeId(Long incomeTypeId);
         Optional<Income> findById(Long incomeId);
-//        Income findByIdAndWalletId(long incomeID, long walletID);
+   Income findByIdAndWalletId(long incomeID, long walletID);
 }

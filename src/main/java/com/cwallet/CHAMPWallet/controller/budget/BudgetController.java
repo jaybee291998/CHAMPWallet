@@ -8,7 +8,6 @@ import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
-import com.cwallet.CHAMPWallet.utils.impl.ExpirableAndOwnedServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-//import javax.jws.WebParam;
+import javax.jws.WebParam;
+
 import javax.validation.Valid;
 import java.util.List;
 
@@ -82,8 +82,64 @@ public class BudgetController {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
         }
         model.addAttribute("budget", budgetDTO);
-        model.addAttribute("isExpired", expirableAndOwnedService.isExpired(budgetDTO));
-        model.addAttribute("isUsed", !expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty() );
+        boolean isExpired = expirableAndOwnedService.isExpired(budgetDTO);
+        if(isExpired) {
+            // if expired
+            model.addAttribute("buttonEnabled", false);
+        } else {
+            // else not expired yet so check if its used
+            model.addAttribute("buttonEnabled", expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty());
+        }
         return "budget/budget-detail";
+    }
+
+    @GetMapping("/users/budget/update/{budgetID}")
+    public String getUpdateBudgetForm(@PathVariable("budgetID") long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+
+        if(budgetService.isUpdateable(budgetDTO)) {
+            BudgetForm budgetForm = BudgetForm.builder()
+                    .id(budgetDTO.getId())
+                    .name(budgetDTO.getName())
+                    .description(budgetDTO.getDescription())
+                    .build();
+            model.addAttribute("budgetForm", budgetForm);
+            return "budget/budget-update";
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+        }
+    }
+    @PostMapping("/users/budget/update/{budgetID}")
+    public String updateBudget(@Valid @ModelAttribute("budgetForm") BudgetForm budgetForm,
+                               BindingResult bindingResult,
+                               @PathVariable("budgetID") long budgetID, Model model) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budgetForm", budgetForm);
+            return "budget/budget-update";
+        }
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetService.isUpdateable(budgetDTO)) {
+            budgetDTO.setName(budgetForm.getName());
+            budgetDTO.setDescription(budgetForm.getDescription());
+            try {
+                budgetService.update(budgetDTO, budgetID);
+            } catch (NoSuchBudgetOrNotAuthorized e) {
+                return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+            }
+            return String.format("redirect:/users/budget/%s", budgetID);
+        } else {
+            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+        }
+
     }
 }

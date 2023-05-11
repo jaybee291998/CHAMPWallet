@@ -1,25 +1,19 @@
 package com.cwallet.CHAMPWallet.service.expenseType.impl;
 
-import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
-import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
-import com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
-import com.cwallet.CHAMPWallet.models.budget.Budget;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper.mapToExpenseType;

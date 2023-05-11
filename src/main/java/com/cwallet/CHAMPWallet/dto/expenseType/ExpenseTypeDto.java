@@ -2,7 +2,6 @@ package com.cwallet.CHAMPWallet.dto.expenseType;
 
 import com.cwallet.CHAMPWallet.models.account.Wallet;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwned;
-import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;

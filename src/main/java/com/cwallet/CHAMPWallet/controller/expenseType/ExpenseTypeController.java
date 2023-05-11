@@ -2,25 +2,19 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
-import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
-import com.cwallet.CHAMPWallet.models.account.UserEntity;
-import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
 import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.expenseType.ExpenseTypeService;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
-import com.cwallet.CHAMPWallet.utils.impl.ExpirableAndOwnedServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.ArrayList;
-
 import javax.validation.Valid;
 
 @Controller
@@ -146,13 +140,48 @@ public class ExpenseTypeController {
         }
     }
 
-//    @GetMapping("users/expense-type/delete/confirmed")
-//    public String confirmDeleteExpenseTypeDetails(){
-//
-//    }
-//    @GetMapping("users/expense-type/delete/{expenseTypeId}")
-//    public String deleteExpenseTypeDetails(){
-//
-//        return"redirect:/users/expense-type/list";
-//    }
+    @GetMapping("users/expense-type/delete/{expenseTypeId}")
+    public String confirmDeleteExpenseTypeDetails(@PathVariable("expenseTypeId") long expenseTypeId, Model model){
+        ExpenseTypeDto expenseTypeDto = null;
+
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        }
+
+        if(expenseTypeService.isUpdatable(expenseTypeDto)){
+            model.addAttribute("expenseType", expenseTypeDto);
+            return "expense-type-delete";
+        }
+        else{
+            return "redirect:/users/expense-type/list?nolongerupdatable=this expense type is no longer updatable";
+        }
+
+    }
+    @GetMapping("users/expense-type/delete/confirmed/{expenseTypeId}")
+    public String deleteExpenseTypeDetails(@PathVariable("expenseTypeId") long expenseTypeId){
+        ExpenseTypeDto expenseTypeDto = null;
+
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        }
+
+        if(expenseTypeService.isUpdatable(expenseTypeDto)){
+            try {
+                expenseTypeService.deleteExpenseType(expenseTypeId);
+            } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+                return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+            } catch (ExpenseTypeExpiredException e) {
+                return "redirect:/users/expense-type/list?nolongerupdatable=this expense type is no longer updatable";
+            }
+            return "redirect:/users/expense-type/list?expensetypedeleted=expense type deleted successfully";
+        }
+        else{
+            return "redirect:/users/expense-type/list?nolongerupdatable=this expense type is no longer updatable";
+        }
+
+    }
 }

@@ -3,34 +3,35 @@ package com.cwallet.CHAMPWallet.models.budget;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name="budget")
-@Builder
-public class Budget {
+@Entity(name = "budget_allocation_history")
+@Data
+public class BudgetAllocationHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private String name;
+    private Long id;
     @Column(length = 2048)
     private String description;
-    private boolean isEnabled;
-    private double balance;
-    @CreationTimestamp
-    private LocalDateTime creationTime;
+
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name="wallet_id", nullable = false)
+    @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
-    private List<BudgetAllocationHistory> allocationHistory = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "budget_id", nullable = false)
+    private Budget budget;
+
+    private Double amount;
+    private Boolean isAllocate;
+    @CreationTimestamp
+    private LocalDateTime creationTime;
 }

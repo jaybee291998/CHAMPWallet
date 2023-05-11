@@ -1,7 +1,9 @@
 package com.cwallet.CHAMPWallet.controller.incomeType;
 
 import com.cwallet.CHAMPWallet.bean.incomeType.IncomeTypeForm;
+
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Controller
 public class IncomeTypeController {
+    @Autowired
     private IncomeTypeService incomeTypeService;
 
     @Autowired
@@ -25,10 +28,6 @@ public class IncomeTypeController {
 
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
-    @Autowired
-    public IncomeTypeController(IncomeTypeService incomeTypeService){
-        this.incomeTypeService = incomeTypeService;
-    }
 //CREATE
     @GetMapping("/users/income-type/create")
     public String getIncomeTypeForm(Model model){
@@ -131,6 +130,44 @@ public class IncomeTypeController {
             return "redirect:/users/income-type/list?nolongerupdateable=this income type is no longer updateable";
         }
 
+    }
+    //    DELETE
+
+    @GetMapping("/users/income-type/delete/{id}")
+    public String deleteConfirmation(@PathVariable ("id") long id, Model model){
+        IncomeTypeDto incomeTypeDto = null;
+        try{
+            incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        }catch (NoSuchBudgetOrNotAuthorized e){
+            return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
+        }
+        if(incomeTypeService.isUpdateable(incomeTypeDto)) {
+            model.addAttribute("incomeType", incomeTypeDto);
+            return "income-type-delete";
+        } else {
+            return "redirect:/users/income-type/list?nolongerupdateable=this income type  is no longer updateable";
+        }
+    }
+    @GetMapping("/users/income-type/delete/confirmed/{id}")
+    public String deleteIncomeType(@PathVariable("id") long id, Model model) {
+        IncomeTypeDto incomeTypeDto = null;
+        try {
+            incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
+        }
+        if(incomeTypeService.isUpdateable(incomeTypeDto)) {
+            try {
+                incomeTypeService.deleteIncomeType(id);
+            } catch (NoSuchBudgetOrNotAuthorized e) {
+                return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
+            } catch (BudgetExpiredException e) {
+                return "redirect:/users/income-type/list?nolongerupdateable=from service this income type  is no longer updateable";
+            }
+            return "redirect:/users/income-type/list?incomeTypedeleted=income type  successfully deleted";
+        } else {
+            return "redirect:/users/income-type/list?nolongerupdateable=from controller this income type  is no longer updateable";
+        }
     }
 
 }

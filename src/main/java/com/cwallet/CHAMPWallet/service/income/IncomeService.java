@@ -2,7 +2,7 @@ package com.cwallet.CHAMPWallet.service.income;
 
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.income.IncomeDTO;
-import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.income.IncomeExpiredException;
 import com.cwallet.CHAMPWallet.exception.income.NoSuchIncomeOrNotAuthorized;
 
 import java.util.List;
@@ -15,4 +15,5 @@ IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
 
 boolean isUpdateable(IncomeDTO incomeDto);
     void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized;
+    void deleteIncome(long budgetID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException;
 }

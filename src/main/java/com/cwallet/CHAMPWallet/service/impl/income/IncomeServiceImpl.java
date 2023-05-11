@@ -1,6 +1,5 @@
 package com.cwallet.CHAMPWallet.service.impl.income;
 
-import com.cwallet.CHAMPWallet.repository.budget.BudgetRepository;
 import com.cwallet.CHAMPWallet.dto.income.IncomeDTO;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
@@ -14,6 +13,7 @@ import com.cwallet.CHAMPWallet.service.income.IncomeService;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.cwallet.CHAMPWallet.exception.income.NoSuchIncomeOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.income.IncomeExpiredException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -36,6 +36,8 @@ public class IncomeServiceImpl implements IncomeService {
     private SecurityUtil securityUtil;
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private IncomeService incomeService;
 
 
     @Override
@@ -67,18 +69,9 @@ public class IncomeServiceImpl implements IncomeService {
         return usersIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
 
-//@Override
-//    public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
-//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-//        Income income= incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
-//        if(income == null) {
-//            throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
-//        }
-//        IncomeDTO incomeDTO = mapToIncomeDTO(income);
-//        return incomeDTO;
-//    }
+
 @Override
-public IncomeDTO getSpecificBudget(long incomeID) throws NoSuchIncomeOrNotAuthorized {
+public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
     UserEntity loggedInUser = securityUtil.getLoggedInUser();
     Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
     if(income == null) {
@@ -107,12 +100,32 @@ public IncomeDTO getSpecificBudget(long incomeID) throws NoSuchIncomeOrNotAuthor
 
     @Override
     public boolean isUpdateable(IncomeDTO incomeDTO){
+        List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
+        double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
         if(expirableAndOwnedService.isExpired(incomeDTO)) {
             return false;
-        } else {
-          if(incomeDTO.getAmount()<0){
-              throw
-          }
         }
+        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
+        {
+            return false;
+        }
+
+        return true;
+
+
+    }
+
+    @Override
+    public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
+        if(income == null) {
+            throw new NoSuchIncomeOrNotAuthorized("No such Income or unauthorized");
+        }
+        IncomeDTO incomeDTO = mapToIncomeDTO(income);
+        if(!isUpdateable(incomeDTO)){
+            throw new IncomeExpiredException("Income no longer updateable");
+        }
+        incomeRepository.delete(income);
     }
 }

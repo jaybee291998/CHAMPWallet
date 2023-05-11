@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Allocate Budget</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
+            </div>
+            <div>
+                <p><b>Wallet Balance:</b><span th:text="${walletBalance}"></span></p>
+                <p><b>Budget Balance:</b><span th:text="${budgetBalance}"></span></p>
+            </div>
+            <form role="form" method="post" th:action="@{/users/budget/allocation/{budgetID}(budgetID=${budgetID})}" th:object="${allocationForm}">
+                <div class="form-group">
+                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                    <label for="description">Description</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="description"
+                            placeholder="Enter Description"
+                            name="description"
+                            th:field="*{description}"
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}" class="text-danger"></p>
+                </div>
+                <div class="form-group">
+                    <p th:if="${amountError}" th:text="${amountError}" class="alert alert-danger"></p>
+                    <label for="amount">amount</label>
+                    <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            id="amount"
+                            placeholder="Enter Amount"
+                            name="amount"
+                            th:field="*{amount}"
+                    >
+                    <p th:if="${#fields.hasErrors('amount')}"
+                       th:errors="*{amount}" class="text-danger"></p>
+                </div>
+                <div class="form-group">
+                    <p th:if="${allocateError}" th:text="${allocateError}" class="alert alert-danger"></p>
+                    <b>Allocate</b>
+                    <select name="allocate" th:field="*{type}">
+                        <option th:value="'allocate'">Allocate</option>
+                        <option th:value="'deallocate'">Deallocate</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('amount')}"
+                       th:errors="*{amount}" class="text-danger"></p>
+                </div>
+                <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

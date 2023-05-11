@@ -1,6 +1,8 @@
 package com.cwallet.CHAMPWallet.controller.incomeType;
 
+import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.bean.incomeType.IncomeTypeForm;
+import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
@@ -30,7 +32,7 @@ public class IncomeTypeController {
     public IncomeTypeController(IncomeTypeService incomeTypeService){
         this.incomeTypeService = incomeTypeService;
     }
-
+//CREATE
     @GetMapping("/users/income-type/create")
     public String getIncomeTypeForm(Model model){
         model.addAttribute("incomeTypeForm", new IncomeTypeForm());
@@ -52,13 +54,14 @@ public class IncomeTypeController {
 
         return "redirect:/users/income-type/list";
     }
+//    LIST
     @GetMapping("/users/income-type/list")
     public String getAllIncomeType(Model model) {
         List<IncomeTypeDto> incomeTypeList = incomeTypeService.getAllIncomeType();
         model.addAttribute("incomeTypeList",incomeTypeList);
         return "income-type-list";
     }
-
+//DETAILS
     @GetMapping("/users/income-type/{id}")
     public String getIncomeTypeById(@PathVariable("id") long id, Model model) {
         IncomeTypeDto incomeTypeDto = null;
@@ -82,4 +85,55 @@ public class IncomeTypeController {
         model.addAttribute("incomeType", incomeTypeDto);
         return "income-type-details";
     }
+//    UPDATE
+    @GetMapping("/users/income-type/update/{id}")
+    public String getUpdateIncomeTypeForm(@PathVariable("id") long id, Model model) {
+        IncomeTypeDto incomeTypeDto = null;
+        try {
+            incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        }
+
+        if(incomeTypeService.isUpdateable(incomeTypeDto)) {
+            IncomeTypeForm incomeTypeForm = IncomeTypeForm.builder()
+                    .id(incomeTypeDto.getId())
+                    .name(incomeTypeDto.getName())
+                    .description(incomeTypeDto.getDescription())
+                    .build();
+            model.addAttribute("incomeTypeForm", incomeTypeForm);
+            return "income-type-update";
+        } else {
+            return "redirect:/users/income-type/list?nolongerupdateable=this income type is no longer updateable";
+        }
+    }
+    @PostMapping("/users/income-type/update/{id}")
+    public String updateIncomeType(@Valid @ModelAttribute("incomeTypeForm") IncomeTypeForm incomeTypeForm,
+                               BindingResult bindingResult,
+                               @PathVariable("id") long id, Model model) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("incomeTypeForm", incomeTypeForm);
+            return "income-type/update";
+        }
+        IncomeTypeDto incomeTypeDto = null;
+        try {
+            incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        }
+        if(incomeTypeService.isUpdateable(incomeTypeDto)) {
+            incomeTypeDto.setName(incomeTypeForm.getName());
+            incomeTypeDto.setDescription(incomeTypeForm.getDescription());
+            try {
+                incomeTypeService.update(incomeTypeDto, id);
+            } catch (NoSuchBudgetOrNotAuthorized e) {
+                return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type or unauthorized";
+            }
+            return String.format("redirect:/users/income-type/%s", id);
+        } else {
+            return "redirect:/users/income-type/list?nolongerupdateable=this income type is no longer updateable";
+        }
+
+    }
+
 }

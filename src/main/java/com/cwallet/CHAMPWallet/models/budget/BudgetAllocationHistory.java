@@ -28,8 +28,8 @@ public class BudgetAllocationHistory {
     @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "budget_id", nullable = false)
-
     private Budget budget;
+
     private Double amount;
     private Boolean isAllocate;
     @CreationTimestamp

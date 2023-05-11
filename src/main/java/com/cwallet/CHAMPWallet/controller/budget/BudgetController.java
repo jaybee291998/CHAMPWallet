@@ -191,6 +191,8 @@ public class BudgetController {
         }
         model.addAttribute("allocationForm", new BudgetAllocationForm());
         model.addAttribute("budgetID", budgetDTO.getId());
+        model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
+        model.addAttribute("budgetBalance", budgetDTO.getBalance());
         return "budget/budget-allocation";
     }
 
@@ -198,19 +200,25 @@ public class BudgetController {
     public String budgetAllocation(@Valid @ModelAttribute("allocationForm") BudgetAllocationForm allocationForm,
                                    BindingResult bindingResult,
                                    Model model,
-                                   @RequestParam("allocate") String allocate,
                                    @PathVariable("budgetID") long budgetID) {
         if(bindingResult.hasErrors()) {
             model.addAttribute("allocationForm", allocationForm);
             return "budget/budget-allocation";
         }
         BudgetDTO budgetDTO = null;
+        if(allocationForm.getAmount() < 0) {
+            model.addAttribute("allocationForm", allocationForm);
+            model.addAttribute("errorMessage", "amount cant be negative");
+            model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
+            model.addAttribute("budgetBalance", budgetDTO.getBalance());
+            return "budget/budget-allocation";
+        }
         try {
             budgetDTO = budgetService.getSpecificBudget(budgetID);
         } catch (NoSuchBudgetOrNotAuthorized e) {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
         }
-        boolean isAllocate = allocate.equalsIgnoreCase("true");
+        boolean isAllocate = allocationForm.getType().equalsIgnoreCase("allocate");
         try {
             budgetService.allocateToBudget(budgetID, allocationForm.getAmount(), allocationForm.getDescription(), isAllocate);
         } catch (NoSuchEntityOrNotAuthorized e) {
@@ -218,7 +226,10 @@ public class BudgetController {
         } catch (AccountingConstraintViolationException e) {
             model.addAttribute("allocationForm", allocationForm);
             model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
+            model.addAttribute("budgetBalance", budgetDTO.getBalance());
             return "budget/budget-allocation";
         }
+        return String.format("redirect:/users/budget/%s", budgetID);
     }
 }

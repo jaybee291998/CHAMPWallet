@@ -6,6 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,4 +29,8 @@ public class Budget {
     @ManyToOne
     @JoinColumn(name="wallet_id", nullable = false)
     private Wallet wallet;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
+    private List<BudgetAllocationHistory> allocationHistory = new ArrayList<>();
 }

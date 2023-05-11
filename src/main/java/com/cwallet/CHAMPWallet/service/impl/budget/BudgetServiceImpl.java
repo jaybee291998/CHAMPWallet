@@ -98,11 +98,12 @@ public class BudgetServiceImpl implements BudgetService {
             return expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty();
         }
     }
-
+    @Transactional
     @Override
     public void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
+        Wallet wallet = loggedInUser.getWallet();
+        Budget budget = budgetRepository.findByIdAndWalletId(budgetID, wallet.getId());
         if(budget == null) {
             throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
         }
@@ -110,6 +111,8 @@ public class BudgetServiceImpl implements BudgetService {
         if(!isUpdateable(budgetDTO)){
             throw new BudgetExpiredException("Budget no longer updateable");
         }
+        wallet.setBalance(wallet.getBalance() + budgetDTO.getBalance());
+        walletRepository.save(wallet);
         budgetRepository.delete(budget);
     }
 

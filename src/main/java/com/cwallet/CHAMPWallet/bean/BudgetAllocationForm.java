@@ -14,4 +14,6 @@ public class BudgetAllocationForm {
     private String description;
     @NotNull
     private double amount;
+    @NotNull
+    private String type;
 }

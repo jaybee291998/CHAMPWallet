@@ -1,6 +1,7 @@
 package com.cwallet.CHAMPWallet.service.impl.incomeType;
 
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
@@ -95,5 +96,19 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         } else {
             return incomeTypeRepository.findByWalletId(incomeTypeDto.getId()).isEmpty();
         }
+    }
+
+    @Override
+    public void deleteIncomeType(long id) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        IncomeType incomeType = incomeTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
+        if(incomeType == null){
+            throw new NoSuchBudgetOrNotAuthorized("No such income type or unauthorized");
+        }
+        IncomeTypeDto incomeTypeDto = mapToIncomeTypeDto(incomeType);
+        if (!isUpdateable (incomeTypeDto)){
+            throw new BudgetExpiredException("Income Type is no longer deletable");
+        }
+        incomeTypeRepository.delete(incomeType);
     }
 }

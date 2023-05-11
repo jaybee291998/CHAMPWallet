@@ -1,5 +1,6 @@
 package com.cwallet.CHAMPWallet.service.incomeType;
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
 
@@ -15,5 +16,7 @@ public interface IncomeTypeService {
 
     void update(IncomeTypeDto incomeTypeDto, long id) throws NoSuchBudgetOrNotAuthorized;
     boolean isUpdateable(IncomeTypeDto incomeTypeDto);
+
+    void deleteIncomeType (long id) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException;;
 
 }

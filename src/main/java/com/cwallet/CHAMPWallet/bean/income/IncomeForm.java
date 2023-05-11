@@ -1,5 +1,6 @@
 package com.cwallet.CHAMPWallet.bean.income;
 
+import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Builder
 public class IncomeForm {
+    private long id;
     @NotNull
     @Size(min=5, max=64)
     private String source;
@@ -22,6 +24,6 @@ public class IncomeForm {
 
     private double amount;
 
-    private String incomeTypeID;
+    private IncomeType incomeTypeID;
 
 }

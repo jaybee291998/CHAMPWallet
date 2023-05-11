@@ -1,8 +1,6 @@
 package com.cwallet.CHAMPWallet.controller.incomeType;
 
-import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.bean.incomeType.IncomeTypeForm;
-import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.incomeType.IncomeTypeDto;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
@@ -10,7 +8,6 @@ import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.incomeType.IncomeTypeService;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;

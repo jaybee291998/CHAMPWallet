@@ -5,7 +5,6 @@ import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.account.Wallet;
-import com.cwallet.CHAMPWallet.models.budget.Budget;
 import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import com.cwallet.CHAMPWallet.repository.incomeType.IncomeTypeRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.CHAMPWallet.mappers.incomeType.IncomeTypeMapper.mapToIncomeTypeDto;

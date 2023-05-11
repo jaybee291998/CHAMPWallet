@@ -26,8 +26,8 @@
         </tr>
       </table>
       <a th:href="@{/users/income-type/list}" class="btn btn-success">Back to Income Type List</a>
-      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/delete/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
-      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/edit/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-success">Edit Income Type</a>
+      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/delete/{id}(id=${incomeType.id})}" class="btn btn-success">Delete Income Type</a>
+      <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/update/{id}(id=${incomeType.id})}" class="btn btn-success">Update</a>
 
 
     </div>

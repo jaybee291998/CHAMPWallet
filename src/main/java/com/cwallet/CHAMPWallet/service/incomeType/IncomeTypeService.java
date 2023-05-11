@@ -13,4 +13,7 @@ public interface IncomeTypeService {
     IncomeTypeDto getIncomeTypeById(long id) throws NoSuchBudgetOrNotAuthorized;
     IncomeType getIncomeType(long id) throws NoSuchBudgetOrNotAuthorized;
 
+    void update(IncomeTypeDto incomeTypeDto, long id) throws NoSuchBudgetOrNotAuthorized;
+    boolean isUpdateable(IncomeTypeDto incomeTypeDto);
+
 }

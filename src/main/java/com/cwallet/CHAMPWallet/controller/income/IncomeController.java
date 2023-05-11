@@ -10,6 +10,7 @@ import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.income.Income;
+import com.cwallet.CHAMPWallet.models.income.IncomeType;
 import com.cwallet.CHAMPWallet.repository.expense.ExpenseRepository;
 import com.cwallet.CHAMPWallet.security.SecurityUtil;
 import com.cwallet.CHAMPWallet.service.budget.BudgetService;
@@ -61,7 +62,7 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        incomeService.save(newIncome, incomeForm.getIncomeTypeID());
+        incomeService.save(newIncome, String.valueOf(incomeForm.getIncomeTypeID()));
         return "redirect:/users/home";
     }
 //    @GetMapping("/user/income/delete")
@@ -114,43 +115,49 @@ model.addAttribute("totalAmount",totalAmount );
             return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
         }
 
-        if(incomeService.) {
-            BudgetForm budgetForm = BudgetForm.builder()
-                    .id(budgetDTO.getId())
-                    .name(budgetDTO.getName())
-                    .description(budgetDTO.getDescription())
+        if(incomeService.isUpdateable(incomeDTO)) {
+           IncomeForm incomeForm =IncomeForm.builder()
+                   .id(incomeDTO.getId())
+                   .description(incomeDTO.getDescription())
+                   .source(incomeDTO.getSource())
+                   .incomeTypeID(incomeDTO.getIncomeType())
+                   .amount(incomeDTO.getAmount())
                     .build();
-            model.addAttribute("budgetForm", budgetForm);
-            return "budget/budget-update";
+            model.addAttribute("incomeForm", incomeForm);
+            return "income/income-update";
         } else {
-            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+            return "redirect:/users/income/list?nolongerupdateable=this budget is no longer updateable";
         }
     }
-    @PostMapping("/users/budget/update/{budgetID}")
-    public String updateBudget(@Valid @ModelAttribute("budgetForm") BudgetForm budgetForm,
+    @PostMapping("/users/budget/update/{incomeID}")
+    public String updateIncome(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
                                BindingResult bindingResult,
-                               @PathVariable("budgetID") long budgetID, Model model) {
+                               @PathVariable("incomeID") long incomeID, Model model) {
         if(bindingResult.hasErrors()) {
-            model.addAttribute("budgetForm", budgetForm);
-            return "budget/budget-update";
+            model.addAttribute("incomeForm", incomeForm);
+            return "income/income-update"; //html pass
         }
-        BudgetDTO budgetDTO = null;
+        IncomeDTO incomeDTO= null;
         try {
-            budgetDTO = budgetService.getSpecificBudget(budgetID);
-        } catch (NoSuchBudgetOrNotAuthorized e) {
-            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+            incomeDTO = incomeService.getSpecificIncome(incomeID);
+        } catch (NoSuchIncomeOrNotAuthorized e) {
+            return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
         }
-        if(budgetService.isUpdateable(budgetDTO)) {
-            budgetDTO.setName(budgetForm.getName());
-            budgetDTO.setDescription(budgetForm.getDescription());
+        if(incomeService.isUpdateable(incomeDTO)) {
+            incomeDTO.setSource(incomeForm.getSource());
+            incomeDTO.setDescription(incomeForm.getDescription());
+            incomeDTO.setAmount(incomeForm.getAmount());
+            incomeDTO.setIncomeType(incomeForm.getIncomeTypeID());
+
+
             try {
-                budgetService.update(budgetDTO, budgetID);
-            } catch (NoSuchBudgetOrNotAuthorized e) {
-                return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+                incomeService.update(incomeDTO,incomeID);
+            } catch (NoSuchIncomeOrNotAuthorized e) {
+                return "redirect:/users/budget/list?nosuchincomeornauthorized=no such income or unauthorized";
             }
-            return String.format("redirect:/users/budget/%s", budgetID);
+            return String.format("redirect:/users/income/%s", incomeID);
         } else {
-            return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
+            return "redirect:/users/income/list?nolongerupdateable=this income is no longer updateable";
         }
 
     }

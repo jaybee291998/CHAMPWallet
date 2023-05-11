@@ -12,4 +12,7 @@ public interface IncomeService {
     List<IncomeDTO> getAllUserIncome();
 //    void delete(Long incomeId);
 IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
+
+boolean isUpdateable(IncomeDTO incomeDto);
+    void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized;
 }

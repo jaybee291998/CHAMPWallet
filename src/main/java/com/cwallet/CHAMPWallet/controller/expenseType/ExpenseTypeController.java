@@ -146,10 +146,10 @@ public class ExpenseTypeController {
         }
     }
 
-    @GetMapping("users/expense-type/delete/confirmed")
-    public String confirmDeleteExpenseTypeDetails(){
-
-    }
+//    @GetMapping("users/expense-type/delete/confirmed")
+//    public String confirmDeleteExpenseTypeDetails(){
+//
+//    }
 //    @GetMapping("users/expense-type/delete/{expenseTypeId}")
 //    public String deleteExpenseTypeDetails(){
 //

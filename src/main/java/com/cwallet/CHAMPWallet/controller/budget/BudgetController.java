@@ -1,7 +1,10 @@
 package com.cwallet.CHAMPWallet.controller.budget;
 
+import com.cwallet.CHAMPWallet.bean.BudgetAllocationForm;
 import com.cwallet.CHAMPWallet.bean.budget.BudgetForm;
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.exception.AccountingConstraintViolationException;
+import com.cwallet.CHAMPWallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
@@ -13,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.jws.WebParam;
 
@@ -178,6 +178,47 @@ public class BudgetController {
             return "redirect:/users/budget/list?budgetdeleted=budget successfully deleted";
         } else {
             return "redirect:/users/budget/list?nolongerupdateable=from controller this budget is no longer updateable";
+        }
+    }
+
+    @GetMapping("/users/budget/allocation/{budgetID}")
+    public String getAllocationForm(@PathVariable("budgetID") long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("allocationForm", new BudgetAllocationForm());
+        model.addAttribute("budgetID", budgetDTO.getId());
+        return "budget/budget-allocation";
+    }
+
+    @PostMapping("/users/budget/allocation/{budgetID}")
+    public String budgetAllocation(@Valid @ModelAttribute("allocationForm") BudgetAllocationForm allocationForm,
+                                   BindingResult bindingResult,
+                                   Model model,
+                                   @RequestParam("allocate") String allocate,
+                                   @PathVariable("budgetID") long budgetID) {
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("allocationForm", allocationForm);
+            return "budget/budget-allocation";
+        }
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        boolean isAllocate = allocate.equalsIgnoreCase("true");
+        try {
+            budgetService.allocateToBudget(budgetID, allocationForm.getAmount(), allocationForm.getDescription(), isAllocate);
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        } catch (AccountingConstraintViolationException e) {
+            model.addAttribute("allocationForm", allocationForm);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "budget/budget-allocation";
         }
     }
 }

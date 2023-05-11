@@ -15,9 +15,11 @@
     <div class="container">
       <p><b>Name: </b><span th:text="${expenseType.name}"></span></p>
       <p><b>Description: </b><span th:text="${expenseType.description}"></span></p>
+      <p><b>Creation Time: </b><span th:text="${expenseType.creationTime}"></span></p>
       <hr>
       <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/update/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-success">Update</a>
       <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/delete/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-danger">Delete</a>
+
     </div>
   </section>
 </main>

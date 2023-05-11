@@ -13,6 +13,9 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1>Expense Type List</h1>
+            <div th:if="${param.nosuchexpensetypeorauthorized}" class="alert alert-danger">
+                <p th:text="${param.nosuchexpensetypeorauthorized}"></p>
+            </div>
             <p><b>Name: </b><span th:text="${expenseTypeNames}"></span></p>
             <p><b>Description: </b><span th:text="${expenseTypeDescriptions}"></span></p>
             <table class="table table-striped">
@@ -22,7 +25,7 @@
                 </tr>
                 <tr th:each="expenseType:${usersExpenseType}">
                     <td th:if="${expenseType.name.length<= 20}"><a th:href="@{/users/expense-type/{expenseTypeID}(expenseTypeID=${expenseType.id})}" th:text="${expenseType.name}"></a></td>
-                    <td th:if="${expenseType.name.length > 20}"><a th:href="@{/users/expense-type/{expenseTypeID}(expenseType=${expenseType.id})}" th:text="${expenseType.name.substring(0, 20) + '...'}"></a></td>
+                    <td th:if="${expenseType.name.length > 20}"><a th:href="@{/users/expense-type/{expenseTypeID}(expenseTypeID=${expenseType.id})}" th:text="${expenseType.name.substring(0, 20) + '...'}"></a></td>
                     <td th:if="${expenseType.description.length<= 30}" th:text="${expenseType.description}"></td>
                     <td th:if="${expenseType.description.length > 30}" th:text="${expenseType.description.substring(0, 30) + '...'}"></td>
                 </tr>

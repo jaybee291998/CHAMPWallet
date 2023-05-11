@@ -19,6 +19,7 @@
       <hr>
       <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/update/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-success">Update</a>
       <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/delete/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-danger">Delete</a>
+      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/list}" class="btn btn-info">Go Back</a>
 
     </div>
   </section>

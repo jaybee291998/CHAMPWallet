@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Update Income</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <div th:if="${param.failedtosave}" class="alert alert-danger">
+                <p th:text="${param.failedtosave}"></p>
+            </div>
+            <form role="form" method="post" th:action="@{/users/income/update/{incomeID}(incomeID=${incomeForm.id})}" th:object="${incomeForm}">
+                <div class="form-group">
+                    <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
+                    <label for="source"></label>
+                    <input
+                            type="text"
+                            class="form-control"
+                            id="source"
+                            placeholder="Enter Source"
+                            name="source"
+                            th:field="*{source}"
+                    >
+                    <p th:if="${#fields.hasErrors('source')}"
+                       th:errors="*{source}" class="text-danger"></p>
+                </div>
+                <div class="form-group">
+                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                    <label for="description">Description</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="description"
+                            placeholder="Enter Description"
+                            name="description"
+                            th:field="*{description}"
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}" class="text-danger"></p>
+                </div>
+                <!--                <select name="income-type" id="incometype">-->
+                <!--                    <option th:></option>-->
+                <!--                </select>-->
+                <select name="income-type" id="incometype" th:field="*{incomeTypeID}">
+                    <option th:each="incomeType:${incomeTypes}" th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
+                </select>
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="amount"
+                            placeholder="Enter Amount"
+                            name="amount"
+                            th:field="*{amount}"
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('amount')}"
+                       th:errors="*{amount}" class="text-danger"></p>
+
+                </div>
+
+                <button type="submit" id="submit" class="btn btn-primary">update budget</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

@@ -20,4 +20,6 @@ public interface ExpenseTypeService {
     void updateExpenseType(ExpenseTypeDto expenseTypeDto, long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized;
 
     boolean isUpdatable(ExpenseTypeDto expenseTypeDto);
+
+    void deleteExpenseType(long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException;
 }

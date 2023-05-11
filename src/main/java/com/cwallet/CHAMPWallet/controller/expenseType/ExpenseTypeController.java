@@ -144,7 +144,15 @@ public class ExpenseTypeController {
         } else{
             return "redirect:/users/expense-type/list?noslongerupdatable=no longer updatable";
         }
+    }
 
+    @GetMapping("users/expense-type/delete/confirmed")
+    public String confirmDeleteExpenseTypeDetails(){
 
     }
+//    @GetMapping("users/expense-type/delete/{expenseTypeId}")
+//    public String deleteExpenseTypeDetails(){
+//
+//        return"redirect:/users/expense-type/list";
+//    }
 }

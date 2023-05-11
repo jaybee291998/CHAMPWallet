@@ -3,6 +3,7 @@ package com.cwallet.CHAMPWallet.service.expenseType.impl;
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.CHAMPWallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.mappers.expenseType.ExpenseTypeMapper;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
@@ -89,5 +90,18 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
         }
     }
 
+    public void deleteExpenseType(long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException{
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(expenseTypeId, loggedInUser.getWallet().getId());
 
+        if(expenseType == null){
+            throw new NoSuchExpenseTypeOrNotAuthorized("No such expense type or not authorized");
+        }
+
+        ExpenseTypeDto expenseTypeDto = mapToExpenseTypeDto(expenseType);
+        if(!isUpdatable(expenseTypeDto)){
+            throw new ExpenseTypeExpiredException("Expense Type no longer updatable");
+        }
+        expenseTypeRepository.delete(expenseType);
+    }
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+  <meta charset="UTF-8">
+  <title>Delete Expense Type</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+  <!-- Page Content-->
+  <section layout:fragment="body" class="py-5">
+    <div class="container">
+      <div class="alert alert-danger">
+        <h2 th:text="${'Are you sure you want to delete ' + expenseType.name + '? '}"></h2>
+        <a th:href="@{/users/budget/delete/confirmed/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Yes</a>
+        <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="alert alert-success">No</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

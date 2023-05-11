@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.cwallet.CHAMPWallet.utils.ExpirableAndOwnedService;
 import com.cwallet.CHAMPWallet.repository.budget.BudgetRepository;
 
-import javax.jws.WebParam;
+//import javax.jws.WebParam;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        incomeService.save(newIncome, String.valueOf(incomeForm.getIncomeTypeID()));
+        incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         return "redirect:/users/home";
     }
 
@@ -107,6 +107,7 @@ model.addAttribute("totalAmount",totalAmount );
                    .amount(incomeDTO.getAmount())
                     .build();
             model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/income-update";
         } else {
             return "redirect:/users/income/list?nolongerupdateable=this budget is no longer updateable";
@@ -157,29 +158,30 @@ model.addAttribute("totalAmount",totalAmount );
             model.addAttribute("income", incomeDTO);
             return "income/income-delete";
         } else {
-            return "redirect:/users/income/list?nolongerupdateable=this income is no longer updateable";
+            return "redirect:/users/income/list?nolongerupdatable=this income is no longer updatable";
         }
     }
 
     @GetMapping("/users/income/delete/confirmed/{incomeID}")
-    public String deleteIncome(@PathVariable("incomeID") long incomeID, Model model) {
+    public String deleteIncome(@PathVariable("incomeID") long incomeID) {
         IncomeDTO incomeDTO = null;
         try {
             incomeDTO = incomeService.getSpecificIncome(incomeID);
         } catch (NoSuchIncomeOrNotAuthorized e) {
-            return "redirect:/users/income/list?nosuchincomebornauthorized=no such income or unauthorized";
+            return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
         }
         if(incomeService.isUpdateable(incomeDTO)) {
             try {
                incomeService.deleteIncome(incomeID);
+
             } catch (NoSuchIncomeOrNotAuthorized e) {
-                return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
+                return "redirect:/users/income/list?nosuchincomeorunauthorized=no such income or unauthorized";
             } catch (IncomeExpiredException e) {
                 return "redirect:/users/income/list?nolongerupdateable=from service this income is no longer updateable";
             }
             return "redirect:/users/income/list?incomedeleted=income successfully deleted";
         } else {
-            return "redirect:/users/income/list?nolongerupdateable=from controller this income is no longer updateable";
+            return "redirect:/users/income/list?nolongerupdatable=from controller this income is no longer updatable";
         }
     }
 

@@ -42,14 +42,14 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional
-    public boolean save(IncomeDTO incomeDTO, String incomeTypeIDStr) {
-        Long incomeTypeID = Long.valueOf(incomeTypeIDStr);
-        Optional<IncomeType> incomeType = incomeTypeRepository.findById(incomeTypeID);
+    public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) {
+        Long incomeTypeID = incomeType.getId();
+        Optional<IncomeType> incomeTypes = incomeTypeRepository.findById(incomeTypeID);
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
        Income income = mapToIncome(incomeDTO);
         income.setWallet(wallet);
 //        incomeDTO.setWallet();
-        income.setIncomeType(incomeType.get());
+        income.setIncomeType(incomeTypes.get());
         wallet.setBalance(wallet.getBalance() + income.getAmount());
         try {
             incomeRepository.save(income);
@@ -105,10 +105,10 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
         if(expirableAndOwnedService.isExpired(incomeDTO)) {
             return false;
         }
-        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
-        {
-            return false;
-        }
+//        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
+//        {
+//            return false;
+//        }
 
         return true;
 

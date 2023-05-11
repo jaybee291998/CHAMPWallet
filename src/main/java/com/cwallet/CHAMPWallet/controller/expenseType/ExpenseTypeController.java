@@ -2,6 +2,7 @@ package com.cwallet.CHAMPWallet.controller.expenseType;
 
 import com.cwallet.CHAMPWallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.CHAMPWallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.expense.ExpenseType;
@@ -88,5 +89,62 @@ public class ExpenseTypeController {
         }
         model.addAttribute("expenseType", expenseTypeDto);
         return "expense-type-details";
+    }
+
+
+    @GetMapping("users/expense-type/update/{expenseTypeId}")
+    public String getUpdateExpenseTypeForm(@PathVariable("expenseTypeId") long expenseTypeId, Model model) throws NoSuchExpenseTypeOrNotAuthorized {
+        ExpenseTypeDto expenseTypeDto = null;
+        try {
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        }
+
+        if(expenseTypeService.isUpdatable(expenseTypeDto)){
+            ExpenseTypeForm expenseTypeForm = ExpenseTypeForm.builder()
+                    .id(expenseTypeDto.getId())
+                    .name(expenseTypeDto.getName())
+                    .description(expenseTypeDto.getDescription())
+                    .build();
+            model.addAttribute("expenseTypeForm", expenseTypeForm);
+            return "/expense-type-update";
+        } else {
+            return "redirect:/users/expense-type/list?nolongerupdateable=this budget is no longer updateable";
+        }
+    }
+
+    @PostMapping("users/expense-type/update/{expenseTypeId}")
+    public String updateExpenseTypeDetails(@PathVariable("expenseTypeId") long expenseTypeId,
+                                           @Valid @ModelAttribute("expenseTypeForm") ExpenseTypeForm expenseTypeForm,
+                                           BindingResult bindingResult,
+                                           Model model){
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("expenseTypeForm", expenseTypeForm);
+            return "/expense-type-update";
+        }
+        ExpenseTypeDto expenseTypeDto = null;
+
+        try{
+            expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
+        } catch (NoSuchExpenseTypeOrNotAuthorized e){
+            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        }
+
+        if(expenseTypeService.isUpdatable(expenseTypeDto)){
+            expenseTypeDto.setName(expenseTypeForm.getName());
+            expenseTypeDto.setDescription(expenseTypeForm.getDescription());
+
+            try{
+                expenseTypeService.updateExpenseType(expenseTypeDto, expenseTypeId);
+            } catch (NoSuchExpenseTypeOrNotAuthorized e){
+                return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+            }
+            return String.format("redirect:/users/expense-type/%s", expenseTypeId);
+        } else{
+            return "redirect:/users/expense-type/list?noslongerupdatable=no longer updatable";
+        }
+
+
     }
 }

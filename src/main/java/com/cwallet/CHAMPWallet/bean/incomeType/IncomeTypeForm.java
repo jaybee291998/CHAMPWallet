@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Builder
 public class IncomeTypeForm {
+    private long id;
     @NotNull
     @Size(min=5, max=255)
     private String name;

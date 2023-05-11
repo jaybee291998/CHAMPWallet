@@ -1,6 +1,7 @@
 package com.cwallet.CHAMPWallet.service.impl.budget;
 
 import com.cwallet.CHAMPWallet.dto.budget.BudgetDTO;
+import com.cwallet.CHAMPWallet.exception.budget.BudgetExpiredException;
 import com.cwallet.CHAMPWallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.CHAMPWallet.models.account.UserEntity;
 import com.cwallet.CHAMPWallet.models.budget.Budget;
@@ -83,5 +84,19 @@ public class BudgetServiceImpl implements BudgetService {
         } else {
             return expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty();
         }
+    }
+
+    @Override
+    public void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
+        if(budget == null) {
+            throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
+        }
+        BudgetDTO budgetDTO = mapToBudgetDTO(budget);
+        if(!isUpdateable(budgetDTO)){
+            throw new BudgetExpiredException("Budget no longer updateable");
+        }
+        budgetRepository.delete(budget);
     }
 }

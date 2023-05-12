@@ -1,10 +1,9 @@
 package com.cwallet.champwallet.controller.incomeType;
 
 import com.cwallet.champwallet.bean.incomeType.IncomeTypeForm;
-
 import com.cwallet.champwallet.dto.incomeType.IncomeTypeDto;
-import com.cwallet.champwallet.exception.budget.BudgetExpiredException;
-import com.cwallet.champwallet.exception.budget.NoSuchBudgetOrNotAuthorized;
+import com.cwallet.champwallet.exception.EntityExpiredException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.income.IncomeType;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.incomeType.IncomeTypeService;
@@ -63,15 +62,15 @@ public class IncomeTypeController {
         IncomeTypeDto incomeTypeDto = null;
         try {
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
-        } catch (NoSuchBudgetOrNotAuthorized e){
-            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e){
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
         }
         boolean isExpired = expirableAndOwnedService.isExpired(incomeTypeDto);
         IncomeType incomeType = null;
         try {
             incomeType = incomeTypeService.getIncomeType(id);
-        } catch (NoSuchBudgetOrNotAuthorized e) {
-            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
         }
         if(isExpired) {
             model.addAttribute("isButtonEnabled", false);
@@ -87,8 +86,8 @@ public class IncomeTypeController {
         IncomeTypeDto incomeTypeDto = null;
         try {
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
-        } catch (NoSuchBudgetOrNotAuthorized e) {
-            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
         }
 
         if(incomeTypeService.isUpdateable(incomeTypeDto)) {
@@ -114,16 +113,16 @@ public class IncomeTypeController {
         IncomeTypeDto incomeTypeDto = null;
         try {
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
-        } catch (NoSuchBudgetOrNotAuthorized e) {
-            return "redirect:/users/income-type/list?nosuchincometypeornauthorized=no such income type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
         }
         if(incomeTypeService.isUpdateable(incomeTypeDto)) {
             incomeTypeDto.setName(incomeTypeForm.getName());
             incomeTypeDto.setDescription(incomeTypeForm.getDescription());
             try {
                 incomeTypeService.update(incomeTypeDto, id);
-            } catch (NoSuchBudgetOrNotAuthorized e) {
-                return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type or unauthorized";
+            } catch (NoSuchEntityOrNotAuthorized e) {
+                return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
             }
             return String.format("redirect:/users/income-type/%s", id);
         } else {
@@ -138,8 +137,8 @@ public class IncomeTypeController {
         IncomeTypeDto incomeTypeDto = null;
         try{
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
-        }catch (NoSuchBudgetOrNotAuthorized e){
-            return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
+        }catch (NoSuchEntityOrNotAuthorized e){
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type  or unauthorized";
         }
         if(incomeTypeService.isUpdateable(incomeTypeDto)) {
             model.addAttribute("incomeType", incomeTypeDto);
@@ -153,15 +152,15 @@ public class IncomeTypeController {
         IncomeTypeDto incomeTypeDto = null;
         try {
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
-        } catch (NoSuchBudgetOrNotAuthorized e) {
-            return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type  or unauthorized";
         }
         if(incomeTypeService.isUpdateable(incomeTypeDto)) {
             try {
                 incomeTypeService.deleteIncomeType(id);
-            } catch (NoSuchBudgetOrNotAuthorized e) {
-                return "redirect:/users/income-type/list?nosuchbudgetornauthorized=no such income type  or unauthorized";
-            } catch (BudgetExpiredException e) {
+            } catch (NoSuchEntityOrNotAuthorized e) {
+                return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type  or unauthorized";
+            } catch (EntityExpiredException e) {
                 return "redirect:/users/income-type/list?nolongerupdateable=from service this income type  is no longer updateable";
             }
             return "redirect:/users/income-type/list?incomeTypedeleted=income type  successfully deleted";

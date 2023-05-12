@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Create Budget</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <h1 class="center-text">Fund Allocation History</h1>
+            <dl class="row">
+                <dt class="col-sm-3">Total Allocation: </dt>
+                <dd class="col-sm-1" id="total-allocation"></dd>
+                <dt class="col-sm-3">Total Deallocation: </dt>
+                <dd class="col-sm-1" id="total-deallocation"></dd>
+            </dl>
+            <div id="table-div">
+
+            </div>
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div class="my-container">
+                        <div class="card-header">
+                            <h5 class="card-title">Fund Allocation History Detail</h5>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-3">Description</dt>
+                                    <dd class="col-sm-9" id="description-data">putang inang bola yan napaka mahal</dd>
+                                    <dt class="col-sm-3">Budget</dt>
+                                    <dd class="col-sm-9" id="budget-data">pang grocery</dd>
+                                    <dt class="col-sm-3">Amount</dt>
+                                    <dd class="col-sm-9" id="amount-data">100</dd>
+                                    <dt class="col-sm-3">Type</dt>
+                                    <dd class="col-sm-9" id="type-data">Allocate</dd>
+                                    <dt class="col-sm-3">Date</dt>
+                                    <dd class="col-sm-9" id="date-data">April 09, 2022 8:33:12 PM</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <script th:src="@{/js/custom.js}"></script> -->
+        <script th:src="@{/js/ui.js}"></script>
+        <script th:src="@{/js/modal.js}"></script>
+        <script th:inline="javascript">
+            let api = /*[[${'/users/api/budget/allocation-history/' + budgetID}]]*/
+            let budget_api = "/users/api/budget/list";
+            let budget_allocation_history;
+            let budgets;
+            let budget_names = {};
+            console.log(api);
+
+        function $(e){
+            return document.getElementById(e);
+        }
+
+        function updateModalContent(row_data){
+            const {budget, creationTime, type, amount, description} = row_data;
+            $('description-data').textContent = description;
+            $('budget-data').textContent = budget;
+            $('amount-data').textContent = amount;
+            $('type-data').textContent = type;
+            $('date-data').textContent = creationTime;
+        }
+
+            async function init_data(){
+                const budget_res = await fetch(budget_api);
+                budgets = await budget_res.json();
+
+                const history_res = await fetch(api);
+                budget_allocation_history = await history_res.json();
+                processData();
+            }
+
+            function processData() {
+                console.log(budget_allocation_history);
+                budgets.forEach(budget =>{
+                    budget_names[budget.id] = budget.name
+                });
+                budget_allocation_history.sort((a, b) => {
+                    let da = new Date(a.creationTime), db = new Date(b.creationTime);
+                    return da - db;
+                })
+                budget_allocation_history = budget_allocation_history.map(bah => {
+                    let processed_data = {};
+                    processed_data["budget"] = budget_names[bah["budgetID"]];
+                    processed_data["creationTime"] = processDateStr(bah["creationTime"]);
+                    processed_data["type"] = bah["isAllocate"] ? "Allocate" : "Deallocate";
+                    processed_data["amount"] = bah["amount"];
+                    processed_data["description"] = bah["description"];
+                    return processed_data;
+                });
+                console.log(budget_allocation_history);
+                let table_data = budget_allocation_history.map(bah => {
+                    let new_bah = {...bah};
+                    if(new_bah.description.length > 30) {
+                        new_bah.description = `${new_bah.description.slice(0,28)}`;
+                    }
+                    return new_bah;
+                });
+                console.log(table_data);
+                const row_selection_func = (e) =>{
+                    openModal();
+                    updateModalContent(budget_allocation_history[e.srcElement.parentNode.id])
+                }
+
+                let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
+                $('table-div').innerHTML = "";
+                $('table-div').appendChild(table);
+
+                $('table-div').innerHTML="";
+                $('table-div').appendChild(table);
+            }
+            init_data();
+        </script>
+    </section>
+</main>
+
+</body>
+</html>

@@ -24,6 +24,7 @@
             <a th:if="${buttonEnabled}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
             <a th:if="${buttonEnabled}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
             <a th:href="@{/users/budget/allocation/{budgetID}(budgetID=${budget.id})}" class="btn btn-info">Allocate</a>
+            <a th:href="@{/users/budget/allocation-history/{budgetID}(budgetID=${budget.id})}" class="btn btn-info">Allocation History</a>
             <a href="/users/budget/list" class="btn btn-secondary">Go back</a>
         </div>
     </section>

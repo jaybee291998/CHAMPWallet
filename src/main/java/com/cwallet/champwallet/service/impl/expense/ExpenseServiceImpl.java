@@ -52,23 +52,34 @@ public class ExpenseServiceImpl implements ExpenseService {
     private ExpirableAndOwnedService expirableAndOwnedService;
     @Override
     public boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType, Budget budget) {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(expenseType);
+        System.out.println(budget);
+        System.out.println(expenseDTO);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Long expenseTypeID = expenseType.getId();
         Long budgetID = budget.getId();
-        double totalBalance= budget.getBalance() - expenseDTO.getPrice();
-        Optional<Budget> Budgets = budgetRepository.findById(budgetID);
+        Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);
+        Budget actualBudget = optionalBudgets.get();
         Optional<ExpenseType> expenseTypes = expenseTypeRepository.findById(expenseTypeID);
+        double totalBalance= actualBudget.getBalance() - expenseDTO.getPrice();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Expense expense = mapToExpense(expenseDTO);
         expense.setWallet(wallet);
+        expense.setBudget(actualBudget);
 //        incomeDTO.setWallet();
         expense.setExpenseType(expenseTypes.get());
-        budget.setBalance(budget.getBalance()-expense.getPrice());
-        try {
-            if(expense.getPrice()<= expense.getBudget().getBalance())
-            expenseRepository.save(expense);
-            budgetRepository.save(budget);
-//           Budgets(budget.setBalance(totalBalance));
 
+        try {
+            if(expense.getPrice()<= actualBudget.getBalance()){
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                actualBudget.setBalance(totalBalance);
+                expenseRepository.save(expense);
+                budgetRepository.save(budget);
+                System.out.println("saved successfully");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//                budgets(budget.setBalance(totalBalance));
+            }
             return true;
         } catch (Exception e) {
             return false;

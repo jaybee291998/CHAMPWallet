@@ -2,9 +2,7 @@ package com.cwallet.champwallet.controller.expense;
 
 import com.cwallet.champwallet.bean.Expense.ExpenseForm;
 import com.cwallet.champwallet.dto.expense.ExpenseDTO;
-import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.models.account.UserEntity;
-import com.cwallet.champwallet.models.expense.Expense;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.expense.ExpenseService;
 
@@ -32,18 +30,17 @@ public class expenseController {
     private SecurityUtil securityUtil;
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
-    @Autowired
 
 
     @GetMapping("/users/expense/create")
     public String getExpenseForm(Model model){
         model.addAttribute("expenseForm", new ExpenseForm());
         model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
-         model.addAttribute("budget", securityUtil.getLoggedInUser().getWallet().getBalance());
+         model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets());
         return "expense/add-expense";
     }
 
-    @PostMapping("/users/expense/expense")
+    @PostMapping("/users/expense/create")
     public String createExpenseForm(@Valid @ModelAttribute("expenseForm") ExpenseForm expenseForm,
                                    BindingResult bindingResult, Model model){
         if(bindingResult.hasErrors()){

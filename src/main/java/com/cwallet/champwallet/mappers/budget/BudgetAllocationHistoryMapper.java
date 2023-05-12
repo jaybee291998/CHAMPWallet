@@ -1,6 +1,7 @@
 package com.cwallet.champwallet.mappers.budget;
 
 import com.cwallet.champwallet.dto.budget.BudgetAllocationHistoryDTO;
+import com.cwallet.champwallet.dto.budget.BudgetAllocationHistoryJson;
 import com.cwallet.champwallet.models.budget.BudgetAllocationHistory;
 
 public class BudgetAllocationHistoryMapper {
@@ -23,6 +24,17 @@ public class BudgetAllocationHistoryMapper {
                 .amount(budgetAllocationHistory.getAmount())
                 .wallet(budgetAllocationHistory.getWallet())
                 .budget(budgetAllocationHistory.getBudget())
+                .isAllocate(budgetAllocationHistory.getIsAllocate())
+                .creationTime(budgetAllocationHistory.getCreationTime())
+                .build();
+    }
+    public static BudgetAllocationHistoryJson mapToBudgetAllocationHistoryJson(BudgetAllocationHistory budgetAllocationHistory) {
+        return BudgetAllocationHistoryJson.builder()
+                .id(budgetAllocationHistory.getId())
+                .description(budgetAllocationHistory.getDescription())
+                .amount(budgetAllocationHistory.getAmount())
+                .walletID(budgetAllocationHistory.getWallet().getId())
+                .budgetID(budgetAllocationHistory.getBudget().getId())
                 .isAllocate(budgetAllocationHistory.getIsAllocate())
                 .creationTime(budgetAllocationHistory.getCreationTime())
                 .build();

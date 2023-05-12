@@ -232,4 +232,10 @@ public class BudgetController {
         }
         return String.format("redirect:/users/budget/%s", budgetID);
     }
+
+    @GetMapping("/users/budget/allocation-history/{budgetID}")
+    public String allocationHistory(@PathVariable Long budgetID, Model model) {
+        model.addAttribute("budgetID", budgetID);
+        return "budget/budget-allocation-history";
+    }
 }

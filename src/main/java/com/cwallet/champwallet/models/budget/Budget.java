@@ -33,4 +33,12 @@ public class Budget {
     @ToString.Exclude
     @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL)
     private List<BudgetAllocationHistory> allocationHistory = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "senderBudget", cascade = CascadeType.ALL)
+    private List<BudgetTransferHistory> outgoingTransferHistory = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "recipientBudget", cascade = CascadeType.ALL)
+    private List<BudgetTransferHistory> incomingTransferHistory = new ArrayList<>();
 }

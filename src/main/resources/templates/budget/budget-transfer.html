@@ -6,7 +6,7 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Allocate Budget</title>
+    <title>Budget Transfer</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
@@ -16,12 +16,9 @@
             <div th:if="${errorMessage}" class="alert alert-danger">
                 <p th:text="${errorMessage}"></p>
             </div>
-            <div>
-                <p><b>Budget Name :</b><span th:text="${budget.name}"></span></p>
-                <p><b>Wallet Balance: </b><span th:text="${walletBalance}"></span></p>
-                <p><b>Budget Balance: </b><span th:text="${budget.balance}"></span></p>
-            </div>
-            <form role="form" method="post" th:action="@{/users/budget/allocation/{budgetID}(budgetID=${budgetID})}" th:object="${allocationForm}">
+            <p><b>Name:</b><span th:text="${budget.name}"></span></p>
+            <p><b>Balance:</b><span th:text="${budget.balance}"></span></p>
+            <form role="form" method="post" th:action="@{/users/budget/fund-transfer/{budgetID}(budgetID=${budgetID})}" th:object="${transferForm}">
                 <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
@@ -53,17 +50,17 @@
                        th:errors="*{amount}" class="text-danger"></p>
                 </div>
                 <div class="form-group">
-                    <p th:if="${allocateError}" th:text="${allocateError}" class="alert alert-danger"></p>
-                    <b>Allocate</b>
-                    <select name="allocate" th:field="*{type}">
-                        <option th:value="'allocate'">Allocate</option>
-                        <option th:value="'deallocate'">Deallocate</option>
+                    <p th:if="${recipientBudgetError}" th:text="${recipientBudgetError}" class="alert alert-danger"></p>
+                    <b>Recipient Budget</b>
+                    <select name="recipient-budget" th:field="*{recipientBudgetID}">
+                        <option th:each="recipientBudget:${recipientBudgets}" th:value="${recipientBudget.id}" th:text="${recipientBudget.name}"></option>
                     </select>
-                    <p th:if="${#fields.hasErrors('amount')}"
-                       th:errors="*{amount}" class="text-danger"></p>
+                    <p th:if="${#fields.hasErrors('recipientBudgetID')}"
+                       th:errors="*{recipientBudgetID}" class="text-danger"></p>
                 </div>
-                <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" id="submit" class="btn btn-primary">Transfer</button>
                 <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-secondary">Go back</a>
+            </form>
             </form>
         </div>
     </section>

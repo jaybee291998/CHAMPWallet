@@ -1,6 +1,7 @@
 package com.cwallet.champwallet.controller.budget;
 
 import com.cwallet.champwallet.bean.BudgetAllocationForm;
+import com.cwallet.champwallet.bean.BudgetTransferForm;
 import com.cwallet.champwallet.bean.budget.BudgetForm;
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class BudgetController {
@@ -174,6 +176,8 @@ public class BudgetController {
                 return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
             } catch (BudgetExpiredException e) {
                 return "redirect:/users/budget/list?nolongerupdateable=from service this budget is no longer updateable";
+            } catch (AccountingConstraintViolationException e) {
+                return String.format("redirect:/users/budget/%s?nolongerdeleteable=%s", budgetDTO.getId(), e.getMessage());
             }
             return "redirect:/users/budget/list?budgetdeleted=budget successfully deleted";
         } else {
@@ -192,7 +196,7 @@ public class BudgetController {
         model.addAttribute("allocationForm", new BudgetAllocationForm());
         model.addAttribute("budgetID", budgetDTO.getId());
         model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
-        model.addAttribute("budgetBalance", budgetDTO.getBalance());
+        model.addAttribute("budget", budgetDTO);
         return "budget/budget-allocation";
     }
 
@@ -206,17 +210,17 @@ public class BudgetController {
             return "budget/budget-allocation";
         }
         BudgetDTO budgetDTO = null;
-        if(allocationForm.getAmount() < 0) {
-            model.addAttribute("allocationForm", allocationForm);
-            model.addAttribute("errorMessage", "amount cant be negative");
-            model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
-            model.addAttribute("budgetBalance", budgetDTO.getBalance());
-            return "budget/budget-allocation";
-        }
         try {
             budgetDTO = budgetService.getSpecificBudget(budgetID);
         } catch (NoSuchBudgetOrNotAuthorized e) {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(allocationForm.getAmount() < 0) {
+            model.addAttribute("allocationForm", allocationForm);
+            model.addAttribute("errorMessage", "amount cant be negative");
+            model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
+            model.addAttribute("budget", budgetDTO);
+            return "budget/budget-allocation";
         }
         boolean isAllocate = allocationForm.getType().equalsIgnoreCase("allocate");
         try {
@@ -227,7 +231,7 @@ public class BudgetController {
             model.addAttribute("allocationForm", allocationForm);
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
-            model.addAttribute("budgetBalance", budgetDTO.getBalance());
+            model.addAttribute("budget", budgetDTO);
             return "budget/budget-allocation";
         }
         return String.format("redirect:/users/budget/%s", budgetID);
@@ -237,5 +241,49 @@ public class BudgetController {
     public String allocationHistory(@PathVariable Long budgetID, Model model) {
         model.addAttribute("budgetID", budgetID);
         return "budget/budget-allocation-history";
+    }
+
+    @GetMapping("/users/budget/fund-transfer/{budgetID}")
+    public String getFundTransferForm(@PathVariable Long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("transferForm", new BudgetTransferForm());
+        model.addAttribute("budgetBalance", budgetDTO.getBalance());
+        model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID).collect(Collectors.toList()));
+        return "budget/budget-transfer";
+    }
+
+    @PostMapping("/users/budget/fund-transfer/{budgetID}")
+    public String transferFund(@Valid @ModelAttribute("transferForm") BudgetTransferForm transferForm, BindingResult bindingResult,
+                               Model model, @PathVariable Long budgetID) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("transferForm", transferForm);
+            model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID && budget.isEnabled()).collect(Collectors.toList()));
+            return  "budget/budget-transfer";
+        }
+        try {
+            budgetService.fundTransferToOtherBudget(budgetID, transferForm.getRecipientBudgetID(), transferForm.getDescription(), transferForm.getAmount());
+            return String.format("redirect:/users/budget/%s", budgetID);
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return String.format("redirect:/users/budget/list?nosuchbudgetornauthorized=%s", e.getMessage());
+        } catch (AccountingConstraintViolationException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("transferForm", transferForm);
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID && budget.isEnabled()).collect(Collectors.toList()));
+            return "budget/budget-transfer";
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.cwallet.champwallet.controller.income;
 
 import com.cwallet.champwallet.bean.income.IncomeForm;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
+import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -31,8 +32,6 @@ public class IncomeController {
     private SecurityUtil securityUtil;
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
-    @Autowired
-    private BudgetRepository budgetRepository;
 
     @GetMapping("/users/income/create")
     public String getIncomeForm(Model model){
@@ -59,7 +58,7 @@ public class IncomeController {
     }
 
     @GetMapping("/users/income/list")
-    public String getUsersBudget(Model model) {
+    public String getUsersIncome(Model model) {
         List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
@@ -132,12 +131,13 @@ model.addAttribute("totalAmount",totalAmount );
             incomeDTO.setDescription(incomeForm.getDescription());
             incomeDTO.setAmount(incomeForm.getAmount());
             incomeDTO.setIncomeType(incomeForm.getIncomeTypeID());
-
-
             try {
                 incomeService.update(incomeDTO,incomeID);
-            } catch (NoSuchIncomeOrNotAuthorized e) {
-                return "redirect:/users/budget/list?nosuchincomeornauthorized=no such income or unauthorized";
+            } catch (NoSuchIncomeOrNotAuthorized | IncomeExpiredException e) {
+                return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
+            }catch (AccountingConstraintViolationException e){
+                model.addAttribute("errorMessage", e.getMessage());
+                return "income/income-update";
             }
             return String.format("redirect:/users/income/%s", incomeID);
         } else {
@@ -177,12 +177,20 @@ model.addAttribute("totalAmount",totalAmount );
             } catch (NoSuchIncomeOrNotAuthorized e) {
                 return "redirect:/users/income/list?nosuchincomeorunauthorized=no such income or unauthorized";
             } catch (IncomeExpiredException e) {
-                return "redirect:/users/income/list?nolongerupdateable=from service this income is no longer updateable";
+                return "redirect:/users/income/list?nolongerupdateable=from service this income is no longer updatable";
             }
             return "redirect:/users/income/list?incomedeleted=income successfully deleted";
         } else {
             return "redirect:/users/income/list?nolongerupdatable=from controller this income is no longer updatable";
         }
     }
+
+//    @GetMapping("/data")
+//    public String getData(Model model) {
+//        List<> dataList = IncomeService.getAllData();
+//        model.addAttribute("dataList", dataList);
+//        return "data";
+//    }
+
 
 }

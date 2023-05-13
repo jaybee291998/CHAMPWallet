@@ -99,6 +99,7 @@
                     processed_data["type"] = bah["isAllocate"] ? "Allocate" : "Deallocate";
                     processed_data["amount"] = bah["amount"];
                     processed_data["description"] = bah["description"];
+                    processed_data["id"] = bah["id"];
                     return processed_data;
                 });
                 console.log(budget_allocation_history);
@@ -112,7 +113,7 @@
                 console.log(table_data);
                 const row_selection_func = (e) =>{
                     openModal();
-                    updateModalContent(budget_allocation_history[e.srcElement.parentNode.id])
+                    updateModalContent(budget_allocation_history.filter(bah => bah.id == e.srcElement.parentNode.id)[0]);
                 }
 
                 let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);

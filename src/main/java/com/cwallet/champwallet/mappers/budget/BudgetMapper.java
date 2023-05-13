@@ -1,6 +1,7 @@
 package com.cwallet.champwallet.mappers.budget;
 
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
+import com.cwallet.champwallet.dto.budget.BudgetJson;
 import com.cwallet.champwallet.models.budget.Budget;
 
 public class BudgetMapper {
@@ -25,6 +26,18 @@ public class BudgetMapper {
                 .isEnabled(budget.isEnabled())
                 .creationTime(budget.getCreationTime())
                 .wallet(budget.getWallet())
+                .build();
+    }
+
+    public static BudgetJson mapToBudgetJson(Budget budget) {
+        return BudgetJson.builder()
+                .id(budget.getId())
+                .name(budget.getName())
+                .description(budget.getDescription())
+                .balance(budget.getBalance())
+                .isEnabled(budget.isEnabled())
+                .creationTime(budget.getCreationTime())
+                .walletID(budget.getWallet().getId())
                 .build();
     }
 }

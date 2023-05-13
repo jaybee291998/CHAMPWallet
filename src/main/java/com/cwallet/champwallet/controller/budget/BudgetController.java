@@ -239,7 +239,13 @@ public class BudgetController {
 
     @GetMapping("/users/budget/allocation-history/{budgetID}")
     public String allocationHistory(@PathVariable Long budgetID, Model model) {
-        model.addAttribute("budgetID", budgetID);
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
         return "budget/budget-allocation-history";
     }
 

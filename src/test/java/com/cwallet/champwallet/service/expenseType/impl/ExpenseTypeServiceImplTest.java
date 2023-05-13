@@ -66,10 +66,10 @@ class ExpenseTypeServiceImplTest {
         Wallet wallet = new Wallet();
         userEntity.setWallet(wallet);
 
-        // Mock the securityUtil.getLoggedInUser() method
+        // Mock securityUtil.getLoggedInUser()
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
 
-        // Mock the expenseTypeRepository.save() method
+        // Mock expenseTypeRepository.save()
         when(expenseTypeRepository.save(any(ExpenseType.class))).thenAnswer(invocation -> {
             ExpenseType savedExpenseType = invocation.getArgument(0);
             assertNotNull(savedExpenseType.getWallet());
@@ -77,54 +77,44 @@ class ExpenseTypeServiceImplTest {
             return savedExpenseType;
         });
 
-        // Perform the save operation and check for exceptions
         assertDoesNotThrow(() -> {
             boolean result = expenseTypeService.save(expenseTypeDto);
-            // Verify the return value
             assertTrue(result);
         });
 
-        // Verify the interactions
         verify(expenseTypeRepository, times(1)).save(any(ExpenseType.class));
     }
 
     @Test
     void testSave_Exception() {
-        // Prepare test data
+
         ExpenseTypeDto expenseTypeDto = new ExpenseTypeDto();
 
         UserEntity userEntity = new UserEntity();
         Wallet wallet = new Wallet();
         userEntity.setWallet(wallet);
 
-        // Mock the securityUtil.getLoggedInUser() method
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
 
-        // Mock the expenseTypeRepository.save() method to throw an exception
+        // need throw exception so we mock this
         when(expenseTypeRepository.save(any(ExpenseType.class))).thenThrow(new RuntimeException("Save failed"));
 
-        // Perform the save operation
         boolean result = expenseTypeService.save(expenseTypeDto);
 
-        // Verify the interactions
         verify(expenseTypeRepository, times(1)).save(any(ExpenseType.class));
 
-        // Verify the return value
         assertFalse(result);
     }
 
     @Test
     void testGetAllUserExpenseType() {
-        // Prepare test data
         UserEntity userEntity = new UserEntity();
         Wallet wallet = new Wallet();
         wallet.setId(1L);
         userEntity.setWallet(wallet);
 
-        // Mock the securityUtil.getLoggedInUser() method
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
 
-        // Mock the expenseTypeRepository.findByWalletId() method
         List<ExpenseType> expenseTypes = new ArrayList<>();
         ExpenseType expenseType1 = new ExpenseType();
         expenseType1.setId(1L);
@@ -136,14 +126,11 @@ class ExpenseTypeServiceImplTest {
         expenseTypes.add(expenseType2);
         when(expenseTypeRepository.findByWalletId(wallet.getId())).thenReturn(expenseTypes);
 
-        // Perform the getAllUserExpenseType operation
         List<ExpenseTypeDto> result = expenseTypeService.getAllUserExpenseType();
 
-        // Verify the interactions
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByWalletId(wallet.getId());
 
-        // Verify the return value
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -154,30 +141,24 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     void testGetExpenseTypeId() throws NoSuchExpenseTypeOrNotAuthorized {
-        // Prepare test data
         long id = 1L;
         UserEntity userEntity = new UserEntity();
         Wallet wallet = new Wallet();
         wallet.setId(1L);
         userEntity.setWallet(wallet);
 
-        // Mock the securityUtil.getLoggedInUser() method
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
 
-        // Mock the expenseTypeRepository.findByIdAndWalletId() method
         ExpenseType expenseType = new ExpenseType();
         expenseType.setId(id);
         expenseType.setName("Expense Type");
         when(expenseTypeRepository.findByIdAndWalletId(id, wallet.getId())).thenReturn(expenseType);
 
-        // Perform the getExpenseTypeId operation
         ExpenseTypeDto result = expenseTypeService.getExpenseTypeId(id);
 
-        // Verify the interactions
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByIdAndWalletId(id, wallet.getId());
 
-        // Verify the return value
         assertNotNull(result);
         assertEquals(id, result.getId());
         assertEquals("Expense Type", result.getName());
@@ -185,7 +166,7 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     void testUpdateExpenseType() {
-        // Prepare test data
+
         long expenseTypeId = 1L;
         ExpenseTypeDto expenseTypeDto = new ExpenseTypeDto();
         expenseTypeDto.setId(1L);
@@ -202,25 +183,20 @@ class ExpenseTypeServiceImplTest {
         wallet.setId(1L);
         userEntity.setWallet(wallet);
 
-        // Mock the securityUtil.getLoggedInUser() method
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
 
-        // Mock the expenseTypeRepository.findByIdAndWalletId() method
         ExpenseType expenseType = new ExpenseType();
         expenseType.setId(expenseTypeId);
         expenseType.setName("Expense Type");
         expenseType.setDescription("Expense Type Description");
         when(expenseTypeRepository.findByIdAndWalletId(expenseTypeId, wallet.getId())).thenReturn(expenseType);
 
-        // Perform the updateExpenseType operation
         assertDoesNotThrow(() -> expenseTypeService.updateExpenseType(expenseTypeDto, expenseTypeId));
 
-        // Verify the interactions
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByIdAndWalletId(expenseTypeId, wallet.getId());
         verify(expenseTypeRepository, times(1)).save(expenseType);
 
-        // Verify the updated expense type
         assertEquals("Updated Expense Type", expenseType.getName());
         assertEquals("Updated Expense Type Description", expenseType.getDescription());
     }
@@ -229,16 +205,13 @@ class ExpenseTypeServiceImplTest {
     //<----------------------->
     @Test
     public void testIsUpdatable_WhenExpenseTypeDtoIsExpired_ShouldReturnFalse() {
-        // Arrange
         ExpenseTypeDto expenseTypeDto = new ExpenseTypeDto();
         expenseTypeDto.setId(1L);
         when(expirableAndOwnedService.isExpired(expenseTypeDto)).thenReturn(true);
         when(expenseRepository.findByExpenseTypeId(expenseTypeDto.getId())).thenReturn(new ArrayList<Expense>());
 
-        // Act
         boolean result = expenseTypeService.isUpdatable(expenseTypeDto);
 
-        // Assert
         assertFalse(result);
         verify(expirableAndOwnedService, times(1)).isExpired(expenseTypeDto);
         verifyNoInteractions(expenseRepository);
@@ -247,16 +220,14 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     public void testIsUpdatable_WhenExpenseTypeDtoIsNotExpiredAndHasAssociatedExpenses_ShouldReturnFalse() {
-        // Arrange
+
         ExpenseTypeDto expenseTypeDto = new ExpenseTypeDto();
         expenseTypeDto.setId(1L);
         when(expirableAndOwnedService.isExpired(expenseTypeDto)).thenReturn(false);
         when(expenseRepository.findByExpenseTypeId(expenseTypeDto.getId())).thenReturn(new ArrayList<Expense>());
 
-        // Act
         boolean result = expenseTypeService.isUpdatable(expenseTypeDto);
 
-        // Assert
         assert (result);
         verify(expirableAndOwnedService, times(1)).isExpired(expenseTypeDto);
         verify(expenseRepository, times(1)).findByExpenseTypeId(expenseTypeDto.getId());
@@ -264,16 +235,13 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     public void testIsUpdatable_WhenExpenseTypeDtoIsNotExpiredAndHasNoAssociatedExpenses_ShouldReturnTrue() {
-        // Arrange
         ExpenseTypeDto expenseTypeDto = new ExpenseTypeDto();
         expenseTypeDto.setId(1L);
         when(expirableAndOwnedService.isExpired(expenseTypeDto)).thenReturn(false);
         when(expenseRepository.findByExpenseTypeId(expenseTypeDto.getId())).thenReturn(new ArrayList<Expense>());
 
-        // Act
         boolean result = expenseTypeService.isUpdatable(expenseTypeDto);
 
-        // Assert
         assertTrue(result);
         verify(expirableAndOwnedService, times(1)).isExpired(expenseTypeDto);
         verify(expenseRepository, times(1)).findByExpenseTypeId(expenseTypeDto.getId());
@@ -281,13 +249,13 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     public void testIsUpdatable_WhenExpenseTypeDtoIsNull_ShouldThrowIllegalArgumentException() {
-        // Arrange
+
         ExpenseTypeDto expenseTypeDto1 = null;
 
         when(expirableAndOwnedService.isExpired(expenseTypeDto)).thenReturn(true);
         when(expenseRepository.findByExpenseTypeId(expenseTypeDto.getId())).thenReturn(new ArrayList<>());
 
-        // Act and Assert
+
         when(expenseRepository.findByExpenseTypeId(expenseTypeDto.getId()).isEmpty()).thenThrow(IllegalArgumentException.class);
 
         verifyNoInteractions(expirableAndOwnedService);
@@ -297,7 +265,7 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     public void deleteExpenseType_ValidExpenseType_DeletesExpenseType() throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException {
-        // Arrange
+
         long expenseTypeId = 1L;
         UserEntity loggedInUser = new UserEntity();
         Wallet wallet = new Wallet();
@@ -308,10 +276,10 @@ class ExpenseTypeServiceImplTest {
         when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
         when(expenseTypeRepository.findByIdAndWalletId(expenseTypeId, wallet.getId())).thenReturn(expenseType);
 
-        // Act
+
         expenseTypeService.deleteExpenseType(expenseTypeId);
 
-        // Assert
+
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByIdAndWalletId(expenseTypeId, wallet.getId());
         verify(expenseTypeRepository, times(1)).delete(expenseType);
@@ -319,7 +287,7 @@ class ExpenseTypeServiceImplTest {
 
     @Test
     public void deleteExpenseType_InvalidExpenseType_ThrowsNoSuchExpenseTypeOrNotAuthorized() throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException {
-        // Arrange
+
         long expenseTypeId = 1L;
         UserEntity loggedInUser = new UserEntity();
         Wallet wallet = new Wallet();
@@ -328,13 +296,13 @@ class ExpenseTypeServiceImplTest {
         when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
         when(expenseTypeRepository.findByIdAndWalletId(expenseTypeId, wallet.getId())).thenReturn(null);
 
-        // Assert
+
         assertThrows(NoSuchExpenseTypeOrNotAuthorized.class, () -> {
-            // Act
+
             expenseTypeService.deleteExpenseType(expenseTypeId);
         });
 
-        // Verify
+
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByIdAndWalletId(expenseTypeId, wallet.getId());
         verify(expenseTypeRepository, never()).delete(any(ExpenseType.class));

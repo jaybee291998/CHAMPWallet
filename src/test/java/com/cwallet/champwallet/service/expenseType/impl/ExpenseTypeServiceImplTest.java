@@ -61,7 +61,6 @@ class ExpenseTypeServiceImplTest {
         expenseTypeDto.setCreationTime(LocalDateTime.now());
         expenseTypeDto.setWallet(new Wallet());
 
-
         UserEntity userEntity = new UserEntity();
         Wallet wallet = new Wallet();
         userEntity.setWallet(wallet);

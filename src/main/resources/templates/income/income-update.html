@@ -13,8 +13,8 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
-            <div th:if="${param.failedtosave}" class="alert alert-danger">
-                <p th:text="${param.failedtosave}"></p>
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
             </div>
             <form role="form" method="post" th:action="@{/users/income/update/{incomeID}(incomeID=${incomeForm.id})}" th:object="${incomeForm}">
                 <div class="form-group">

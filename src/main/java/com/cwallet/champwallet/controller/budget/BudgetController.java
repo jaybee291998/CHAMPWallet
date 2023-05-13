@@ -286,4 +286,18 @@ public class BudgetController {
             return "budget/budget-transfer";
         }
     }
+
+    @GetMapping("/users/budget/transfer-history/{budgetID}")
+    public String transferHistory(@PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("transferredToAPI", String.format("/users/api/budget/budget-transferred-to/%s", budgetID));
+        model.addAttribute("receivedFromAPI", String.format("/users/api/budget/budget-received-from/%s", budgetID));
+        return "budget/budget-transfer-history";
+    }
 }

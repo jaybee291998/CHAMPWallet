@@ -36,6 +36,7 @@ public class BudgetTransferHistoryMapper {
                 .senderBudgetID(budgetTransferHistory.getSenderBudget().getId())
                 .recipientBudgetID(budgetTransferHistory.getRecipientBudget().getId())
                 .amount(budgetTransferHistory.getAmount())
+                .description(budgetTransferHistory.getDescription())
                 .creationTime(budgetTransferHistory.getCreationTime())
                 .walletID(budgetTransferHistory.getWallet().getId())
                 .build();

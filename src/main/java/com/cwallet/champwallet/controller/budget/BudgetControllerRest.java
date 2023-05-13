@@ -28,8 +28,8 @@ public class BudgetControllerRest {
     private BudgetTransferHistoryService budgetTransferHistoryService;
 
     @GetMapping("/users/api/budget/allocation-history/{budgetID}")
-    List<BudgetAllocationHistoryJson> budgetAllocation(@PathVariable long budgetID) {
-       List<BudgetAllocationHistoryJson> history = budgetAllocationHistoryService.budgetAllocationHistory(budgetID);
+    List<BudgetAllocationHistoryJson> budgetAllocation(@PathVariable long budgetID, @RequestParam int interval) {
+       List<BudgetAllocationHistoryJson> history = budgetAllocationHistoryService.budgetAllocationHistory(budgetID, interval);
        return history;
     }
     @GetMapping("/users/api/budget/list")

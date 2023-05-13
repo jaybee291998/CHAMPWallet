@@ -14,15 +14,23 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1 class="center-text">Fund Allocation History</h1>
-            <dl class="row">
+            <h2 th:text="${budget.name}"></h2>
+            <!-- <dl class="row">
                 <dt class="col-sm-3">Total Allocation: </dt>
                 <dd class="col-sm-1" id="total-allocation"></dd>
                 <dt class="col-sm-3">Total Deallocation: </dt>
                 <dd class="col-sm-1" id="total-deallocation"></dd>
-            </dl>
+            </dl> -->
+            <label for="interval-select">Interval</label>
+            <select name="interval-select" id="interval-select"></select>
             <div id="table-div">
 
             </div>
+
+            <!-- <div id="table-div-hidden">
+
+            </div> -->
+            <button onclick="exp()" class="btn btn-primary">Download Excel</button>
             <div id="myModal" class="modal">
                 <div class="modal-content">
                     <span class="close">&times;</span>
@@ -51,15 +59,18 @@
             </div>
         </div>
         <!-- <script th:src="@{/js/custom.js}"></script> -->
+        <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <script th:src="@{/js/modal.js}"></script>
         <script th:inline="javascript">
-            let api = /*[[${'/users/api/budget/allocation-history/' + budgetID}]]*/
+            let api = /*[[${'/users/api/budget/allocation-history/' + budget.id}]]*/;
+            let budgetName = /*[[${budget.name}]]*/;
             let budget_api = "/users/api/budget/list";
             let budget_allocation_history;
             let budgets;
             let budget_names = {};
             console.log(api);
+            let currentInterval = 0;
 
         function $(e){
             return document.getElementById(e);
@@ -71,14 +82,39 @@
             $('budget-data').textContent = budget;
             $('amount-data').textContent = amount;
             $('type-data').textContent = type;
-            $('date-data').textContent = creationTime;
+            $('date-data').textContent = processDateStr(creationTime);
         }
+
+
+            const populateSelectControl = (select_object, key_value_dict, func) => {
+                select_object.onchange = func
+                // add an option to select all
+                let all_option = document.createElement("OPTION");
+                all_option.text = "ALL";
+                all_option.value = -1;
+                select_object.add(all_option);
+                // generate options
+                let keys = Object.keys(key_value_dict);
+                keys.forEach((key) => {
+                    let new_option = document.createElement("OPTION");
+                    new_option.text = key_value_dict[key];
+                    new_option.value = key;
+                    // add the option to the select object
+                    select_object.add(new_option);
+                });
+            }
 
             async function init_data(){
                 const budget_res = await fetch(budget_api);
                 budgets = await budget_res.json();
+                init_history();
+                let interval_obj = {7:"1 week", 14:"2 weeks", 30:"1 month", 90:"3 months", 180:"6 months"};
+                populateSelectControl($('interval-select') ,interval_obj, () => {let interval = $('interval-select').value;init_history(interval);});
+            }
 
-                const history_res = await fetch(api);
+            async function init_history(interval=7) {
+                currentInterval = interval;
+                const history_res = await fetch(`${api}?interval=${interval}`);
                 budget_allocation_history = await history_res.json();
                 processData();
             }
@@ -95,7 +131,7 @@
                 budget_allocation_history = budget_allocation_history.map(bah => {
                     let processed_data = {};
                     processed_data["budget"] = budget_names[bah["budgetID"]];
-                    processed_data["creationTime"] = processDateStr(bah["creationTime"]);
+                    processed_data["creationTime"] = bah["creationTime"];
                     processed_data["type"] = bah["isAllocate"] ? "Allocate" : "Deallocate";
                     processed_data["amount"] = bah["amount"];
                     processed_data["description"] = bah["description"];
@@ -108,6 +144,7 @@
                     if(new_bah.description.length > 30) {
                         new_bah.description = `${new_bah.description.slice(0,28)}`;
                     }
+                    new_bah.creationTime = processDateStr(new_bah.creationTime);
                     return new_bah;
                 });
                 console.log(table_data);
@@ -117,13 +154,31 @@
                 }
 
                 let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
+                // let hiddenTable = createTable(budget_allocation_history, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
+                table.setAttribute("id", "tbl_exporttable_to_xls");
                 $('table-div').innerHTML = "";
                 $('table-div').appendChild(table);
 
-                $('table-div').innerHTML="";
-                $('table-div').appendChild(table);
+                // $('table-div-hidden').innerHTML="";
+                // $('table-div-hidden').appendChild(hiddenTable);
             }
             init_data();
+            const export_to_excel = (type, fn, dl) => {
+                console.log(currentInterval);
+                var elt = document.getElementById('tbl_exporttable_to_xls');
+                var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+                let start;
+                let end = new Date();
+                let file_name = "";
+                start = new Date();
+                start.setDate(end.getDate() - currentInterval);
+                file_name = `${budgetName}: ${start} - ${end}`;
+                return dl ?
+                    XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                    XLSX.writeFile(wb, fn || (file_name + '.' + (type || 'xlsx')));
+            }
+
+            const exp = () => {export_to_excel('xlsx'); console.log("export clicked");};
         </script>
     </section>
 </main>

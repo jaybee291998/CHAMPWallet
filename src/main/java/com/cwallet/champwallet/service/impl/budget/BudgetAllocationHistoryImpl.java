@@ -14,6 +14,7 @@ import com.cwallet.champwallet.service.budget.BudgetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,12 +31,17 @@ public class BudgetAllocationHistoryImpl implements BudgetAllocationHistoryServi
     @Autowired
     private BudgetService budgetService;
     @Override
-    public List<BudgetAllocationHistoryJson> budgetAllocationHistory(long budgetId) {
+    public List<BudgetAllocationHistoryJson> budgetAllocationHistory(long budgetId, int intervalInDays) {
+        if(intervalInDays <= 0) {
+            throw new IllegalArgumentException("Interval must be greater than 0");
+        }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         BudgetDTO budget = null;
         try {
            budget = budgetService.getSpecificBudget(budgetId);
-            return budgetAllocationHistoryRepository.findByBudgetId(budgetId).stream().map(e -> mapToBudgetAllocationHistoryJson(e)).collect(Collectors.toList());
+            LocalDateTime end = LocalDateTime.now();
+            LocalDateTime start = end.minusDays(intervalInDays);
+            return budgetAllocationHistoryRepository.getAllocationHistory(budgetId, loggedInUser.getWallet().getId(), start, end).stream().map(e -> mapToBudgetAllocationHistoryJson(e)).collect(Collectors.toList());
         } catch (NoSuchBudgetOrNotAuthorized e) {
             return new ArrayList<BudgetAllocationHistoryJson>();
         }

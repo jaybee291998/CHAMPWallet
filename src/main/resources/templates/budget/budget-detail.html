@@ -13,6 +13,9 @@
     <!-- Page Content-->
     <section layout:fragment="body" class="py-5">
         <div class="container">
+            <div th:if="${param.nolongerdeleteable}" class="alert alert-danger">
+                <p th:text="${param.nolongerdeleteable}"></p>
+            </div>
             <div>
                 <p><b>Name:</b><span th:text="${budget.name}"></span></p>
                 <p><b>Description:</b><span th:text="${budget.description}"></span></p>
@@ -24,6 +27,8 @@
             <a th:if="${buttonEnabled}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
             <a th:if="${buttonEnabled}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
             <a th:href="@{/users/budget/allocation/{budgetID}(budgetID=${budget.id})}" class="btn btn-info">Allocate</a>
+            <a th:href="@{/users/budget/allocation-history/{budgetID}(budgetID=${budget.id})}" class="btn btn-dark">Allocation History</a>
+            <a th:href="@{/users/budget/fund-transfer/{budgetID}(budgetID=${budget.id})}" class="btn btn-warning">Transfer</a>
             <a href="/users/budget/list" class="btn btn-secondary">Go back</a>
         </div>
     </section>

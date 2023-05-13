@@ -14,12 +14,10 @@ import com.cwallet.champwallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.expenseType.ExpenseTypeService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
-import junit.framework.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;

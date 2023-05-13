@@ -22,10 +22,10 @@
             <div th:if="${param.usernamealreadyused}" class="alert alert-success">
                 <p th:text="${param.usernamealreadyused}"></p>
             </div>
-<!--            <div th:if="${#fields.hasErrors('usernameEmailError')}">-->
-<!--                <h3>Global errors:</h3>-->
-<!--                <p th:each="err : ${#fields.errors('usernameEmailError')}" th:text="${err}" class="error" />-->
-<!--            </div>-->
+            <!--            <div th:if="${#fields.hasErrors('usernameEmailError')}">-->
+            <!--                <h3>Global errors:</h3>-->
+            <!--                <p th:each="err : ${#fields.errors('usernameEmailError')}" th:text="${err}" class="error" />-->
+            <!--            </div>-->
             <form role="form" method="post" th:action="@{/register}" th:object="${registrationForm}">
                 <div class="form-group">
                     <p th:if="${usernameError}" th:text="${usernameError}" class="alert alert-danger"></p>
@@ -41,7 +41,8 @@
                     >
                     <p th:if="${#fields.hasErrors('username')}"
                        th:text="${#strings.listJoin(#fields.errors('username'), ', ')}" class="text-danger"></p>
-                    <small id="userHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    <small id="userHelp" class="form-text text-muted">We'll never share your email with anyone
+                        else.</small>
                 </div>
                 <div class="form-group">
                     <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
@@ -57,7 +58,8 @@
                     ></input>
                     <p th:if="${#fields.hasErrors('email')}"
                        th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
-                    <small id="contentHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    <small id="contentHelp" class="form-text text-muted">We'll never share your email with anyone
+                        else.</small>
                 </div>
                 <div class="form-group">
                     <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
@@ -74,7 +76,8 @@
                     >
                     <p th:if="${#fields.hasErrors('password')}"
                        th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
-                    <small id="photoUrlHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    <small id="photoUrlHelp" class="form-text text-muted">We'll never share your email with anyone
+                        else.</small>
                     <div id="password-errors" class="alert alert-danger">
                     </div>
                 </div>
@@ -93,7 +96,8 @@
                     >
                     <p th:if="${#fields.hasErrors('password')}"
                        th:text="${#strings.listJoin(#fields.errors('confirmPassword'), ', ')}" class="text-danger"></p>
-                    <small id="confirmPasswordHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    <small id="confirmPasswordHelp" class="form-text text-muted">We'll never share your email with
+                        anyone else.</small>
                     <div id="confirm-password-errors" class="alert alert-danger">
                     </div>
                 </div>
@@ -168,6 +172,9 @@
                     $("#submit").prop('disabled', true);
                 }
             }
+
+
+
         </script>
     </section>
 </main>

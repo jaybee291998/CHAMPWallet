@@ -40,6 +40,7 @@ public class UserController {
         }
         model.addAttribute("registrationForm", new RegistrationForm());
         return "users-registration";
+//        return "users-registration1";
     }
 
     @PostMapping("/register")
@@ -52,11 +53,13 @@ public class UserController {
         if(result.hasErrors()){
             model.addAttribute("registrationForm", registrationForm);
             return "users-registration";
+//            return "users-registration1";
         }
         if(!registrationForm.getPassword().equals(registrationForm.getConfirmPassword())) {
             model.addAttribute("registrationForm", registrationForm);
             model.addAttribute("passwordError", "Password must match");
             return "users-registration";
+//            return "users-registration1";
         }
         UserEntityDTO newUser = UserEntityDTO.builder()
                 .username(registrationForm.getUsername())
@@ -67,12 +70,14 @@ public class UserController {
             userService.save(newUser);
         } catch (UserNameNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
-            model.addAttribute("usernameError", "username already exist");
+            model.addAttribute("usernameError", "Username already exists");
             return "users-registration";
+//            return "users-registration1";
         } catch (EmailNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
-            model.addAttribute("emailError", "Email Already exist");
-            return "users-registration";
+            model.addAttribute("emailError", "Email already exists");
+//            return "users-registration";
+            return "users-registration1";
         } catch (EmailNotSentException e) {
             return "redirect:/login?emailnotsent=email not sent";
         }
@@ -85,7 +90,8 @@ public class UserController {
             return "redirect:/users/home";
         }
         model.addAttribute("loginForm", new RegistrationForm());
-        return "users-login";
+//        return "users-login";
+        return "users-login1";
     }
 
     @GetMapping("/users/home")

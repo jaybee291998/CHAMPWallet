@@ -1,6 +1,7 @@
 package com.cwallet.champwallet.service.impl.budget;
 
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
+import com.cwallet.champwallet.dto.budget.BudgetTransferHistoryDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.budget.BudgetExpiredException;
@@ -12,9 +13,11 @@ import com.cwallet.champwallet.models.budget.BudgetAllocationHistory;
 import com.cwallet.champwallet.repository.account.WalletRepository;
 import com.cwallet.champwallet.repository.budget.BudgetAllocationHistoryRepository;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
+import com.cwallet.champwallet.repository.budget.BudgetTransferHistoryRepository;
 import com.cwallet.champwallet.repository.expense.ExpenseRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.budget.BudgetService;
+import com.cwallet.champwallet.service.budget.BudgetTransferHistoryService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.champwallet.mappers.budget.BudgetMapper.mapToBudget;
@@ -41,7 +45,8 @@ public class BudgetServiceImpl implements BudgetService {
     private BudgetAllocationHistoryRepository budgetAllocationHistoryRepository;
     @Autowired
     private WalletRepository walletRepository;
-
+    @Autowired
+    private BudgetTransferHistoryService budgetTransferHistoryService;
     @Override
     public boolean save(BudgetDTO budgetDTO) {
         Budget budget = mapToBudget(budgetDTO);
@@ -99,7 +104,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
     @Transactional
     @Override
-    public void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
+    public void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException, AccountingConstraintViolationException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = loggedInUser.getWallet();
         Budget budget = budgetRepository.findByIdAndWalletId(budgetID, wallet.getId());
@@ -107,9 +112,16 @@ public class BudgetServiceImpl implements BudgetService {
             throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
         }
         BudgetDTO budgetDTO = mapToBudgetDTO(budget);
-        if(!isUpdateable(budgetDTO)){
+        if(!isUpdateable(budgetDTO)) {
             throw new BudgetExpiredException("Budget no longer updateable");
+        } else {
+            // not expired yet, but check whether if this budget is in involved in any transfer transaction
+            if(!budget.getOutgoingTransferHistory().isEmpty() || !budget.getIncomingTransferHistory().isEmpty()) {
+                // the budget is involved in some kind of transaction
+                throw new AccountingConstraintViolationException(String.format("This budget %s is involved on a transfer transaction, so it can no longer be deleted", budget.getName()));
+            }
         }
+
         wallet.setBalance(wallet.getBalance() + budgetDTO.getBalance());
         walletRepository.save(wallet);
         budgetRepository.delete(budget);
@@ -154,5 +166,44 @@ public class BudgetServiceImpl implements BudgetService {
         budgetAllocationHistoryRepository.save(history);
         walletRepository.save(wallet);
         budgetRepository.save(budget);
+    }
+
+    @Transactional
+    @Override
+    public void fundTransferToOtherBudget(long senderBudgetID, long recipientBudgetID, String description, double amount) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException {
+        if(description == null || description.equals("")) {
+            throw new IllegalArgumentException("description cannot be empty or null");
+        }
+        if(amount < 0) {
+            throw new IllegalArgumentException("amount shouldnt be a negative number");
+        }
+        Wallet wallet = securityUtil.getLoggedInUser().getWallet();
+        Budget senderBudget = budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId());
+        Budget recipientBudget = budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId());
+        if(senderBudget == null || recipientBudget == null) {
+            throw new NoSuchEntityOrNotAuthorized("sending budget or receiving budget does not exist or not authorized");
+        }
+        if(senderBudget.getId() == recipientBudget.getId()) {
+            throw new IllegalArgumentException("Transfer to itself is not allowed");
+        }
+        if(amount > senderBudget.getBalance()) {
+            throw new AccountingConstraintViolationException(String.format("The amount(%.2f) to be transferred is greater than the balance of the budget(%.2f)", amount, senderBudget.getBalance()));
+        }
+        // initiate the transfer
+        senderBudget.setBalance(senderBudget.getBalance() - amount);
+        recipientBudget.setBalance(recipientBudget.getBalance() + amount);
+        // build the transfer history
+        BudgetTransferHistoryDTO budgetTransferHistoryDTO = BudgetTransferHistoryDTO.builder()
+                .senderBudget(senderBudget)
+                .recipientBudget(recipientBudget)
+                .amount(amount)
+                .description(description)
+                .wallet(wallet)
+                .build();
+        // save the changes to the database
+        budgetRepository.save(senderBudget);
+        budgetRepository.save(recipientBudget);
+        // save the history
+        budgetTransferHistoryService.save(budgetTransferHistoryDTO);
     }
 }

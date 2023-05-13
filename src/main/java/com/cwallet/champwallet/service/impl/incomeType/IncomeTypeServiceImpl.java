@@ -6,6 +6,7 @@ import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.mappers.incomeType.IncomeTypeMapper;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.income.IncomeType;
+import com.cwallet.champwallet.repository.income.IncomeRepository;
 import com.cwallet.champwallet.repository.incomeType.IncomeTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.incomeType.IncomeTypeService;
@@ -29,6 +30,8 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
 
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
+    @Autowired
+    private IncomeRepository incomeRepository;
 
     @Override
     public boolean save(IncomeTypeDto incomeTypeDto) {
@@ -68,7 +71,6 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         }
         return incomeType;
     }
-
     @Override
     public void update(IncomeTypeDto incomeTypeDto, long id) throws NoSuchEntityOrNotAuthorized {
 
@@ -85,13 +87,13 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         incomeTypeRepository.save(incomeType);
     }
 
-
     @Override
     public boolean isUpdateable(IncomeTypeDto incomeTypeDto) {
         if(expirableAndOwnedService.isExpired(incomeTypeDto)) {
             return false;
         } else {
-            return incomeTypeRepository.findByWalletId(incomeTypeDto.getId()).isEmpty();
+            return incomeRepository.findByIncomeTypeId(incomeTypeDto.getId()).isEmpty();
+
         }
     }
 
@@ -108,4 +110,5 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
         }
         incomeTypeRepository.delete(incomeType);
     }
+
 }

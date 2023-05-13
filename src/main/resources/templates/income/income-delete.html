@@ -14,8 +14,9 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <div class="alert alert-danger">
-                <h2 th:text="${'Are you sure you want to delete ' + income.name + '? '}"></h2>
-                <a th:href="@{/users/income/delete/confirmed/{incomeDTO}(incomeID=${income.id})}" class="btn btn-danger">Yes</a>
+<!--                <h2 th:text="${'Are you sure you want to delete ' + income.name + '? '}"></h2>-->
+                <h2>Are you sure you want to DELETE this Record?</h2>
+                <a th:href="@{/users/income/delete/confirmed/{incomeID}(incomeID=${income.id})}" class="btn btn-danger">Yes</a>
                 <a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" class="alert alert-success">No</a>
             </div>
         </div>

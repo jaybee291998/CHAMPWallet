@@ -1,20 +1,21 @@
-package com.cwallet.champwallet.dto.expenseType;
-
+package com.cwallet.champwallet.dto.expense;
 import com.cwallet.champwallet.models.account.Wallet;
-import com.cwallet.champwallet.utils.ExpirableAndOwned;
+import com.cwallet.champwallet.models.budget.Budget;
 import lombok.*;
+import com.cwallet.champwallet.models.expense.ExpenseType;
+import com.cwallet.champwallet.utils.ExpirableAndOwned;
 
 import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ExpenseTypeDto implements ExpirableAndOwned {
+public class ExpenseDTO implements ExpirableAndOwned {
     private long id;
-    private String name;
+    private Budget budget;
+    private ExpenseType expenseType;
     private String description;
-    private boolean isEnabled;
+    private double price;
     private LocalDateTime creationTime;
     @ToString.Exclude
     private Wallet wallet;

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Expense List</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+  <!-- Page Content-->
+  <section layout:fragment="body" class="py-5">
+    <div class="container">
+      <h1>Income List</h1>
+      <table class="table table-striped">
+        <tr>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Budget</th>
+          <th>Date Recorded</th>
+          <!--                    <th>Date Recorded</th>-->
+        </tr>
+
+        <tr th:each="expense:${userExpense}">
+          <td th:if="${expense.description.length<= 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" th:text="${expense.description}"></a></td>
+          <td th:if="${expense.description.length > 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}"  th:text="${expense.description.substring(0, 30) + '...'}"></a></td>
+          <td th:text="${expense.expenseType.name}"></td>
+          <td th:text="${expense.price}"></td>
+          <td th:text="${expense.budget.name}"></td>
+          <td th:text="${expense.creationTime}"></td>
+        </tr>
+      </table>
+      <p><b>Total Amount: </b><span th:text="${totalAmount}"></span></p>
+      <a th:href="@{/users/expense/create}" class="btn btn-success">Add Expense</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

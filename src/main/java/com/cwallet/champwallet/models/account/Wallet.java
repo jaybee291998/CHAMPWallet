@@ -1,5 +1,6 @@
 package com.cwallet.champwallet.models.account;
 
+import com.cwallet.champwallet.models.budget.Budget;
 import com.cwallet.champwallet.models.expense.ExpenseType;
 import com.cwallet.champwallet.models.income.IncomeType;
 import lombok.*;
@@ -27,5 +28,8 @@ public class Wallet {
     @ToString.Exclude
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.REMOVE)
     private List<IncomeType> incomeTypes = new ArrayList<>();
+    @ToString.Exclude
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL)
+    private List<Budget> budgets = new ArrayList<>();
 
 }

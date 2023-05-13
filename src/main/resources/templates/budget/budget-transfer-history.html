@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Create Budget</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <h1 class="center-text">Budget Transfer History</h1>
+            <div id="table-div">
+
+            </div>
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div class="my-container">
+                        <div class="card-header">
+                            <h5 class="card-title">Budget Transfer Detail</h5>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-3">Description</dt>
+                                    <dd class="col-sm-9" id="description-data">putang inang bola yan napaka mahal</dd>
+                                    <dt class="col-sm-3">Amount</dt>
+                                    <dd class="col-sm-9" id="amount-data">100</dd>
+                                    <dt class="col-sm-3">From</dt>
+                                    <dd class="col-sm-9" id="sender-data">pang grocery</dd>
+                                    <dt class="col-sm-3">To</dt>
+                                    <dd class="col-sm-9" id="recipient-data">pang grocery</dd>
+                                    <dt class="col-sm-3">Date</dt>
+                                    <dd class="col-sm-9" id="date-data">April 09, 2022 8:33:12 PM</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <script th:src="@{/js/custom.js}"></script> -->
+        <script th:src="@{/js/ui.js}"></script>
+        <script th:src="@{/js/modal.js}"></script>
+        <script th:src="@{/js/api.js}"></script>
+        <script th:inline="javascript">
+            const budget_received_from = /*[[${receivedFromAPI}]]*/;
+            const budget_transferred_to = /*[[${transferredToAPI}]]*/;
+            const budget_api = "/users/api/budget/list";
+            // a list of a subset of the transfer history where the current budget received a fund from other budgets
+            let sender_budgets = [];
+            // a list of a subset of the transfer historu where the current budget sent a fund to another budget
+            let recipient_budgets = [];
+            let budgets = [];
+            let budget_names = {};
+            // initialize all the budgets that sent fund to the current budget
+            async function init_sender_budgets(interval=7) {
+                const{data, status} = await get_data(`${budget_received_from}?interval=${interval}`);
+                sender_budgets = data;
+                console.log(sender_budgets);
+            }
+
+            async function init_recipient_budgets(interval=7) {
+                const{data, status} = await get_data(`${budget_transferred_to}?interval=${interval}`);
+                recipient_budgets = data;
+                console.log(recipient_budgets);
+            }
+            init_sender_budgets();
+            init_recipient_budgets();
+        </script>
+    </section>
+</main>
+
+</body>
+</html>

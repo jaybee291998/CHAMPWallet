@@ -1,4 +1,4 @@
-package com.cwallet.champwallet.dto.expenseType;
+package com.cwallet.champwallet.dto.budget;
 
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.utils.ExpirableAndOwned;
@@ -10,18 +10,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ExpenseTypeDto implements ExpirableAndOwned {
+public class BudgetJson {
     private long id;
     private String name;
     private String description;
+    private double balance;
     private boolean isEnabled;
     private LocalDateTime creationTime;
-    @ToString.Exclude
-    private Wallet wallet;
-
-
-    @Override
-    public Wallet getOwner() {
-        return wallet;
-    }
+    private Long walletID;
 }

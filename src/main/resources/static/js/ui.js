@@ -33,7 +33,7 @@ function createTable(raw_data, properties_to_show, row_selection_func, table_cla
 	});
 	raw_data.forEach((data, i) => {
 		let row = table.insertRow(i+1);
-		row.id = i;
+		row.id = data.id;
 		row.onclick = row_selection_func;
 		properties_to_show.forEach((data_property, j) => {
 			let data_property_value = data[data_property];

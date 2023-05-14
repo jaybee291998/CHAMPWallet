@@ -239,7 +239,13 @@ public class BudgetController {
 
     @GetMapping("/users/budget/allocation-history/{budgetID}")
     public String allocationHistory(@PathVariable Long budgetID, Model model) {
-        model.addAttribute("budgetID", budgetID);
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
         return "budget/budget-allocation-history";
     }
 
@@ -285,5 +291,19 @@ public class BudgetController {
             model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID && budget.isEnabled()).collect(Collectors.toList()));
             return "budget/budget-transfer";
         }
+    }
+
+    @GetMapping("/users/budget/transfer-history/{budgetID}")
+    public String transferHistory(@PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("transferredToAPI", String.format("/users/api/budget/budget-transferred-to/%s", budgetID));
+        model.addAttribute("receivedFromAPI", String.format("/users/api/budget/budget-received-from/%s", budgetID));
+        return "budget/budget-transfer-history";
     }
 }

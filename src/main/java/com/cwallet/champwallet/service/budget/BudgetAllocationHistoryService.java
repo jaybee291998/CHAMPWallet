@@ -7,5 +7,5 @@ import com.cwallet.champwallet.dto.budget.BudgetJson;
 import java.util.List;
 
 public interface BudgetAllocationHistoryService {
-    List<BudgetAllocationHistoryJson> budgetAllocationHistory(long budgetId);
+    List<BudgetAllocationHistoryJson> budgetAllocationHistory(long budgetId, int intervalInDays);
 }

@@ -101,6 +101,11 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = end.minusDays(intervalInDays);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(intervalInDays);
+        System.out.println(start);
+        System.out.println(end);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         return expenseRepository.getExpensesWithinDateRange(wallet.getId(), start, end).stream().map(e -> mapToExpenseJson(e)).collect(Collectors.toList());
     }

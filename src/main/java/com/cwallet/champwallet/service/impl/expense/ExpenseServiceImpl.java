@@ -158,7 +158,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
-        Budget budget =new Budget();
+        Budget budget = Budget;
         Long budgetID = budget.getId();
         Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);
         Budget actualBudget = optionalBudgets.get();

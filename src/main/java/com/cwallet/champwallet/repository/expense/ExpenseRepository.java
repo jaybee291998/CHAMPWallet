@@ -10,5 +10,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findByBudgetId(long budgetID);
     List<Expense> findByExpenseTypeId(long expenseTypeID);
     Expense findByIdAndWalletId(long expenseID, long walletID);
+    Expense findById(long expenseID);
     List<Expense> findByWalletId(Long walletID);
 }

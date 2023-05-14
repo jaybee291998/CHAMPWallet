@@ -5,26 +5,22 @@ import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.expense.ExpenseExpiredException;
 import com.cwallet.champwallet.exception.expense.NoSuchExpenseOrNotAuthorized;
+import com.cwallet.champwallet.exception.income.IncomeExpiredException;
+import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.models.budget.Budget;
 import com.cwallet.champwallet.models.expense.ExpenseType;
 import com.cwallet.champwallet.models.expense.Expense;
 import com.cwallet.champwallet.models.income.Income;
-import com.cwallet.champwallet.models.income.IncomeType;
 import com.cwallet.champwallet.repository.account.WalletRepository;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
 import com.cwallet.champwallet.repository.expense.ExpenseRepository;
 import com.cwallet.champwallet.repository.expenseType.ExpenseTypeRepository;
-import com.cwallet.champwallet.repository.income.IncomeRepository;
-import com.cwallet.champwallet.repository.incomeType.IncomeTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.expense.ExpenseService;
-import com.cwallet.champwallet.service.income.IncomeService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
-import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -51,6 +47,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Autowired
     private ExpirableAndOwnedService expirableAndOwnedService;
     @Override
+    @Transactional
     public boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType, Budget budget) {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println(expenseType);
@@ -93,29 +90,87 @@ public class ExpenseServiceImpl implements ExpenseService {
         return usersExpense.stream().map((expense) -> mapToExpenseDTO(expense)).collect(Collectors.toList());
     }
 
-//    @Override
-//    public ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized {
-//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-//        Expense expense = expenseRepository.findByIdAndWalletId(expenseID,loggedInUser.);
-//        if(income == null) {
-//            throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
-//        }
-//        IncomeDTO incomeDTO = mapToIncomeDTO(income);
-//        return incomeDTO;
-//    }
-//
-//    @Override
-//    public boolean isUpdateable(ExpenseDTO expenseDTO) {
-//        return false;
-//    }
-//
-//    @Override
-//    public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException {
-//
-//    }
-//
-//    @Override
-//    public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException {
-//
-//    }
+    @Override
+    public ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Expense expense = expenseRepository.findByIdAndWalletId(expenseID,loggedInUser.getWallet().getId());
+        if(expense == null) {
+            throw new NoSuchExpenseOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+        ExpenseDTO expenseDTO = mapToExpenseDTO(expense);
+        return expenseDTO;
+    }
+
+    @Override
+    public boolean isUpdateable(ExpenseDTO expenseDTO) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException {
+        if(expirableAndOwnedService.isExpired(expenseDTO)) {
+            return false;
+        }return true;
 }
+
+    @Override
+    public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException {
+        if(expenseDTO == null) {
+            throw new IllegalArgumentException("budget dto must not be null");
+        }
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
+        if(expense == null) {
+            throw new NoSuchExpenseOrNotAuthorized("No such income or unauthorized");
+        }
+        if(!isUpdateable(expenseDTO)){
+            throw new ExpenseExpiredException("Expense no longer updateable");
+        }
+        double oldExpense = expense.getPrice();
+        double newExpense = expenseDTO.getPrice();
+      Budget budget =new Budget();
+        Long budgetID = budget.getId();
+        Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);
+        Budget actualBudget = optionalBudgets.get();
+
+        if(oldExpense < newExpense) {
+            double expenseIncrease = newExpense - oldExpense;
+           budget.setBalance(budget.getBalance() - expenseIncrease);
+
+        } else {
+
+            double expenseDecrease = oldExpense - newExpense;
+            if(expenseDecrease > budget.getBalance()){
+                try {
+                    throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
+                } catch (AccountingConstraintViolationException e) {
+                    throw new RuntimeException(e);
+                }
+            }else
+            {
+                budget.setBalance(budget.getBalance() + expenseDecrease);
+            }
+        }
+
+        expense.setDescription(expenseDTO.getDescription());
+        expense.setExpenseType(expenseDTO.getExpenseType());
+        expense.setPrice(expenseDTO.getPrice());
+        expense.setBudget(expenseDTO.getBudget());
+        expenseRepository.save(expense);
+    }
+
+    @Override
+    public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Wallet wallet = securityUtil.getLoggedInUser().getWallet();
+        Budget budget =new Budget();
+        Long budgetID = budget.getId();
+        Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);
+        Budget actualBudget = optionalBudgets.get();
+       Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
+        if(expense == null) {
+            throw new NoSuchExpenseOrNotAuthorized("No such Expense or unauthorized");
+        }
+        ExpenseDTO expenseDTO = mapToExpenseDTO(expense);
+        if(!isUpdateable(expenseDTO)){
+            throw new ExpenseExpiredException("Expense no longer updateable");
+        }
+       budget.setBalance(budget.getBalance() + expenseDTO.getPrice());
+        expenseRepository.delete(expense);
+    }
+    }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Details</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <div>
+                <!--                <p><b>Name:</b><span th:text="${budget.name}"></span></p>-->
+                <p><b>Description:</b><span th:text="${expense.description}"></span></p>
+                <p><b>Category:</b><span th:text="${expense.expenseType.name}"></span></p>
+                <p><b>Amount:</b><span th:text="${expense.price}"></span></p>
+                <p><b>Budget:</b><span th:text="${income.budget.name}"></span></p>
+                <p><b>Creation Time:</b><span th:text="${expense.creationTime}"></span></p>
+            </div>
+
+            <hr>
+            <a th:if="${buttonEnabled}" th:href="@{/users/expense/update/{expenseID}(expenseID=${expense.id})}" class="btn btn-success">Update</a>
+            <a th:if="${buttonEnabled}" th:href="@{/users/expense/delete/{expenseID}(expenseID=${expense.id})}" class="btn btn-danger">Delete</a>
+            <a href="/users/expense/list" class="btn btn-secondary">Go back</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

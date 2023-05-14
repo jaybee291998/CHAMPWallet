@@ -150,7 +150,5 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
         }
         wallet.setBalance(wallet.getBalance()-incomeDTO.getAmount());
         incomeRepository.delete(income);
-
-
     }
 }

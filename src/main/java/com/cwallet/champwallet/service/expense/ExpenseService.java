@@ -14,9 +14,9 @@ public interface ExpenseService {
     boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType,Budget budget);
     List<ExpenseDTO> getAllUserExpense();
 
-//     ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized;
-//
-//    boolean isUpdateable(ExpenseDTO expenseDTO);
-//    void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException;
-//    void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException;
+     ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized;
+
+    boolean isUpdateable(ExpenseDTO expenseDTO) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException;
+    void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException;
+    void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException;
 }

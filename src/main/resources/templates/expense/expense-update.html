@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Update</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
+            </div>
+            <form role="form" method="post" th:action="@{/users/expense/update/{expenseID}(expenseID=${expenseForm.id})}" th:object="${expenseForm}">
+                <div class="form-group">
+                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                    <label for="description">Description</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="description"
+                            placeholder="Enter Description"
+                            name="description"
+                            th:field="*{description}"
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('description')}"
+                       th:errors="*{description}" class="text-danger"></p>
+                </div>
+                <!--                <select name="income-type" id="incometype">-->
+                <!--                    <option th:></option>-->
+                <!--                </select>-->
+                <select name="expense-type" id="expensetype" th:field="*{expenseTypeID}">
+                    <option th:each="expenseType:${expenseTypes}" th:value="${expenseType.id}" th:text="${expenseType.name}"></option>
+                </select>
+                <div class="form-group">
+                    <label for="price">Amount</label>
+                    <textarea
+                            type="text"
+                            class="form-control"
+                            id="price"
+                            placeholder="Enter price"
+                            name="price"
+                            th:field="*{price"}
+                    ></textarea>
+                    <p th:if="${#fields.hasErrors('price)}"
+                       th:errors="*{price}" class="text-danger"></p>
+
+                </div>
+                <select name="budget" id="budget" th:field="*{budgetID}">
+                    <option th:each="budget:${budgets}" th:value="${budget.id}" th:text="${budget.name}"></option>
+                </select>
+
+                <button type="submit" id="submit" class="btn btn-primary">update expense</button>
+            </form>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

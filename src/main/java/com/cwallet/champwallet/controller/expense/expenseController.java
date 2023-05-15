@@ -5,6 +5,7 @@ import com.cwallet.champwallet.bean.income.IncomeForm;
 import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.expense.ExpenseExpiredException;
 import com.cwallet.champwallet.exception.expense.NoSuchExpenseOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
@@ -76,6 +77,7 @@ public class expenseController {
         return "expense/expense-list";
     }
 
+
     @SneakyThrows
     @GetMapping("/users/expense/{expenseID}")
     public String getSpecificExpense(@PathVariable("expenseID") long expenseID, Model model) {
@@ -144,7 +146,9 @@ public class expenseController {
             expenseDTO.setExpenseType(expenseForm.getExpenseTypeID());
             expenseDTO.setPrice(expenseForm.getPrice());
             expenseDTO.setBudget(expenseForm.getBudgetID());
-
+System.out.println("________________________________________________________________");
+            System.out.println(expenseForm);
+            System.out.println("________________________________________________________________");
             try {
                 expenseService.update(expenseDTO, expenseID);
             } catch (NoSuchExpenseOrNotAuthorized | ExpenseExpiredException e) {
@@ -152,6 +156,8 @@ public class expenseController {
             } catch (AccountingConstraintViolationException e) {
                 model.addAttribute("errorMessage", e.getMessage());
                 return "expense/expense-update";
+            } catch (NoSuchEntityOrNotAuthorized e) {
+                return "redirect:/users/expense/list?nosuchexpenseornauthorized=budget is not found";
             }
             return String.format("redirect:/users/expense/%s", expenseID);
         } else {
@@ -192,10 +198,19 @@ public class expenseController {
                 return "redirect:/users/expense/list?nosuchexpenseorunauthorized=no such expense or unauthorized";
             } catch (ExpenseExpiredException e) {
                 return "redirect:/users/expense/list?nolongerupdateable=from service this expense is no longer updatable";
+            } catch (NoSuchEntityOrNotAuthorized e) {
+                return "redirect:/users/expense/list?nolongerupdateable=no such budget";
             }
             return "redirect:/users/expense/list?expensedeleted=expense successfully deleted";
         } else {
             return "redirect:/users/expense/list?nolongerupdatable=from controller this expense is no longer updatable";
         }
     }
+
+
+    @GetMapping("/users/expense/stats")
+    public String getExpenseStats(Model model) {
+        return "expense/expense-stats";
+    }
 }
+

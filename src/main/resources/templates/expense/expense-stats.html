@@ -47,10 +47,12 @@
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js" integrity="sha512-Wt1bJGtlnMtGP0dqNFH1xlkLBNpEodaiQ8ZN5JLA5wpc1sUlk/O5uuOMNgvzddzkpvZ9GLyYNa8w2s7rqiTk5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <!-- <script th:src="@{/js/modal.js}"></script> -->
         <script th:src="@{/js/api.js}"></script>
-        <script th:inline="javascript">
+        <script th:inline="javascript" defer>
             let raw_expense_data = [];
             let processed_expensed_data = [];
             let filtered_expense_data = [];
@@ -61,9 +63,10 @@
             const expense_category_api = "/users/api/expense-type/list";
             const budget_api = "/users/api/budget/list";
             // const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            function $(e){
-                return document.getElementById(e);
-            }
+
+            // function $(e){
+            //     return document.getElementById(e);
+            // }
 
             async function init_data() {
                 await init_budget_names();
@@ -73,7 +76,7 @@
                 console.log(category_names);
                 console.log(raw_expense_data);
                 let interval_obj = {1:"1 day", 7:"1 week", 14:"2 weeks", 30:"1 month", 90:"3 months", 180:"6 months"};
-                populateSelectControl($('interval-select'), interval_obj, () => {let interval = $('interval-select').value; init_expense_data(interval)});
+                populateSelectControl($('#interval-select')[0], interval_obj, () => {let interval = $('#interval-select')[0].value; init_expense_data(interval)});
                 createControls();
                 updateChartAndTable();
             }
@@ -122,8 +125,8 @@
 
             const createControls = () => {
                 // remove all the elements on the control div
-                $('control-div').innerHTML = '';
-                $('button-div').innerHTML = '';
+                $('#control-div')[0].innerHTML = '';
+                $('#button-div')[0].innerHTML = '';
                 // create the radio buttons
                 createRadioControl("chart-type", "expense-chart", "expense-chart", "Expense Chart ", updateChart);
                 createRadioControl("chart-type", "budget-chart", "budget-chart", "Budget Chart ", updateChart);
@@ -146,10 +149,10 @@
             // filter expenses bases on selected controls
             const filterData = () => {
                 // data processing section
-                let budget_select = $('budget-select');
-                let category_select = $('category-select');
-                let start_date_select = $('start-date-select');
-                let end_date_select = $('end-date-select');
+                let budget_select = $('#budget-select')[0];
+                let category_select = $('#category-select')[0];
+                let start_date_select = $('#start-date-select')[0];
+                let end_date_select = $('#end-date-select')[0];
                 let expenses = raw_expense_data;
 
                 console.log(budget_select.value);
@@ -183,7 +186,7 @@
                 console.log("updateChartAndTable called");
                 filtered_expense_data = filterData();
                 updateChart();
-                displayTable(filtered_expense_data, $('table-div'), e => console.log("clicked"));
+                displayTable(filtered_expense_data, $('#table-div')[0], e => console.log("clicked"));
             }
 
             const populateSelectControl = (select_object, key_value_dict, func) => {
@@ -231,8 +234,8 @@
                 });
 
                 // add the select object and label to control div
-                $('control-div').appendChild(label);
-                $('control-div').appendChild(select_object);
+                $('#control-div')[0].appendChild(label);
+                $('#control-div')[0].appendChild(select_object);
             }
 
             // create radio button controls
@@ -247,9 +250,9 @@
                 label.htmlFor = radio.id;
                 label.innerHTML = inner;
 
-                $("button-div").appendChild(label);
-                $("button-div").appendChild(radio);
-                $("button-div").appendChild(document.createElement("BR"));
+                $("#button-div")[0].appendChild(label);
+                $("#button-div")[0].appendChild(radio);
+                $("#button-div")[0].appendChild(document.createElement("BR"));
             }
 
 
@@ -261,6 +264,9 @@
                     let table = createTable(table_data, ['description', 'price', 'budget', 'category', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Price', 'Budget', 'Category', 'Date']);
                     table.setAttribute('id', 'tbl_exporttable_to_xls');
                     table_div.appendChild(table);
+                    $(document).ready( function () {
+                        $('#tbl_exporttable_to_xls').DataTable();
+                    });
                 }
             }
 
@@ -282,7 +288,7 @@
             const make_expense_chart = async() =>{
                 let expense_data = filtered_expense_data;
                 var chart_data = process_chart_data(expense_data.map((data) => data.price), expense_data.map((data) => data.creationTime.slice(5, 10)));
-                make_chart(chart_data, "expenses", $('canvas-div'), $('graph-type').value);
+                make_chart(chart_data, "expenses", $('#canvas-div')[0], $('#graph-type')[0].value);
             }
             // make a chart for fund and category
             const make_fund_chart = () => {
@@ -293,7 +299,7 @@
                 console.log(prices);
                 let chart_data = findAllIndices(budgets, prices);
                 chart_data["labels"] = chart_data["labels"].map((label) => budget_names[label]);
-                make_chart(chart_data, "Total Expenses per Budget", $('canvas-div'), $('graph-type').value);
+                make_chart(chart_data, "Total Expenses per Budget", $('#canvas-div')[0], $('#graph-type')[0].value);
             }
 
             // make a chart for fund and category
@@ -303,7 +309,7 @@
                 let prices = expense_data.map((expense) => expense.price)
                 let chart_data = findAllIndices(categories, prices);
                 chart_data["labels"] = chart_data["labels"].map((label) => category_names[label]);
-                make_chart(chart_data, "Total Expenses per Category", $('canvas-div'), $('graph-type').value);
+                make_chart(chart_data, "Total Expenses per Category", $('#canvas-div')[0], $('#graph-type')[0].value);
             }
 
             // make a chart

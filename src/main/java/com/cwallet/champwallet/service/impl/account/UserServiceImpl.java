@@ -33,15 +33,15 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     private InetAddress IP= null;
-    @Autowired
     private WalletRepository walletRepository;
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder,
-                           VerificationService verificationService, EmailService emailService){
+                           VerificationService verificationService, EmailService emailService, WalletRepository walletRepository){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.verificationService = verificationService;
+        this.walletRepository = walletRepository;
         this.emailService = emailService;
         try {
             IP = InetAddress.getLocalHost();
@@ -76,10 +76,10 @@ public class UserServiceImpl implements UserService {
                 .verification_code(code)
                 .user(user)
                 .build();
-        String message = getActivationMessage(user.getUsername(), String.valueOf(user.getId()), verificationDTO.getVerification_code(), IP.toString());
+        String message = getActivationMessage(user.getUsername(), String.valueOf(user.getId()), verificationDTO.getVerification_code(), IP.getHostAddress());
 
         try {
-            emailService.sendSimpleMessage(user.getEmail(), "Account Activation", message);
+            emailService.sendMIMEMessage(user.getEmail(), "Account Activation", message);
         } catch(SendFailedException e){
             e.printStackTrace();
             throw new EmailNotSentException("Email not sent");
@@ -96,10 +96,10 @@ public class UserServiceImpl implements UserService {
         VerificationDTO verificationDTO = verificationService.requestVerification(user);
         String username = user.getUsername();
         String verificationCode = verificationDTO.getVerification_code();
-        String message = getPasswordResetMessage(username, String.valueOf(user.getId()), verificationCode, IP.toString());
+        String message = getPasswordResetMessage(username, String.valueOf(user.getId()), verificationCode, IP.getHostAddress());
 
         try {
-            emailService.sendSimpleMessage(email, "Password Reset", message);
+            emailService.sendMIMEMessage(email, "Password Reset", message);
             verificationService.saveVerificationCode(verificationDTO);
         } catch (SendFailedException e) {
             throw new SendFailedException("Failed to send email");
@@ -116,10 +116,10 @@ public class UserServiceImpl implements UserService {
         VerificationDTO verificationDTO = verificationService.requestVerification(user);
         String username = user.getUsername();
         String verificationCode = verificationDTO.getVerification_code();
-        String message = getActivationMessage(username, String.valueOf(user.getId()), verificationCode, IP.toString());
+        String message = getActivationMessage(username, String.valueOf(user.getId()), verificationCode, IP.getHostAddress());
 
         try {
-            emailService.sendSimpleMessage(email, "Account Activation", message);
+            emailService.sendMIMEMessage(email, "Account Activation", message);
         } catch (SendFailedException e) {
             throw new EmailNotSentException("Email not sent");
         }
@@ -128,22 +128,22 @@ public class UserServiceImpl implements UserService {
 
     private static String getActivationMessage(String username, String accountID, String verificationCode, String ipAddress) {
         StringBuilder message = new StringBuilder();
-        String activationLink = String.format("%s:8080/activate-account?activation=%s&account=%s", ipAddress, verificationCode, accountID);
-        message.append(String.format("Dear %s;\n", username));
-        message.append("You have successfully registered to CHAMP Wallet.\n");
-        message.append("Please verify your account by following the instruction.\n");
-        message.append("To verify your account please click on this link: \n");
+        String activationLink = String.format("<a href=\"%s:8080/activate-account?activation=%s&account=%s\">Click to verify account</a>", ipAddress, verificationCode, accountID);
+        message.append(String.format("<h2>Dear %s;</h2>", username));
+        message.append("<p>You have successfully registered to CHAMP Wallet.</p>");
+        message.append("<p>Please verify your account by following the instruction.</p>");
+        message.append("<p>To verify your account please click on this link: </p>");
         message.append(activationLink);
         return  message.toString();
     }
 
     private static String getPasswordResetMessage(String username, String accountID, String verificationCode, String ipAddress) {
         StringBuilder message = new StringBuilder();
-        String activationLink = String.format("%s:8080/reset-password?activation=%s&account=%s", ipAddress, verificationCode, accountID);
-        message.append(String.format("Dear %s;\n", username));
-        message.append("We received a request to reset your password for your account.\n");
-        message.append("If you didn't request this password reset please ignore this email.\n");
-        message.append("To reset you password please click on this link: \n");
+        String activationLink = String.format("<a href=\"%s:8080/reset-password?activation=%s&account=%s\">Click here to reset password</a>", ipAddress, verificationCode, accountID);
+        message.append(String.format("<h2>Dear %s;</h2>", username));
+        message.append("<p>We received a request to reset your password for your account.</p>");
+        message.append("<p>If you didn't request this password reset please ignore this email.</p>");
+        message.append("<p>To reset you password please click on this link: </p>");
         message.append(activationLink);
         return  message.toString();
     }

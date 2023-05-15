@@ -26,13 +26,18 @@ function createTable(raw_data, properties_to_show, row_selection_func, table_cla
 	let data_properties = Object.keys(raw_data[0]);
 
 	// add the head 
-	let thead = table.insertRow(0);
+//	let thead = table.insertRow(0);
+    let thead = document.createElement('thead');
+    let theadRow = thead.insertRow(0)
 	titles.forEach((title, i)=>{
-		let cell = thead.insertCell(i);
+		let cell = theadRow.insertCell(i);
 		cell.textContent = title;
 	});
+	table.appendChild(thead);
+	let tbody = document.createElement('tbody');
+	table.appendChild(tbody);
 	raw_data.forEach((data, i) => {
-		let row = table.insertRow(i+1);
+		let row = document.createElement('tr');
 		row.id = data.id;
 		row.onclick = row_selection_func;
 		properties_to_show.forEach((data_property, j) => {
@@ -40,9 +45,48 @@ function createTable(raw_data, properties_to_show, row_selection_func, table_cla
 			let cell = row.insertCell(j);
 			cell.textContent = data_property_value;
 		});
+		tbody.appendChild(row);
 	});
 	return table;
 }
+
+
+//function createTable(raw_data, properties_to_show, row_selection_func, table_class, titles){
+//	if(raw_data.length==0) throw 'raw_data is empty';
+//	if(properties_to_show.length != titles.length) throw 'properties_to_show and titles has mismatching length' ;
+//	properties_to_show.forEach((property)=>{
+//		if(!raw_data[0].hasOwnProperty(property)) throw `${property} is not a property of the raw_data`;
+//	})
+//	let table = document.createElement('TABLE');
+//	table.className = table_class;
+//
+//	// get the properties of the data
+//	let data_properties = Object.keys(raw_data[0]);
+//
+//	// add the head
+////	let thead = table.insertRow(0);
+//    let thead = document.createElement('thead');
+//    let theadRow = thead.insertRow(0)
+//	titles.forEach((title, i)=>{
+//		let cell = theadRow.insertCell(i);
+//		cell.textContent = title;
+//	});
+//	table.appendChild(thead);
+//	let tbody = document.createElemet('tbody');
+//
+//	raw_data.forEach((data, i) => {
+//		let row = table.insertRow(i);
+//		row.id = data.id;
+//		row.onclick = row_selection_func;
+//		properties_to_show.forEach((data_property, j) => {
+//			let data_property_value = data[data_property];
+//			let cell = row.insertCell(j);
+//			cell.textContent = data_property_value;
+//		});
+//	});
+//	return table;
+//}
+
 
 // convert raw timestamp into a more huma readbable format
 function convert_date(raw_date){

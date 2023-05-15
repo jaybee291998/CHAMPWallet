@@ -59,55 +59,47 @@
 
                     <!------>
                     <form role="form" method="post" th:action="@{/register}" th:object="${registrationForm}">
-                      <div th:if="${param.fail}" class="alert alert-danger">
-                        <p>Username or Email already exists</p>
-                      </div>
-                      <div th:if="${param.password_error}" class="alert alert-danger">
-                        <p>Password must match</p>
-                      </div>
-                      <div th:if="${param.usernamealreadyused}" class="alert alert-danger">
-                        <p th:text="${param.usernamealreadyused}"></p>
-                      </div>
+                        <div th:if="${param.fail}" class="alert alert-danger">
+                            <p>Username or email already exists.</p>
+                        </div>
+                        <div th:if="${param.password_error}" class="alert alert-danger">
+                            <p>Password must match.</p>
+                        </div>
+                        <div th:if="${param.usernamealreadyused}" class="alert alert-danger">
+                            <p th:text="${param.usernamealreadyused}"></p>
+                        </div>
 
-                      <!---username---->
+                        <!---username---->
+                        <p th:if="${usernameError}" th:action="@{/register}" th:object="${registrationForm}"></p>
                         <div class="form-floating mb-3">
-                            <p th:if="${usernameError}" th:action="@{/register}" th:object="${registrationForm}"></p>
-                            <input type="text" class="form-control" id="floatingText" placeholder="jhondoe"
-                                   th:field="*{username}">
+                            <input type="text" class="form-control" id="floatingText" placeholder="johndoe" th:field="*{username}">
                             <label for="floatingText">Username</label>
-                            <p th:if="${#fields.hasErrors('username')}"
-                               th:text="${#strings.listJoin(#fields.errors('username'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('username')}" th:text="${#strings.listJoin(#fields.errors('username'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!-----Email----->
+                        <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
                         <div class="form-floating mb-3">
-                            <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
-                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com"
-                                   required th:field="*{email}">
+                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" required th:field="*{email}">
                             <label for="floatingInput">Email address</label>
-                            <p th:if="${#fields.hasErrors('email')}"
-                               th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('email')}" th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!------Password---->
+                        <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
                         <div class="form-floating mb-4">
-                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
-                                   required th:field="*{password}">
+                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" required th:field="*{password}">
                             <label for="floatingPassword">Password</label>
-                            <p th:if="${#fields.hasErrors('password')}"
-                               th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('password')}" th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!---------ConfirmPassword---->
                         <div class="form-floating mb-4">
-                            <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
-                            <input type="password" class="form-control" id="floatingPassword2" placeholder="Password"
-                                   required th:field="*{confirmPassword}">
+                            <input type="password" class="form-control" id="floatingPassword2" placeholder="Password" required th:field="*{confirmPassword}">
                             <label for="floatingPassword2">Confirm Password</label>
-                            <p th:if="${#fields.hasErrors('password')}"
-                               th:text="${#strings.listJoin(#fields.errors('confirmPassword'), ', ')}"
-                               class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('password')}" th:text="${#strings.listJoin(#fields.errors('confirmPassword'), ', ')}" class="text-danger"></p>
                         </div>
+
 
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="form-check">
@@ -203,6 +195,9 @@
                     $("#submit").prop('disabled', true);
                 }
             }
+
+
+
 
 
 </script>

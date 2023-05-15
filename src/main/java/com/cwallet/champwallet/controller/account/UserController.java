@@ -39,8 +39,8 @@ public class UserController {
             return "redirect:/users/home";
         }
         model.addAttribute("registrationForm", new RegistrationForm());
-        return "users-registration";
-//        return "users-registration1";
+//        return "users-registration";
+        return "users-registration1";
     }
 
     @PostMapping("/register")
@@ -52,14 +52,14 @@ public class UserController {
         System.out.println(registrationForm);
         if(result.hasErrors()){
             model.addAttribute("registrationForm", registrationForm);
-            return "users-registration";
-//            return "users-registration1";
+//            return "users-registration";
+            return "users-registration1";
         }
         if(!registrationForm.getPassword().equals(registrationForm.getConfirmPassword())) {
             model.addAttribute("registrationForm", registrationForm);
             model.addAttribute("passwordError", "Password must match");
-            return "users-registration";
-//            return "users-registration1";
+//            return "users-registration";
+            return "users-registration1";
         }
         UserEntityDTO newUser = UserEntityDTO.builder()
                 .username(registrationForm.getUsername())
@@ -71,13 +71,13 @@ public class UserController {
         } catch (UserNameNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
             model.addAttribute("usernameError", "Username already exists");
-            return "users-registration";
-//            return "users-registration1";
+//            return "users-registration";
+            return "users-registration1";
         } catch (EmailNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
             model.addAttribute("emailError", "Email already exists");
-//            return "users-registration";
-            return "users-registration1";
+            return "users-registration";
+//            return "users-registration1";
         } catch (EmailNotSentException e) {
             return "redirect:/login?emailnotsent=email not sent";
         }

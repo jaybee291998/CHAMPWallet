@@ -67,4 +67,9 @@ public class expenseController {
         model.addAttribute("totalAmount",totalAmount );
         return "expense/expense-list";
     }
+
+    @GetMapping("/users/expense/stats")
+    public String getExpenseStats(Model model) {
+        return "expense/expense-stats";
+    }
 }

@@ -1,5 +1,6 @@
 package com.cwallet.champwallet.service.impl.expense;
 
+import com.cwallet.champwallet.dto.ExpenseJson;
 import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
@@ -28,12 +29,12 @@ import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.mapToExpense;
-import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.mapToExpenseDTO;
+import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.*;
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncomeDTO;
 
 @Service
@@ -91,6 +92,22 @@ public class ExpenseServiceImpl implements ExpenseService {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         List<Expense> usersExpense = expenseRepository.findByWalletId(loggedInUser.getWallet().getId());
         return usersExpense.stream().map((expense) -> mapToExpenseDTO(expense)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ExpenseJson> getExpensesWithinInterval(int intervalInDays) {
+        if(intervalInDays <= 0) {
+            throw new IllegalArgumentException("interval must not be less than or equal to zero");
+        }
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusDays(intervalInDays);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(intervalInDays);
+        System.out.println(start);
+        System.out.println(end);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        Wallet wallet = securityUtil.getLoggedInUser().getWallet();
+        return expenseRepository.getExpensesWithinDateRange(wallet.getId(), start, end).stream().map(e -> mapToExpenseJson(e)).collect(Collectors.toList());
     }
 
 //    @Override

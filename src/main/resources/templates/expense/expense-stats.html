@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Statistics</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <h1>Expense Statistics</h1>
+            <label for="interval-select">Interval</label>
+            <select name="interval-select" id="interval-select"></select>
+            <select id="graph-type" onchange="updateChartAndTable()">
+                <option value="bar">Bar</option>
+                <option value="line">Line</option>
+                <option value="radar">Radar</option>
+                <option value="pie">Pie</option>
+                <option value="doughnut">Doughnut</option>
+                <option value="polarArea">Polar Area</option>
+            </select>
+            <div id="button-div">
+            </div>
+            <div id="control-div">
+                <!-- <label for="budget-select">Budget</label>
+                <select name="budget-select" id="budget-select"></select>
+    
+                <label for="category-select">Category</label>
+                <select name="category-select" id="category-select"></select>
+
+                <label for="start-date-select">Start Date</label>
+                <select name="start-date-select" id="start-date-select"></select>
+
+                <label for="end-date-select">End Date</label>
+                <select name="end-date-select" id="end-date-select"></select> -->
+            </div>
+            <div id="canvas-div">
+            </div>
+            <div id="table-div">
+            </div>	
+            <button onclick="exp()" class="btn btn-primary">Download Excel</button>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js" integrity="sha512-Wt1bJGtlnMtGP0dqNFH1xlkLBNpEodaiQ8ZN5JLA5wpc1sUlk/O5uuOMNgvzddzkpvZ9GLyYNa8w2s7rqiTk5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+        <script th:src="@{/js/ui.js}"></script>
+        <!-- <script th:src="@{/js/modal.js}"></script> -->
+        <script th:src="@{/js/api.js}"></script>
+        <script th:inline="javascript">
+            let raw_expense_data = [];
+            let processed_expensed_data = [];
+            let filtered_expense_data = [];
+            let budget_names = {};
+            let category_names = {};
+            let currentInterval = 0;
+            const expense_api = "/users/api/expense/stats";
+            const expense_category_api = "/users/api/expense-type/list";
+            const budget_api = "/users/api/budget/list";
+            // const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            function $(e){
+                return document.getElementById(e);
+            }
+
+            async function init_data() {
+                await init_budget_names();
+                await init_expense_category_names();
+                await init_expense_data();
+                console.log(budget_names);
+                console.log(category_names);
+                console.log(raw_expense_data);
+                let interval_obj = {1:"1 day", 7:"1 week", 14:"2 weeks", 30:"1 month", 90:"3 months", 180:"6 months"};
+                populateSelectControl($('interval-select'), interval_obj, () => {let interval = $('interval-select').value; init_expense_data(interval)});
+                createControls();
+                updateChartAndTable();
+            }
+
+            async function init_expense_data(interval=7) {
+                currentInterval = interval;
+                const {data, status} = await get_data(`${expense_api}?interval=${interval}`);
+                raw_expense_data = preProcessData(data);
+                raw_expense_data.sort((a, b) => {
+                    let da = new Date(a.creationTime), db = new Date(b.creationTime);
+                    return da - db;
+                })
+                console.log("interva = " + interval);
+                console.log(data);
+                createControls();
+            }
+
+            async function init_budget_names() {
+                const {data, status} = await get_data(budget_api);
+                data.forEach(budget => budget_names[budget.id] = budget.name);
+            }
+
+            async function init_expense_category_names() {
+                const {data, staus} = await get_data(expense_category_api);
+                data.forEach(c => category_names[c.id] = c.name);
+            }
+
+            // process the raw data, such that the recipient and sender fund will be a named instead of the fund id
+            // and the timestamp is converted into a more readble format e.g. 12/03/2022 19:00+8:00 to Decemeber 3, 2022 7:00PM
+            function preProcessData(raw_data){
+                return raw_data.map((fah, index)=>{
+                    // create a copy of the object
+                    let new_fah = {};
+                    // new_fah.category = category_names[fah["expenseTypeID"]];
+                    // new_fah.budget = budget_names[fah["budgetID"]];
+                    new_fah.category = fah["expenseTypeID"];
+                    new_fah.budget = fah["budgetID"];
+                    // convert the timestamp into a more readable format
+                    new_fah.creationTime = fah.creationTime;
+                    new_fah.description = fah.description;
+                    new_fah.price = fah.price;
+                    new_fah.id = fah.id;
+                    return new_fah;
+                });
+            }
+
+            const createControls = () => {
+                // remove all the elements on the control div
+                $('control-div').innerHTML = '';
+                $('button-div').innerHTML = '';
+                // create the radio buttons
+                createRadioControl("chart-type", "expense-chart", "expense-chart", "Expense Chart ", updateChart);
+                createRadioControl("chart-type", "budget-chart", "budget-chart", "Budget Chart ", updateChart);
+                createRadioControl("chart-type", "category-chart", "category-chart", "Category Chart ", updateChart);
+
+
+                createSelectControl(budget_names, 'budget', 'budget-select', updateChartAndTable);
+                createSelectControl(category_names, 'category', 'category-select', updateChartAndTable);
+                // populateSelectControl($('budget-select'), budget_names, updateChartAndTable);
+                // populateSelectControl($('category-select'), category_names, updateChartAndTable);
+                // create a selector for dates
+                let dict = {}
+                raw_expense_data.map((expense_data) => expense_data.creationTime.slice(0,10)).forEach((date) => dict[date]=convertDate(date.slice(5,10)));
+                createSelectControl(dict, 'start-date', 'start-date-select', updateChartAndTable);
+                createSelectControl(dict, 'end-date', 'end-date-select', updateChartAndTable);
+                // populateSelectControl($('start-date-select'), dict, updateChartAndTable);
+                // populateSelectControl($('end-date-select'), dict, updateChartAndTable);
+            }
+
+            // filter expenses bases on selected controls
+            const filterData = () => {
+                // data processing section
+                let budget_select = $('budget-select');
+                let category_select = $('category-select');
+                let start_date_select = $('start-date-select');
+                let end_date_select = $('end-date-select');
+                let expenses = raw_expense_data;
+
+                console.log(budget_select.value);
+                // if the fund selected is not all
+                // fiter the data to the selected fund
+                if(budget_select.value != -1) expenses = expenses.filter((expense) => expense['budget'] == budget_names[budget_select.value]);
+                // if category is not all
+                // filter the data based on the value of category
+                if(category_select.value != -1) expenses = expenses.filter((expense) => expense['category'] == category_names[category_select.value]);
+                if(start_date_select.value != -1 && end_date_select.value != -1){
+                    if(start_date_select.value < end_date_select.value){
+                        expenses = expenses.filter((expense) => (start_date_select.value <= expense.creationTime.slice(0,10) && expense.creationTime.slice(0,10) <= end_date_select.value));
+                        console.log(expenses);
+                    }
+                }		
+                return expenses;
+            }
+
+            // update chart based on the selected radio controls
+            const updateChart = () => {
+                let getSelectedValue = document.querySelector('input[name="chart-type"]:checked');
+                if(getSelectedValue!=null){
+                    let selectedValue = getSelectedValue.value;
+                    if(selectedValue=='expense-chart') make_expense_chart();
+                    else if(selectedValue=='budget-chart') make_fund_chart();
+                    else if(selectedValue=='category-chart') make_category_chart();
+                    else console.log("RAdio buttons are fucked");
+                }
+            }
+            const updateChartAndTable = () => {
+                console.log("updateChartAndTable called");
+                filtered_expense_data = filterData();
+                updateChart();
+                displayTable(filtered_expense_data, $('table-div'), e => console.log("clicked"));
+            }
+
+            const populateSelectControl = (select_object, key_value_dict, func) => {
+                select_object.innerHTML = "";
+                select_object.onchange = func
+                // add an option to select all
+                let all_option = document.createElement("OPTION");
+                all_option.text = "Select Interval";
+                all_option.value = -1;
+                select_object.add(all_option);
+                // generate options
+                let keys = Object.keys(key_value_dict);
+                keys.forEach((key) => {
+                    let new_option = document.createElement("OPTION");
+                    new_option.text = key_value_dict[key];
+                    new_option.value = key;
+                    // add the option to the select object
+                    select_object.add(new_option);
+                });
+            }
+
+            // create options for a select
+            const createSelectControl = (key_value_dict, label_name, id, func) => {
+                let select_object = document.createElement("SELECT");
+                select_object.id = id;
+                select_object.onchange = func
+                let label = document.createElement("LABEL");
+                label.htmlFor = select_object.id;
+                label.innerHTML = label_name;
+
+                // add an option to select all
+                let all_option = document.createElement("OPTION");
+                all_option.text = "ALL";
+                all_option.value = -1;
+                // add the option to the select object
+                select_object.add(all_option);
+                // generate options
+                let keys = Object.keys(key_value_dict);
+                keys.forEach((key) => {
+                    let new_option = document.createElement("OPTION");
+                    new_option.text = key_value_dict[key];
+                    new_option.value = key;
+                    // add the option to the select object
+                    select_object.add(new_option);
+                });
+
+                // add the select object and label to control div
+                $('control-div').appendChild(label);
+                $('control-div').appendChild(select_object);
+            }
+
+            // create radio button controls
+            const createRadioControl = (name, id, value, inner, func) => {
+                let radio = document.createElement("INPUT");
+                radio.setAttribute("type", "radio");
+                radio.id = id;
+                radio.name = name;
+                radio.value = value;
+                radio.onclick = func;
+                let label = document.createElement("LABEL");
+                label.htmlFor = radio.id;
+                label.innerHTML = inner;
+
+                $("button-div").appendChild(label);
+                $("button-div").appendChild(radio);
+                $("button-div").appendChild(document.createElement("BR"));
+            }
+
+
+
+            function displayTable(raw_data, table_div, row_selection_func){
+                let table_data = preprocessForTable(raw_data, 30);
+                table_div.innerHTML="";
+                if(table_data.length > 0){
+                    let table = createTable(table_data, ['description', 'price', 'budget', 'category', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Price', 'Budget', 'Category', 'Date']);
+                    table.setAttribute('id', 'tbl_exporttable_to_xls');
+                    table_div.appendChild(table);
+                }
+            }
+
+            // shorten the description into just 30 characters
+            function preprocessForTable(raw_data, len){
+                return raw_data.map((fah, i)=>{
+                    let new_fah = {...fah}
+                    if(new_fah.description.length > len){
+                        new_fah.description = `${new_fah.description.slice(0, len-2)}...`
+                    }
+                    new_fah["creationTime"] = processDateStr(new_fah["creationTime"]);
+                    new_fah.category = category_names[fah["category"]];
+                    new_fah.budget = budget_names[fah["budget"]];
+                    return new_fah;
+                });
+            }
+
+            // make a expense chart
+            const make_expense_chart = async() =>{
+                let expense_data = filtered_expense_data;
+                var chart_data = process_chart_data(expense_data.map((data) => data.price), expense_data.map((data) => data.creationTime.slice(5, 10)));
+                make_chart(chart_data, "expenses", $('canvas-div'), $('graph-type').value);
+            }
+            // make a chart for fund and category
+            const make_fund_chart = () => {
+                let expense_data = filtered_expense_data;
+                let budgets = expense_data.map((expense) => expense.budget);
+                let prices = expense_data.map((expense) => expense.price)
+                console.log(budgets);
+                console.log(prices);
+                let chart_data = findAllIndices(budgets, prices);
+                chart_data["labels"] = chart_data["labels"].map((label) => budget_names[label]);
+                make_chart(chart_data, "Total Expenses per Budget", $('canvas-div'), $('graph-type').value);
+            }
+
+            // make a chart for fund and category
+            const make_category_chart = () => {
+                let expense_data = filtered_expense_data;
+                let categories = expense_data.map((expense) => expense.category);
+                let prices = expense_data.map((expense) => expense.price)
+                let chart_data = findAllIndices(categories, prices);
+                chart_data["labels"] = chart_data["labels"].map((label) => category_names[label]);
+                make_chart(chart_data, "Total Expenses per Category", $('canvas-div'), $('graph-type').value);
+            }
+
+            // make a chart
+            const make_chart = (chart_data, label, canvas_div, chart_type) => {
+                // create a new canvas inside the canvas div
+                canvas_div.innerHTML = '';
+                const ctx = document.createElement('canvas');
+                ctx.id = 'myChart';
+                
+                // create the dataset that will be used by the chart
+                dataset = {
+                    label: label,
+                    data: chart_data.data,
+                    backgroundColor: getRandomColors(chart_data.data.length),
+                    borderWidth: 1
+                }
+
+                // the actual chart object
+                var myChart = new Chart(ctx,{
+                    type: chart_type,
+                    data: {
+                        labels: chart_data.labels,
+                        datasets: [dataset]
+                    },
+                    options:{
+                        scales:{
+                            y:{
+                                beginAtZero:true
+                            }
+                        }
+                    }
+                });
+
+                canvas_div.appendChild(ctx);
+
+            }
+            // helper functions 
+
+            // count the consecutive occurence of an element in given index on a given array
+            // ex. arr = [1,2,3,3,3,4,4,5,5,9,9,9]
+            // count_consec_occur(arr, 2, 3) = 3
+            // counts the number of times 3 appears on the array on the index 2
+            const count_consec_occur = (array, start_index, element) => {
+                var occurence_count = 0;
+                for(let i = start_index; i < array.length; i++){
+                    var cur_val = array[i];
+                    if(cur_val == element){ occurence_count++ }
+                    else{ break; }
+                }
+                return occurence_count;
+            }
+            // compute the sum of all the elements of the array
+            // from start index to the end index(exclusive)
+            const sum_fr_to = (array, start_index, end_index) => {
+                sum = 0;
+                for(let i = start_index; i < end_index; i++){
+                    sum += array[i];
+                }
+                return sum
+            }
+
+            // generate a random rgba color
+            const randomColor = () => {
+                var o = Math.round, r = Math.random, s = 255;
+                return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+            }
+            // get an array of random rgba colors
+            const getRandomColors = size => {
+                var colors = []
+                for(var i = 0; i < size; i++){
+                    colors.push(randomColor());
+                }
+                return colors;
+            }
+            // process the data from the server 
+            // to return a dictionary than can be used for makeChart
+            const process_chart_data = (array_1, array_2) => {
+                var chart_data = {data:[], labels:[]}
+                var i = 0;
+                while(i < array_2.length){
+                    let cur_val = array_2[i];
+                    let count = count_consec_occur(array_2, i, cur_val);
+                    let sum = sum_fr_to(array_1, i, i+count);
+                    chart_data["data"].push(sum);
+                    chart_data["labels"].push(cur_val)
+                    i += count;
+                } 
+                return chart_data;
+            }
+            // some fancy function, i cant explian it for now
+
+            // find all the indices of the target element
+            const findIndices = (items, target) => {
+                let indices = [];
+                items.forEach((item, index) => {
+                    if(target == item){
+                        indices.push(index);
+                    }
+                })
+                return indices;
+            }
+
+            // get the sum of the elements of a given array of indices
+            const sumElementOfIndices = (array, indices_array) => {
+                let sum = 0;
+                indices_array.forEach((index) => {
+                    sum += array[index]
+                })
+                return sum;
+            }
+
+            // find all of the indices of the unique elements of the array
+            const findAllIndices = (items, array) => {
+                let unique = items.filter((e, i, a) => a.indexOf(e) == i);
+                let object = {labels:unique, data:[]};
+                unique.forEach((item) => {
+                    object["data"].push(sumElementOfIndices(array, findIndices(items, item)));
+                })
+                console.log(object);
+                return object;
+            }
+
+            // convert the raw date
+            const convertDate = (raw_date) => {
+                let month_str = raw_date.substr(0,2);
+                let day_str = raw_date.substr(3,2);
+                return months[parseInt(month_str, 10)] + ' ' + day_str;
+            }
+
+            const export_to_excel = (type, fn, dl) => {
+                console.log(currentInterval);
+                var elt = document.getElementById('tbl_exporttable_to_xls');
+                var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
+                let start;
+                let end = new Date();
+                let file_name = "";
+                start = new Date();
+                start.setDate(end.getDate() - currentInterval);
+                file_name = `Expense History: ${start} - ${end}`;
+                return dl ?
+                    XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+                    XLSX.writeFile(wb, fn || (file_name + '.' + (type || 'xlsx')));
+            }
+            const exp = () => {export_to_excel('xlsx'); console.log("export clicked");};
+            init_data();
+        </script>
+    </section>
+</main>
+
+
+</body>
+</html>

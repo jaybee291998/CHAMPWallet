@@ -60,6 +60,8 @@
         </div>
         <!-- <script th:src="@{/js/custom.js}"></script> -->
         <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <script th:src="@{/js/modal.js}"></script>
         <script th:inline="javascript">
@@ -72,17 +74,17 @@
             console.log(api);
             let currentInterval = 0;
 
-        function $(e){
-            return document.getElementById(e);
-        }
+        // function $(e){
+        //     return document.getElementById(e);
+        // }
 
         function updateModalContent(row_data){
             const {budget, creationTime, type, amount, description} = row_data;
-            $('description-data').textContent = description;
-            $('budget-data').textContent = budget;
-            $('amount-data').textContent = amount;
-            $('type-data').textContent = type;
-            $('date-data').textContent = processDateStr(creationTime);
+            $('#description-data')[0].textContent = description;
+            $('#budget-data')[0].textContent = budget;
+            $('#amount-data')[0].textContent = amount;
+            $('#type-data')[0].textContent = type;
+            $('#date-data')[0].textContent = processDateStr(creationTime);
         }
 
 
@@ -109,7 +111,7 @@
                 budgets = await budget_res.json();
                 init_history();
                 let interval_obj = {7:"1 week", 14:"2 weeks", 30:"1 month", 90:"3 months", 180:"6 months"};
-                populateSelectControl($('interval-select') ,interval_obj, () => {let interval = $('interval-select').value;init_history(interval);});
+                populateSelectControl($('#interval-select')[0] ,interval_obj, () => {let interval = $('#interval-select')[0].value;init_history(interval);});
             }
 
             async function init_history(interval=7) {
@@ -156,9 +158,11 @@
                 let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
                 // let hiddenTable = createTable(budget_allocation_history, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
                 table.setAttribute("id", "tbl_exporttable_to_xls");
-                $('table-div').innerHTML = "";
-                $('table-div').appendChild(table);
-
+                $('#table-div')[0].innerHTML = "";
+                $('#table-div')[0].appendChild(table);
+                $(document).ready( function () {
+                    $('#tbl_exporttable_to_xls').DataTable();
+                });
                 // $('table-div-hidden').innerHTML="";
                 // $('table-div-hidden').appendChild(hiddenTable);
             }

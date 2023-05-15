@@ -206,4 +206,9 @@ public class BudgetServiceImpl implements BudgetService {
         // save the history
         budgetTransferHistoryService.save(budgetTransferHistoryDTO);
     }
+
+    @Override
+    public void disableFund(long budgetID) {
+
+    }
 }

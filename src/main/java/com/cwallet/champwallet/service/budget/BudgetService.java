@@ -18,4 +18,5 @@ public interface BudgetService {
     void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException, AccountingConstraintViolationException;
     void allocateToBudget(long budgetID, double amount, String description, boolean isAllocate) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException;
     void fundTransferToOtherBudget(long senderBudgetID, long recipientBudgetID, String description, double amount) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException;
+    void disableFund(long budgetID);
 }

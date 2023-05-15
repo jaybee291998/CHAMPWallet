@@ -16,6 +16,9 @@
             <div th:if="${param.nolongerdeleteable}" class="alert alert-danger">
                 <p th:text="${param.nolongerdeleteable}"></p>
             </div>
+            <div th:if="${param.budgetdisabled}" class="alert alert-danger">
+                <p th:text="${param.budgetdisabled}"></p>
+            </div>
             <div>
                 <p><b>Name:</b><span th:text="${budget.name}"></span></p>
                 <p><b>Description:</b><span th:text="${budget.description}"></span></p>

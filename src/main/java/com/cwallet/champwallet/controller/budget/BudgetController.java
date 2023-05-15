@@ -2,6 +2,7 @@ package com.cwallet.champwallet.controller.budget;
 
 import com.cwallet.champwallet.bean.BudgetAllocationForm;
 import com.cwallet.champwallet.bean.BudgetTransferForm;
+import com.cwallet.champwallet.bean.PasswordForm;
 import com.cwallet.champwallet.bean.budget.BudgetForm;
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
@@ -305,5 +306,44 @@ public class BudgetController {
         model.addAttribute("transferredToAPI", String.format("/users/api/budget/budget-transferred-to/%s", budgetID));
         model.addAttribute("receivedFromAPI", String.format("/users/api/budget/budget-received-from/%s", budgetID));
         return "budget/budget-transfer-history";
+    }
+    @GetMapping("/users/budget/disable/{budgetID}")
+    public String getDisableBudgetForm(@PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budgets/%s?budgetdisabled=this budget is already disabled", budgetDTO.getId());
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("passwordForm", new PasswordForm());
+        return "budget/budget-disable";
+    }
+    @PostMapping("/users/budget/disable/{budgetID}")
+    public String disableBudget(@ModelAttribute PasswordForm passwordForm, BindingResult bindingResult,
+                                @PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budgets/%s?budgetdisabled=this budget is already disabled", budgetDTO.getId());
+        }
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("passwordForm", passwordForm);
+            return "budget/budget-disable";
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("passwordForm", passwordForm);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(passwordForm);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        return "budget/budget-disable";
     }
 }

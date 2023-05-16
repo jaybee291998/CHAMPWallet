@@ -82,7 +82,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized {
+    public void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
         if(budgetDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
         }
@@ -90,6 +90,9 @@ public class BudgetServiceImpl implements BudgetService {
         Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
         if(budget == null) {
             throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
+        }
+        if(!isUpdateable(mapToBudgetDTO(budget))) {
+            throw new BudgetExpiredException("Budget is no longer updateable");
         }
         budget.setName(budgetDTO.getName());
         budget.setDescription(budgetDTO.getDescription());

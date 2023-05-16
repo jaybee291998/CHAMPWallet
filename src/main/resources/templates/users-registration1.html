@@ -34,7 +34,9 @@
 </head>
 
 <body>
-<div style="background: linear-gradient(to bottom, #2b96cb, black, #c43a3a); height: 100vh;" class="container-fluid position-relative d-flex p-0 bg-primary">
+<body style="background-image: url('/assets/img/wallet-login-bg.jpg'); background-size: cover;">
+<!--<div style="background: linear-gradient(to bottom, #2b96cb, black, #c43a3a); height: 100vh;" class="container-fluid position-relative d-flex p-0 bg-primary">-->
+<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <!-- Spinner Start -->
     <div id="spinner"
          class="show bg-dark position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
@@ -44,20 +46,26 @@
     </div>
     <!-- Spinner End -->
 
-
     <!-- Sign Up Start -->
     <div class="container-fluid">
-        <div class="row h-100 align-items-center justify-content-center" style="min-height: 100vh;">
-            <div class="col-12 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+        <div class="row h-100 align-items-center justify-content-center" style="min-height: 100h;">
+            <!--            <div class="col-12 col-sm-8 col-md-6 col-lg-5 col-xl-4">-->
+            <div class="col-6 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+                <div style="text-align: center;">
+                    <img th:src="@{/assets/champ_wallet_logo-register.png}" width="300" height="350"
+                         alt="ChampWallet Logo">
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-8 col-md-6 col-lg-5 col-xl-4">
                 <div class="bg-secondary rounded p-4 p-sm-5 my-4 mx-3">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <a href="index.html" class="">
-                            <h3 class="text-primary"><i class="fa fa-user-edit me-2"></i>CHAMPWallet</h3>
-                        </a>
+                        <!--                        <a href="index.html" class="">-->
+                        <h3 class="text-primary">CHAMPWallet</h3>
+<!--                        </a>-->
                         <h3>Sign Up</h3>
                     </div>
 
-                    <!------>
                     <form role="form" method="post" th:action="@{/register}" th:object="${registrationForm}">
                         <div th:if="${param.fail}" class="alert alert-danger">
                             <p>Username or email already exists.</p>
@@ -72,39 +80,48 @@
                         <!---username---->
                         <p th:if="${usernameError}" th:action="@{/register}" th:object="${registrationForm}"></p>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="floatingText" placeholder="johndoe" th:field="*{username}">
+                            <input type="text" class="form-control" id="floatingText" placeholder="johndoe"
+                                   th:field="*{username}">
                             <label for="floatingText">Username</label>
-                            <p th:if="${#fields.hasErrors('username')}" th:text="${#strings.listJoin(#fields.errors('username'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('username')}"
+                               th:text="${#strings.listJoin(#fields.errors('username'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!-----Email----->
                         <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
                         <div class="form-floating mb-3">
-                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" required th:field="*{email}">
+                            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com"
+                                   required th:field="*{email}">
                             <label for="floatingInput">Email address</label>
-                            <p th:if="${#fields.hasErrors('email')}" th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('email')}"
+                               th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!------Password---->
                         <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
                         <div class="form-floating mb-4">
-                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" required th:field="*{password}">
+                            <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
+                                   required th:field="*{password}">
                             <label for="floatingPassword">Password</label>
-                            <p th:if="${#fields.hasErrors('password')}" th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('password')}"
+                               th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
                         </div>
 
                         <!---------ConfirmPassword---->
                         <div class="form-floating mb-4">
-                            <input type="password" class="form-control" id="floatingPassword2" placeholder="Password" required th:field="*{confirmPassword}">
+                            <input type="password" class="form-control" id="floatingPassword2"
+                                   placeholder="Confirm Password" required th:field="*{confirmPassword}">
                             <label for="floatingPassword2">Confirm Password</label>
-                            <p th:if="${#fields.hasErrors('password')}" th:text="${#strings.listJoin(#fields.errors('confirmPassword'), ', ')}" class="text-danger"></p>
+                            <p th:if="${#fields.hasErrors('password')}"
+                               th:text="${#strings.listJoin(#fields.errors('confirmPassword'), ', ')}"
+                               class="text-danger"></p>
                         </div>
 
 
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                                <label class="form-check-label" for="exampleCheck1">Remember Me</label>
                             </div>
                             <a th:href="@{/password-reset}">Forgot Password</a>
                         </div>
@@ -112,7 +129,11 @@
                         <p class="text-center mb-0">Already have an Account? <a th:href="@{/login}">Click here to Sign
                             In</a></p>
                     </form>
+                    <!--                    </div>-->
                 </div>
+
+
+                <!----->
             </div>
         </div>
     </div>
@@ -195,6 +216,7 @@
                     $("#submit").prop('disabled', true);
                 }
             }
+
 
 
 

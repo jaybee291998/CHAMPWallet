@@ -53,11 +53,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     private ExpirableAndOwnedService expirableAndOwnedService;
     @Override
     public boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType, Budget budget) {
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println(expenseType);
-        System.out.println(budget);
-        System.out.println(expenseDTO);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//        System.out.println(expenseType);
+//        System.out.println(budget);
+//        System.out.println(expenseDTO);
+//        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Long expenseTypeID = expenseType.getId();
         Long budgetID = budget.getId();
         Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);
@@ -73,12 +73,12 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         try {
             if(expense.getPrice()<= actualBudget.getBalance()){
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                 actualBudget.setBalance(totalBalance);
                 expenseRepository.save(expense);
                 budgetRepository.save(budget);
-                System.out.println("saved successfully");
-                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//                System.out.println("saved successfully");
+//                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 //                budgets(budget.setBalance(totalBalance));
             }
             return true;

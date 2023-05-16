@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncome;
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncomeDTO;
+
 @Service
 public class IncomeServiceImpl implements IncomeService {
     @Autowired
@@ -44,7 +45,7 @@ public class IncomeServiceImpl implements IncomeService {
         Long incomeTypeID = incomeType.getId();
         Optional<IncomeType> incomeTypes = incomeTypeRepository.findById(incomeTypeID);
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
-       Income income = mapToIncome(incomeDTO);
+        Income income = mapToIncome(incomeDTO);
         income.setWallet(wallet);
 //        incomeDTO.setWallet();
         income.setIncomeType(incomeTypes.get());
@@ -59,7 +60,6 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
 
-
     @Override
     public List<IncomeDTO> getAllUserIncome() {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
@@ -68,49 +68,48 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
 
-@Override
-public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
-    UserEntity loggedInUser = securityUtil.getLoggedInUser();
-    Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
-    if(income == null) {
-        throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
+    @Override
+    public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
+        if (income == null) {
+            throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+        IncomeDTO incomeDTO = mapToIncomeDTO(income);
+        return incomeDTO;
     }
-   IncomeDTO incomeDTO = mapToIncomeDTO(income);
-    return incomeDTO;
-}
 
     @Override
-    public void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException,AccountingConstraintViolationException {
-        if(incomeDTO == null) {
+    public void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
+        if (incomeDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
         }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
-        if(income == null) {
+        if (income == null) {
             throw new NoSuchIncomeOrNotAuthorized("No such income or unauthorized");
         }
-        if(!isUpdateable(incomeDTO)){
+        if (!isUpdateable(incomeDTO)) {
             throw new IncomeExpiredException("Income no longer updateable");
         }
         double oldIncome = income.getAmount();
         double newIncome = incomeDTO.getAmount();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         // income increase
-        if(oldIncome < newIncome) {
+        if (oldIncome < newIncome) {
             double incomeIncrease = newIncome - oldIncome;
-            wallet.setBalance(wallet.getBalance() + incomeIncrease) ;
+            wallet.setBalance(wallet.getBalance() + incomeIncrease);
 
         } else {
             // income decrease
             double incomeDecrease = oldIncome - newIncome;
-            if(incomeDecrease > wallet.getBalance()){
+            if (incomeDecrease > wallet.getBalance()) {
                 try {
                     throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
                 } catch (AccountingConstraintViolationException e) {
                     throw new RuntimeException(e);
                 }
-            }else
-            {
+            } else {
                 wallet.setBalance(wallet.getBalance() - incomeDecrease);
             }
         }
@@ -122,10 +121,10 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
     }
 
     @Override
-    public boolean isUpdateable(IncomeDTO incomeDTO){
+    public boolean isUpdateable(IncomeDTO incomeDTO) {
 //        List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
 //        double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
-        if(expirableAndOwnedService.isExpired(incomeDTO)) {
+        if (expirableAndOwnedService.isExpired(incomeDTO)) {
             return false;
         }
 //        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
@@ -141,16 +140,15 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
-        if(income == null) {
+        if (income == null) {
             throw new NoSuchIncomeOrNotAuthorized("No such Income or unauthorized");
         }
         IncomeDTO incomeDTO = mapToIncomeDTO(income);
-        if(!isUpdateable(incomeDTO)){
+        if (!isUpdateable(incomeDTO)) {
             throw new IncomeExpiredException("Income no longer updateable");
         }
-        wallet.setBalance(wallet.getBalance()-incomeDTO.getAmount());
+        wallet.setBalance(wallet.getBalance() - incomeDTO.getAmount());
         incomeRepository.delete(income);
-
 
     }
 }

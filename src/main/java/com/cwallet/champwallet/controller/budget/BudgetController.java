@@ -2,10 +2,10 @@ package com.cwallet.champwallet.controller.budget;
 
 import com.cwallet.champwallet.bean.BudgetAllocationForm;
 import com.cwallet.champwallet.bean.BudgetTransferForm;
+import com.cwallet.champwallet.bean.PasswordForm;
 import com.cwallet.champwallet.bean.budget.BudgetForm;
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
-import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
-import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
+import com.cwallet.champwallet.exception.*;
 import com.cwallet.champwallet.exception.budget.BudgetExpiredException;
 import com.cwallet.champwallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -86,13 +86,12 @@ public class BudgetController {
         }
         model.addAttribute("budget", budgetDTO);
         boolean isExpired = expirableAndOwnedService.isExpired(budgetDTO);
-        if(isExpired) {
-            // if expired
+        model.addAttribute("buttonEnabled", true);
+        if(!budgetService.isUpdateable(budgetDTO)) {
+            // if no longer updateable
             model.addAttribute("buttonEnabled", false);
-        } else {
-            // else not expired yet so check if its used
-            model.addAttribute("buttonEnabled", expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty());
         }
+        model.addAttribute("enableTransactionButtons", budgetDTO.isEnabled());
         return "budget/budget-detail";
     }
 
@@ -193,6 +192,9 @@ public class BudgetController {
         } catch (NoSuchBudgetOrNotAuthorized e) {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
         }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=this budget is disabled", budgetDTO.getId());
+        }
         model.addAttribute("allocationForm", new BudgetAllocationForm());
         model.addAttribute("budgetID", budgetDTO.getId());
         model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
@@ -233,6 +235,8 @@ public class BudgetController {
             model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
             model.addAttribute("budget", budgetDTO);
             return "budget/budget-allocation";
+        } catch (BudgetDisabledException e) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=%s", budgetDTO.getId(), e.getMessage());
         }
         return String.format("redirect:/users/budget/%s", budgetID);
     }
@@ -257,10 +261,13 @@ public class BudgetController {
         } catch (NoSuchBudgetOrNotAuthorized e) {
             return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
         }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=this budget is disabled", budgetDTO.getId());
+        }
         model.addAttribute("budget", budgetDTO);
         model.addAttribute("transferForm", new BudgetTransferForm());
         model.addAttribute("budgetBalance", budgetDTO.getBalance());
-        model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID).collect(Collectors.toList()));
+        model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID && budget.isEnabled()).collect(Collectors.toList()));
         return "budget/budget-transfer";
     }
 
@@ -290,6 +297,8 @@ public class BudgetController {
             model.addAttribute("budget", budgetDTO);
             model.addAttribute("recipientBudgets", budgetService.getAllUserBudget().stream().filter(budget -> budget.getId() != budgetID && budget.isEnabled()).collect(Collectors.toList()));
             return "budget/budget-transfer";
+        } catch (BudgetDisabledException e) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=%s", budgetDTO.getId(), e.getMessage());
         }
     }
 
@@ -305,5 +314,99 @@ public class BudgetController {
         model.addAttribute("transferredToAPI", String.format("/users/api/budget/budget-transferred-to/%s", budgetID));
         model.addAttribute("receivedFromAPI", String.format("/users/api/budget/budget-received-from/%s", budgetID));
         return "budget/budget-transfer-history";
+    }
+    @GetMapping("/users/budget/disable/{budgetID}")
+    public String getDisableBudgetForm(@PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=this budget is already disabled", budgetDTO.getId());
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("passwordForm", new PasswordForm());
+        return "budget/budget-disable";
+    }
+    @PostMapping("/users/budget/disable/{budgetID}")
+    public String disableBudget(@Valid @ModelAttribute PasswordForm passwordForm, BindingResult bindingResult,
+                                @PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(!budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=this budget is already disabled", budgetDTO.getId());
+        }
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("passwordForm", passwordForm);
+            return "budget/budget-disable";
+        }
+
+        try {
+            budgetService.disableFund(budgetID, passwordForm.getPassword());
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        } catch (BudgetAlreadyDisabledException e) {
+            return String.format("redirect:/users/budget/%s?budgetdisabled=this budget is already disabled", budgetDTO.getId());
+        } catch (IncorrectPasswordException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("passwordForm", passwordForm);
+            return "budget/budget-disable";
+        }
+        return String.format("redirect:/users/budget/%s", budgetDTO.getId());
+    }
+    @GetMapping("/users/budget/enable/{budgetID}")
+    public String getEnableBudgetForm(@PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetenabled=this budget is already enabled", budgetDTO.getId());
+        }
+        model.addAttribute("budget", budgetDTO);
+        model.addAttribute("passwordForm", new PasswordForm());
+        return "budget/budget-enable";
+    }
+    @PostMapping("/users/budget/enable/{budgetID}")
+    public String enableBudget(@Valid @ModelAttribute PasswordForm passwordForm, BindingResult bindingResult,
+                                @PathVariable long budgetID, Model model) {
+        BudgetDTO budgetDTO = null;
+        try {
+            budgetDTO = budgetService.getSpecificBudget(budgetID);
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        }
+        if(budgetDTO.isEnabled()) {
+            return String.format("redirect:/users/budget/%s?budgetenabled=this budget is already enabled", budgetDTO.getId());
+        }
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("passwordForm", passwordForm);
+            return "budget/budget-enable";
+        }
+
+        try {
+            budgetService.enableFund(budgetID, passwordForm.getPassword());
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+        } catch (BudgetAlreadyEnabledException e) {
+            return String.format("redirect:/users/budget/%s?budgetenabled=this budget is already enabled", budgetDTO.getId());
+        } catch (IncorrectPasswordException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("budget", budgetDTO);
+            model.addAttribute("passwordForm", passwordForm);
+            return "budget/budget-disable";
+        }
+        return String.format("redirect:/users/budget/%s", budgetDTO.getId());
     }
 }

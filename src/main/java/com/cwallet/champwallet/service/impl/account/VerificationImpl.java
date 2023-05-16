@@ -23,15 +23,16 @@ import static com.cwallet.champwallet.mappers.account.VerificationMapper.mapToVe
 public class VerificationImpl implements VerificationService {
     private VerificationRepository verificationRepository;
     private Random rand;
-    private final UserRepository userRepository;
-    @Autowired
+    private UserRepository userRepository;
+
     private PasswordEncoder passwordEncoder;
 
     public VerificationImpl(VerificationRepository verificationRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.verificationRepository = verificationRepository;
         rand = new Random();
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     @Override
     public String generateCode() {

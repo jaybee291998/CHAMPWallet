@@ -23,24 +23,35 @@
             <p><b>Unallocated Balance: </b><span th:text="${unallocatedBalance}"></span></p>
             <p><b>Allocated Balance: </b><span th:text="${allocatedBalance}"></span></p>
             <p><b>Total Balance: </b><span th:text="${totalBalance}"></span></p>
-            <table class="table table-striped">
-                <tr>
-                    <th>name</th>
-                    <th>description</th>
-                    <th>enabled</th>
-                    <th>balance</th>
-                </tr>
-                <tr th:each="budget:${userBudgets}">
-                    <td th:if="${budget.name.length<= 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name}"></a></td>
-                    <td th:if="${budget.name.length > 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name.substring(0, 20) + '...'}"></a></td>
-                    <td th:if="${budget.description.length<= 30}" th:text="${budget.description}"></td>
-                    <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
-                    <td th:text="${budget.isEnabled}"></td>
-                    <td th:text="${budget.balance}"></td>
-                </tr>
+            <table class="table table-striped" id="budget-table">
+                <thead>
+                    <tr>
+                        <th>name</th>
+                        <th>description</th>
+                        <th>enabled</th>
+                        <th>balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="budget:${userBudgets}">
+                        <td th:if="${budget.name.length<= 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name}"></a></td>
+                        <td th:if="${budget.name.length > 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name.substring(0, 20) + '...'}"></a></td>
+                        <td th:if="${budget.description.length<= 30}" th:text="${budget.description}"></td>
+                        <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
+                        <td th:text="${budget.isEnabled}"></td>
+                        <td th:text="${budget.balance}"></td>
+                    </tr>
+                </tbody>
             </table>
             <a th:href="@{/users/budget/create}" class="btn btn-success">Create Budget</a>
         </div>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+        <script th:inline="javascript">
+            $(document).ready( function () {
+               $('#budget-table').DataTable();
+            });
+        </script>
     </section>
 </main>
 

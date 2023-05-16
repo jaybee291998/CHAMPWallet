@@ -10,6 +10,8 @@ import com.cwallet.champwallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.expenseType.ExpenseTypeService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
 
     @Autowired
     private ExpenseRepository expenseRepository;
+
     @Override
     public boolean save(ExpenseTypeDto expenseTypeDto) {
         ExpenseType expense = mapToExpenseType(expenseTypeDto);

@@ -79,6 +79,14 @@ public class UserController {
         return "redirect:/login";
     }
 
+    @GetMapping("/")
+    public String adam() {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        } else {
+            return "landing";
+        }
+    }
     @GetMapping("/login")
     public String getLoginForm(Model model) {
         if(securityUtil.getLoggedInUser() != null) {

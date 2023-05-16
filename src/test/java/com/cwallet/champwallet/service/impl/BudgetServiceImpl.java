@@ -1,9 +1,8 @@
 package com.cwallet.champwallet.service.impl;
 
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
-import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
-import com.cwallet.champwallet.exception.BudgetDisabledException;
-import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
+import com.cwallet.champwallet.dto.budget.BudgetTransferHistoryDTO;
+import com.cwallet.champwallet.exception.*;
 import com.cwallet.champwallet.exception.budget.BudgetExpiredException;
 import com.cwallet.champwallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -26,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,6 +52,8 @@ public class BudgetServiceImpl {
     private WalletRepository walletRepository;
     @Mock
     private BudgetTransferHistoryService budgetTransferHistoryService;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private com.cwallet.champwallet.service.impl.budget.BudgetServiceImpl budgetService;
     @Test
@@ -471,6 +473,392 @@ public class BudgetServiceImpl {
         verify(budgetRepository).findByIdAndWalletId(budgetID, wallet.getId());
         verify(budgetAllocationHistoryRepository).save(budgetAllocationHistory);
         verify(walletRepository).save(wallet);
+        verify(budgetRepository).save(budget);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowIllegalArgumentException_WhenDescriptionIsNull() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = null;
+        double amount = 69;
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowIllegalArgumentException_WhenDescriptionIsEmpty() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "";
+        double amount = 69;
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowIllegalArgumentException_WhenAmountIsLessThanOrEqualToZero() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = -69;
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowIllegalArgumentException_WhenSenderBudgetAndRecipientBudgetIsTheSame() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 1L;
+        String description = "some description";
+        double amount = 69;
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+    }
+    @Test(expected = NoSuchEntityOrNotAuthorized.class)
+    public void testFundTransferToOtherBudget_ShouldThrowNoSuchEntityOrNotAuthorized_WhenSenderBudgetIsNull() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(null);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(null);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+    }
+    @Test(expected = NoSuchEntityOrNotAuthorized.class)
+    public void testFundTransferToOtherBudget_ShouldThrowNoSuchEntityOrNotAuthorized_WhenRecipientBudgetIsNull() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget senderBudget = new Budget();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(senderBudget);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(null);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+    }
+    @Test(expected = BudgetDisabledException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowBudgetDisabledException_WhenSenderBudgetIsDisabled() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget senderBudget = Budget.builder()
+                .isEnabled(false)
+                .build();
+        Budget recipientBudget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(senderBudget);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(recipientBudget);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+    }
+    @Test(expected = BudgetDisabledException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowBudgetDisabledException_WhenRecipientBudgetIsDisabled() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget senderBudget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        Budget recipientBudget = Budget.builder()
+                .isEnabled(false)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(senderBudget);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(recipientBudget);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+    }
+    @Test(expected = AccountingConstraintViolationException.class)
+    public void testFundTransferToOtherBudget_ShouldThrowAccountingConstraintViolationException_WhenTheAmountToDebitFromTheSenderBudgetIsGreaterThanTheBalanceOfTheSenderBudget() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69;
+        double senderBudgetBalance = 68;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget senderBudget = Budget.builder()
+                .isEnabled(true)
+                .balance(senderBudgetBalance)
+                .build();
+        Budget recipientBudget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(senderBudget);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(recipientBudget);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+    }
+    @Test
+    public void testFundTransferToOtherBudget_ShouldThrowSucceed() throws NoSuchEntityOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
+        long senderBudgetID = 1L;
+        long recipientBudgetID = 2L;
+        String description = "some description";
+        double amount = 69D;
+        double senderBudgetBalance = 6969D;
+        double recipientBudgetBalance = 6969D;
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget senderBudget = Budget.builder()
+                .isEnabled(true)
+                .balance(senderBudgetBalance)
+                .build();
+        Budget recipientBudget = Budget.builder()
+                .isEnabled(true)
+                .balance(recipientBudgetBalance)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId())).thenReturn(senderBudget);
+        when(budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId())).thenReturn(recipientBudget);
+        budgetService.fundTransferToOtherBudget(senderBudgetID, recipientBudgetID, description, amount);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(senderBudgetID, wallet.getId());
+        verify(budgetRepository).findByIdAndWalletId(recipientBudgetID, wallet.getId());
+        BudgetTransferHistoryDTO budgetTransferHistoryDTO = BudgetTransferHistoryDTO.builder()
+                .senderBudget(senderBudget)
+                .recipientBudget(recipientBudget)
+                .amount(amount)
+                .description(description)
+                .wallet(wallet)
+                .build();
+        assertEquals(senderBudget.getBalance(), senderBudgetBalance - amount, 0.001);
+        assertEquals(recipientBudget.getBalance(), recipientBudgetBalance + amount, 0.001);
+        verify(budgetRepository).save(senderBudget);
+        verify(budgetRepository).save(recipientBudget);
+        verify(budgetTransferHistoryService).save(budgetTransferHistoryDTO);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testDisableFund_ShouldThrowIllegalArgumentException_WhenPasswordIsEmpty() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = "";
+        budgetService.disableFund(budgetID, password);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testDisableFund_ShouldThrowIllegalArgumentException_WhenPasswordIsNull() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = null;
+        budgetService.disableFund(budgetID, password);
+    }
+
+    @Test(expected = NoSuchEntityOrNotAuthorized.class)
+    public void testDisableFund_ShouldThrowNoSuchEntityOrUnauthorized_WhenBudgetIDDoesntExistOrNotOwnedByUser() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = "password";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(null);
+        budgetService.disableFund(budgetID, password);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test(expected = BudgetAlreadyDisabledException.class)
+    public void testDisableFund_ShouldThrowBudgetAlreadyDisabled_WhenBudgetIsAlreadyDisabled() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = "password";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(false)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        budgetService.disableFund(budgetID, password);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test(expected = IncorrectPasswordException.class)
+    public void testDisableFund_ShouldThrowIncorrectPasswordException_WhenTheProvidedPasswordDoesntMatchTheUsersAccountPassword() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = "password";
+        String hashedPassword = "hashedPassword";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .password(hashedPassword)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        when(passwordEncoder.matches(password, loggedInUser.getPassword())).thenReturn(false);
+        budgetService.disableFund(budgetID, password);
+        verify(securityUtil, times(2)).getLoggedInUser();
+        verify(budgetRepository, times(2)).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test
+    public void testDisableFund_ShouldSucceed() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException {
+        long budgetID = 1L;
+        String password = "password";
+        String hashedPassword = "hashedPassword";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .password(hashedPassword)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        when(passwordEncoder.matches(password, loggedInUser.getPassword())).thenReturn(true);
+        budgetService.disableFund(budgetID, password);
+        assertFalse(budget.isEnabled());
+        verify(securityUtil, times(2)).getLoggedInUser();
+        verify(budgetRepository, times(1)).findByIdAndWalletId(budgetID, wallet.getId());
+        verify(passwordEncoder).matches(password, loggedInUser.getPassword());
+        verify(budgetRepository).save(budget);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEnableFund_ShouldThrowIllegalArgumentException_WhenPasswordIsEmpty() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = "";
+        budgetService.enableFund(budgetID, password);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void testEnableFund_ShouldThrowIllegalArgumentException_WhenPasswordIsNull() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = null;
+        budgetService.enableFund(budgetID, password);
+    }
+
+    @Test(expected = NoSuchEntityOrNotAuthorized.class)
+    public void testEnableFund_ShouldThrowNoSuchEntityOrUnauthorized_WhenBudgetIDDoesntExistOrNotOwnedByUser() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = "password";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(null);
+        budgetService.enableFund(budgetID, password);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test(expected = BudgetAlreadyEnabledException.class)
+    public void testEnableFund_ShouldThrowBudgetAlreadyEnabled_WhenBudgetIsAlreadyDisabled() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = "password";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(true)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        budgetService.enableFund(budgetID, password);
+        verify(securityUtil).getLoggedInUser();
+        verify(budgetRepository).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test(expected = IncorrectPasswordException.class)
+    public void testEnableFund_ShouldThrowIncorrectPasswordException_WhenTheProvidedPasswordDoesntMatchTheUsersAccountPassword() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = "password";
+        String hashedPassword = "hashedPassword";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .password(hashedPassword)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(false)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        when(passwordEncoder.matches(password, loggedInUser.getPassword())).thenReturn(false);
+        budgetService.enableFund(budgetID, password);
+        verify(securityUtil, times(2)).getLoggedInUser();
+        verify(budgetRepository, times(2)).findByIdAndWalletId(budgetID, wallet.getId());
+    }
+    @Test
+    public void testEnableFund_ShouldSucceed() throws IncorrectPasswordException, NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException {
+        long budgetID = 1L;
+        String password = "password";
+        String hashedPassword = "hashedPassword";
+        Wallet wallet = Wallet.builder()
+                .id(1L)
+                .build();
+        UserEntity loggedInUser = UserEntity.builder()
+                .wallet(wallet)
+                .password(hashedPassword)
+                .build();
+        Budget budget = Budget.builder()
+                .isEnabled(false)
+                .build();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(budgetRepository.findByIdAndWalletId(budgetID, wallet.getId())).thenReturn(budget);
+        when(passwordEncoder.matches(password, loggedInUser.getPassword())).thenReturn(true);
+        budgetService.enableFund(budgetID, password);
+        assertTrue(budget.isEnabled());
+        verify(securityUtil, times(2)).getLoggedInUser();
+        verify(budgetRepository, times(1)).findByIdAndWalletId(budgetID, wallet.getId());
+        verify(passwordEncoder).matches(password, loggedInUser.getPassword());
         verify(budgetRepository).save(budget);
     }
 }

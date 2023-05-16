@@ -184,23 +184,23 @@ public class BudgetServiceImpl implements BudgetService {
         if(description == null || description.equals("")) {
             throw new IllegalArgumentException("description cannot be empty or null");
         }
-        if(amount < 0) {
+        if(amount <= 0) {
             throw new IllegalArgumentException("amount shouldnt be a negative number");
+        }
+        if(senderBudgetID == recipientBudgetID) {
+            throw new IllegalArgumentException("Transfer to itself is not allowed");
         }
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Budget senderBudget = budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId());
         Budget recipientBudget = budgetRepository.findByIdAndWalletId(recipientBudgetID, wallet.getId());
+        if(senderBudget == null || recipientBudget == null) {
+            throw new NoSuchEntityOrNotAuthorized("sending budget or receiving budget does not exist or not authorized");
+        }
         if(!senderBudget.isEnabled()) {
             throw new BudgetDisabledException("This sender budget is inactive");
         }
         if(!recipientBudget.isEnabled()) {
             throw new BudgetDisabledException("This recipient budget is inactive");
-        }
-        if(senderBudget == null || recipientBudget == null) {
-            throw new NoSuchEntityOrNotAuthorized("sending budget or receiving budget does not exist or not authorized");
-        }
-        if(senderBudget.getId() == recipientBudget.getId()) {
-            throw new IllegalArgumentException("Transfer to itself is not allowed");
         }
         if(amount > senderBudget.getBalance()) {
             throw new AccountingConstraintViolationException(String.format("The amount(%.2f) to be transferred is greater than the balance of the budget(%.2f)", amount, senderBudget.getBalance()));

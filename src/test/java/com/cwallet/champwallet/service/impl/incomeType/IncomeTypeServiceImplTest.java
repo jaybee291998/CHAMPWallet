@@ -1,10 +1,12 @@
 package com.cwallet.champwallet.service.impl.incomeType;
 
 import com.cwallet.champwallet.dto.incomeType.IncomeTypeDto;
+import com.cwallet.champwallet.exception.EntityExpiredException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.models.income.IncomeType;
+import com.cwallet.champwallet.repository.income.IncomeRepository;
 import com.cwallet.champwallet.repository.incomeType.IncomeTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
@@ -25,6 +27,8 @@ import static org.mockito.Mockito.*;
 class IncomeTypeServiceImplTest {
     @Mock
     private IncomeTypeRepository incomeTypeRepository;
+    @Mock
+    private IncomeRepository incomeRepository;
 
     @Mock
     private SecurityUtil securityUtil;
@@ -241,6 +245,44 @@ class IncomeTypeServiceImplTest {
 
     }
 
+    @Test
+    void deleteIncomeType_ValidId_DeletesIncomeType() throws NoSuchEntityOrNotAuthorized, EntityExpiredException {
+        // Arrange
+        long id = 1;
+        UserEntity loggedInUser = new UserEntity();
+        Wallet wallet = new Wallet();
+        wallet.setId(123); // Set the wallet ID
+        loggedInUser.setWallet(wallet);
+        IncomeType incomeType = new IncomeType();
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(incomeTypeRepository.findByIdAndWalletId(id, wallet.getId())).thenReturn(incomeType);
+
+        // Act
+        incomeTypeService.deleteIncomeType(id);
+
+        // Assert
+        verify(securityUtil, times(1)).getLoggedInUser();
+        verify(incomeTypeRepository, times(1)).findByIdAndWalletId(id, wallet.getId());
+        verify(incomeTypeRepository, times(1)).delete(incomeType);
+    }
+
+    @Test
+    void deleteIncomeType_InexistentId_ThrowsNoSuchEntityOrNotAuthorized() {
+        // Arrange
+        long id = 1;
+        UserEntity loggedInUser = new UserEntity();
+        Wallet wallet = new Wallet();
+        wallet.setId(123); // Set the wallet ID
+        loggedInUser.setWallet(wallet);
+        when(securityUtil.getLoggedInUser()).thenReturn(loggedInUser);
+        when(incomeTypeRepository.findByIdAndWalletId(id, wallet.getId())).thenReturn(null);
+
+        // Act and Assert
+        assertThrows(NoSuchEntityOrNotAuthorized.class, () -> incomeTypeService.deleteIncomeType(id));
+        verify(securityUtil, times(1)).getLoggedInUser();
+        verify(incomeTypeRepository, times(1)).findByIdAndWalletId(id, wallet.getId());
+        verify(incomeTypeRepository, never()).delete(any(IncomeType.class));
+    }
 
 
 }

@@ -1,52 +1,47 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
 <head>
     <meta charset="UTF-8">
-    <title>Expense Type Creation Form</title>
+    <title>Create</title>
 </head>
+
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-
-            <form role="form" method="post" th:action="@{/users/income-type/create}" th:object="${incomeTypeForm}">
-                <div class="form-group">
-                    <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
-                    <label for="name">Name</label>
-                    <input
-                            type="text"
-                            class="form-control"
-                            id="name"
-                            name="name"
-                            th:field="*{name}">
-                    <p th:if="${#fields.hasErrors('name')}"
-                       th:errors="*{name}" class="text-danger"></p>
-                </div>
-
-                <div class="form-group">
-                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
-                    <label for="description">Description</label>
-                    <textarea
-                            type="text"
-                            class="form-control"
-                            id="description"
-                            name="description"
-                            th:field="*{description}"></textarea>
-                    <p th:if="${#fields.hasErrors('description')}"
-                       th:errors="*{description}" class="text-danger"></p>
-                </div>
-
-
-                <button type="submit" id="submit" class="btn btn-primary">Create Income Type</button>
-            </form>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Income Types</h4>
+            <div>
+                <a th:href="@{/users/income-type/list}" class="btn btn-success mx-1">Back</a>
+                <button type="submit" form="incomeTypeForm" class="btn btn-primary mx-1">Add</button>
+            </div>
         </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <form id="incomeTypeForm" role="form" method="post" th:action="@{/users/income-type/create}"
+                      th:object="${incomeTypeForm}">
+                    <div class="mb-3">
+                        <p class="alert alert-danger" th:if="${nameError}" th:text="${nameError}"></p>
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" th:field="*{name}" required>
+                        <p class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                    </div>
+                    <div class="form-group">
+                        <p class="alert alert-danger" th:if="${descriptionError}" th:text="${descriptionError}"></p>
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" th:field="*{description}" required></textarea>
+                        <p class="text-danger" th:if="${#fields.hasErrors('description')}"
+                           th:errors="*{description}"></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </section>
 </main>
-
 </body>
+
 </html>

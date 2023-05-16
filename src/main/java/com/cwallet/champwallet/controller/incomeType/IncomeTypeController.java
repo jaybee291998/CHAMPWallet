@@ -31,7 +31,7 @@ public class IncomeTypeController {
     @GetMapping("/users/income-type/create")
     public String getIncomeTypeForm(Model model){
         model.addAttribute("incomeTypeForm", new IncomeTypeForm());
-        return "create-income-type-form";
+        return "income-type/create-income-type-form";
     }
     @PostMapping("/users/income-type/create")
     public String createIncomeTypeForm(@Valid @ModelAttribute("incomeTypeForm") IncomeTypeForm incomeTypeForm,
@@ -39,7 +39,7 @@ public class IncomeTypeController {
         if (bindingResult.hasErrors()) {
             System.out.println(incomeTypeForm);
             model.addAttribute("incomeTypeForm", incomeTypeForm);
-            return "create-income-type-form";
+            return "income-type/create-income-type-form";
         }
         IncomeTypeDto newIncomeType = IncomeTypeDto.builder()
                 .name((incomeTypeForm.getName()))
@@ -54,7 +54,7 @@ public class IncomeTypeController {
     public String getAllIncomeType(Model model) {
         List<IncomeTypeDto> incomeTypeList = incomeTypeService.getAllIncomeType();
         model.addAttribute("incomeTypeList",incomeTypeList);
-        return "income-type-list";
+        return "income-type/income-type-list";
     }
 //DETAILS
     @GetMapping("/users/income-type/{id}")
@@ -78,7 +78,7 @@ public class IncomeTypeController {
             model.addAttribute("isButtonEnabled", incomeType.getIncomes().isEmpty());
         }
         model.addAttribute("incomeType", incomeTypeDto);
-        return "income-type-details";
+        return "income-type/income-type-details";
     }
 //    UPDATE
     @GetMapping("/users/income-type/update/{id}")
@@ -97,7 +97,7 @@ public class IncomeTypeController {
                     .description(incomeTypeDto.getDescription())
                     .build();
             model.addAttribute("incomeTypeForm", incomeTypeForm);
-            return "income-type-update";
+            return "income-type/income-type-update";
         } else {
             return "redirect:/users/income-type/list?nolongerupdateable=this income type is no longer updateable";
         }
@@ -108,7 +108,7 @@ public class IncomeTypeController {
                                @PathVariable("id") long id, Model model) {
         if(bindingResult.hasErrors()) {
             model.addAttribute("incomeTypeForm", incomeTypeForm);
-            return "income-type/update";
+            return "income-type/income-type-update";
         }
         IncomeTypeDto incomeTypeDto = null;
         try {
@@ -142,7 +142,7 @@ public class IncomeTypeController {
         }
         if(incomeTypeService.isUpdateable(incomeTypeDto)) {
             model.addAttribute("incomeType", incomeTypeDto);
-            return "income-type-delete";
+            return "income-type/income-type-delete";
         } else {
             return "redirect:/users/income-type/list?nolongerupdateable=this income type  is no longer updateable";
         }

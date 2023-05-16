@@ -25,6 +25,8 @@ import static com.cwallet.champwallet.mappers.incomeType.IncomeTypeMapper.mapToI
 public class IncomeTypeServiceImpl implements IncomeTypeService {
     @Autowired
     private IncomeTypeRepository incomeTypeRepository;
+
+
     @Autowired
     private SecurityUtil securityUtil;
 
@@ -37,6 +39,7 @@ public class IncomeTypeServiceImpl implements IncomeTypeService {
     public boolean save(IncomeTypeDto incomeTypeDto) {
         IncomeType incomeType = mapToIncomeType(incomeTypeDto);
         incomeType.setWallet(securityUtil.getLoggedInUser().getWallet());
+
         try{
             incomeTypeRepository.save(incomeType);
             return true;

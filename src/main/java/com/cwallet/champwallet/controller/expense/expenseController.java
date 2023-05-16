@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 //import javax.jws.WebParam;
 import javax.validation.Valid;
@@ -146,9 +147,7 @@ public class expenseController {
             expenseDTO.setExpenseType(expenseForm.getExpenseTypeID());
             expenseDTO.setPrice(expenseForm.getPrice());
             expenseDTO.setBudget(expenseForm.getBudgetID());
-System.out.println("________________________________________________________________");
-            System.out.println(expenseForm);
-            System.out.println("________________________________________________________________");
+
             try {
                 expenseService.update(expenseDTO, expenseID);
             } catch (NoSuchExpenseOrNotAuthorized | ExpenseExpiredException e) {
@@ -183,29 +182,25 @@ System.out.println("____________________________________________________________
     }
 
     @GetMapping("/users/expense/delete/confirmed/{expenseID}")
-    public String deleteExpense(@PathVariable("expenseID") long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException {
-        ExpenseDTO expenseDTO = null;
+    public String deleteExpense(@PathVariable("expenseID") long expenseID, RedirectAttributes redirectAttributes)  {
         try {
-            expenseDTO = expenseService.getSpecificExpense(expenseID);
-        } catch (NoSuchExpenseOrNotAuthorized e) {
-            return "redirect:/users/expense/list?nosuchexpenseornauthorized=no such expense or unauthorized";
-        }
-        if (expenseService.isUpdateable(expenseDTO)) {
-            try {
+            ExpenseDTO expenseDTO = expenseService.getSpecificExpense(expenseID);
+            if (expenseService.isUpdateable(expenseDTO)) {
                 expenseService.deleteExpense(expenseID);
-
-            } catch (NoSuchExpenseOrNotAuthorized e) {
-                return "redirect:/users/expense/list?nosuchexpenseorunauthorized=no such expense or unauthorized";
-            } catch (ExpenseExpiredException e) {
-                return "redirect:/users/expense/list?nolongerupdateable=from service this expense is no longer updatable";
-            } catch (NoSuchEntityOrNotAuthorized e) {
-                return "redirect:/users/expense/list?nolongerupdateable=no such budget";
+                redirectAttributes.addFlashAttribute("successMessage", "Expense successfully deleted!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "This expense is no longer updatable.");
             }
-            return "redirect:/users/expense/list?expensedeleted=expense successfully deleted";
-        } else {
-            return "redirect:/users/expense/list?nolongerupdatable=from controller this expense is no longer updatable";
+        } catch (NoSuchExpenseOrNotAuthorized e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "No such expense or unauthorized.");
+        } catch (ExpenseExpiredException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "This expense has expired.");
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "No such budget.");
         }
+        return "redirect:/users/expense/list";
     }
+
 
 
     @GetMapping("/users/expense/stats")

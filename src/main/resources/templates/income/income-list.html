@@ -12,6 +12,7 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
+
     <section layout:fragment="body" class="py-4 px-4">
         <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
             <h4>List of Income Types</h4>
@@ -33,7 +34,7 @@
         <div class="col-12">
             <div class="bg-secondary rounded h-100 p-3">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="income-table">
                         <thead>
                         <tr>
                             <th><h6><strong>Description</strong></h6></th>
@@ -56,10 +57,15 @@
                         </tbody>
                     </table>
                 </div>
+                <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+                <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+                <script th:inline="javascript">
+            $(document).ready( function () {
+               $('#income-table').DataTable();
+            });
+        </script>
 
             </div>
-
-
         </div>
     </section>
 </main>

@@ -3,6 +3,7 @@ package com.cwallet.champwallet.controller.income;
 import com.cwallet.champwallet.bean.income.IncomeForm;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -43,9 +44,14 @@ public class IncomeController {
     @PostMapping("/users/income/create")
     public String createIncomeForm(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
                                         BindingResult bindingResult, Model model){
+        model.addAttribute("incomeForm", incomeForm);
+        model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
         if(bindingResult.hasErrors()){
             System.out.println(incomeForm);
-            model.addAttribute("incomeForm", incomeForm);
+            return "income/add-income";
+        }
+        if(incomeForm.getAmount() <= 0) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
             return "income/add-income";
         }
        IncomeDTO newIncome = IncomeDTO.builder()
@@ -53,8 +59,15 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        incomeService.save(newIncome, incomeForm.getIncomeTypeID());
-        return "redirect:/users/home";
+        try {
+            incomeService.save(newIncome, incomeForm.getIncomeTypeID());
+        } catch (AccountingConstraintViolationException e) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
+            return "income/add-income";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            throw new RuntimeException(e);
+        }
+        return "redirect:/users/income/list";
     }
 
     @GetMapping("/users/income/list")
@@ -62,12 +75,12 @@ public class IncomeController {
         List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
-model.addAttribute("userIncome",userIncome);
+        model.addAttribute("userIncome",userIncome);
 
-model.addAttribute("totalAmount",totalAmount );
+        model.addAttribute("totalAmount",totalAmount );
         return "income/income-list";
     }
-    @SneakyThrows
+
     @GetMapping("/users/income/{incomeID}")
     public String getSpecificIncome(@PathVariable("incomeID") long incomeID, Model model) {
        IncomeDTO incomeDTO = null;
@@ -116,9 +129,14 @@ model.addAttribute("totalAmount",totalAmount );
     public String updateIncome(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
                                BindingResult bindingResult,
                                @PathVariable("incomeID") long incomeID, Model model) {
+        model.addAttribute("incomeForm", incomeForm);
+        model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
         if(bindingResult.hasErrors()) {
-            model.addAttribute("incomeForm", incomeForm);
             return "income/income-update"; //html pass
+        }
+        if(incomeForm.getAmount() <= 0) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
+            return "income/income-update";
         }
         IncomeDTO incomeDTO= null;
         try {
@@ -178,6 +196,8 @@ model.addAttribute("totalAmount",totalAmount );
                 return "redirect:/users/income/list?nosuchincomeorunauthorized=no such income or unauthorized";
             } catch (IncomeExpiredException e) {
                 return "redirect:/users/income/list?nolongerupdateable=from service this income is no longer updatable";
+            } catch (AccountingConstraintViolationException e) {
+                return String.format("redirect:/users/income/%s?nolongerdeleatable=%s", incomeID, e.getMessage());
             }
             return "redirect:/users/income/list?incomedeleted=income successfully deleted";
         } else {

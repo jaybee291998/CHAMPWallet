@@ -1,6 +1,8 @@
 package com.cwallet.champwallet.service.expenseType.impl;
 
 import com.cwallet.champwallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.champwallet.exception.EntityExpiredException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.champwallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -53,26 +55,26 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
     }
 
     @Override
-    public ExpenseTypeDto getExpenseTypeId(long id) throws NoSuchExpenseTypeOrNotAuthorized {
+    public ExpenseTypeDto getExpenseTypeId(long id) throws NoSuchEntityOrNotAuthorized {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(id, loggedInUser.getWallet().getId());
 
         if(expenseType == null){
-            throw new NoSuchExpenseTypeOrNotAuthorized("Not authorized or doesn't exist");
+            throw new NoSuchEntityOrNotAuthorized("Not authorized or doesn't exist");
         }
         ExpenseTypeDto expenseTypeDto = mapToExpenseTypeDto(expenseType);
         return expenseTypeDto;
     }
 
     @Override
-    public void updateExpenseType(ExpenseTypeDto expenseTypeDTO, long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized {
+    public void updateExpenseType(ExpenseTypeDto expenseTypeDTO, long expenseTypeId) throws NoSuchEntityOrNotAuthorized {
         if(expenseTypeDTO == null) {
-            throw new IllegalArgumentException("expense type dto must not be null");
+            throw new IllegalArgumentException("Expense type dto must not be null");
         }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(expenseTypeId, loggedInUser.getWallet().getId());
         if(expenseType == null) {
-            throw new NoSuchExpenseTypeOrNotAuthorized("No such expense type or unauthorized");
+            throw new NoSuchEntityOrNotAuthorized("No such expense type or unauthorized");
         }
         expenseType.setName(expenseTypeDTO.getName());
         expenseType.setDescription(expenseTypeDTO.getDescription());
@@ -87,17 +89,17 @@ public class ExpenseTypeServiceImpl implements ExpenseTypeService {
         }
     }
 
-    public void deleteExpenseType(long expenseTypeId) throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException{
+    public void deleteExpenseType(long expenseTypeId) throws NoSuchEntityOrNotAuthorized, EntityExpiredException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         ExpenseType expenseType = expenseTypeRepository.findByIdAndWalletId(expenseTypeId, loggedInUser.getWallet().getId());
 
         if(expenseType == null){
-            throw new NoSuchExpenseTypeOrNotAuthorized("No such expense type or not authorized");
+            throw new NoSuchEntityOrNotAuthorized("No such expense type or not authorized");
         }
 
         ExpenseTypeDto expenseTypeDto = mapToExpenseTypeDto(expenseType);
         if(!isUpdatable(expenseTypeDto)){
-            throw new ExpenseTypeExpiredException("Expense Type no longer updatable");
+            throw new EntityExpiredException("Expense Type no longer updatable");
         }
         expenseTypeRepository.delete(expenseType);
     }

@@ -13,29 +13,44 @@
   <!-- Page Content-->
   <section layout:fragment="body" class="py-5">
     <div class="container">
-      <h1>Income List</h1>
-      <table class="table table-striped">
-        <tr>
-          <th>Description</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Budget</th>
-          <th>Date Recorded</th>
-          <!--                    <th>Date Recorded</th>-->
-        </tr>
-
-        <tr th:each="expense:${userExpense}">
-          <td th:if="${expense.description.length<= 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" th:text="${expense.description}"></a></td>
-          <td th:if="${expense.description.length > 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}"  th:text="${expense.description.substring(0, 30) + '...'}"></a></td>
-          <td th:text="${expense.expenseType.name}"></td>
-          <td th:text="${expense.price}"></td>
-          <td th:text="${expense.budget.name}"></td>
-          <td th:text="${expense.creationTime}"></td>
-        </tr>
+      <div th:if="${param.failedtosave}" class="alert alert-danger">
+        <p th:text="${param.failedtosave}"></p>
+      </div>
+      <div th:if="${param.savesuccess}" class="alert alert-success">
+        <p th:text="${param.savesuccess}"></p>
+      </div>
+      <h1>Expense List</h1>
+      <table class="table table-striped" id="expense-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Budget</th>
+            <th>Date Recorded</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="expense:${userExpense}">
+            <td th:if="${expense.description.length<= 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" th:text="${expense.description}"></a></td>
+            <td th:if="${expense.description.length > 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}"  th:text="${expense.description.substring(0, 30) + '...'}"></a></td>
+            <td th:text="${expense.expenseType.name}"></td>
+            <td th:text="${expense.price}"></td>
+            <td th:text="${expense.budget.name}"></td>
+            <td th:text="${expense.creationTime}"></td>
+          </tr>
+        </tbody>
       </table>
       <p><b>Total Amount: </b><span th:text="${totalAmount}"></span></p>
       <a th:href="@{/users/expense/create}" class="btn btn-success">Add Expense</a>
     </div>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    <script th:inline="javascript">
+            $(document).ready( function () {
+               $('#expense-table').DataTable();
+            });
+        </script>
   </section>
 </main>
 </body>

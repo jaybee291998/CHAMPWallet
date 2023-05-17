@@ -64,27 +64,22 @@ public class IncomeServiceImpl implements IncomeService {
             return false;
         }
     }
-
-
-
     @Override
     public List<IncomeDTO> getAllUserIncome() {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        List<Income> usersIncome = incomeRepository.findByWalletId(loggedInUser.getWallet().getId());
+        List<Income> usersIncome = incomeRepository.findByWalletIdOrderByTimestamp(loggedInUser.getWallet().getId());
         return usersIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
-
-
-@Override
-public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
-    UserEntity loggedInUser = securityUtil.getLoggedInUser();
-    Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
-    if(income == null) {
-        throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
+    @Override
+    public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
+        if(income == null) {
+            throw new NoSuchIncomeOrNotAuthorized("Not authorized or doesnt exsit");
+        }
+       IncomeDTO incomeDTO = mapToIncomeDTO(income);
+        return incomeDTO;
     }
-   IncomeDTO incomeDTO = mapToIncomeDTO(income);
-    return incomeDTO;
-}
 
     @Override
     public void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException,AccountingConstraintViolationException {
@@ -129,9 +124,9 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
     public boolean isUpdateable(IncomeDTO incomeDTO){
         return !expirableAndOwnedService.isExpired(incomeDTO);
     }
-
+    @Transactional
     @Override
-    public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException {
+    public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
@@ -142,7 +137,12 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
         if(!isUpdateable(incomeDTO)){
             throw new IncomeExpiredException("Income no longer updateable");
         }
-        wallet.setBalance(wallet.getBalance()-incomeDTO.getAmount());
+        double incomeToDeduct = incomeDTO.getAmount();
+        if(incomeToDeduct > wallet.getBalance()) {
+            throw new AccountingConstraintViolationException(String.format("You can no longer delete this income as the amount to be debited to the balance is %.2f while the balance is %.2f", incomeToDeduct, wallet.getBalance()));
+        }
+        wallet.setBalance(wallet.getBalance() - incomeToDeduct);
         incomeRepository.delete(income);
+        walletRepository.save(wallet);
     }
 }

@@ -61,11 +61,11 @@ public class expenseController {
             model.addAttribute("expenseForm", expenseForm);
             return "expense/add-expense";
         }
+        model.addAttribute("expenseForm", expenseForm);
+        model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
+        model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
         if(expenseForm.getPrice() <= 0) {
             model.addAttribute("errorMessage", "price must be greater than 0");
-            model.addAttribute("expenseForm", expenseForm);
-            model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
-            model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
             return "expense/add-expense";
         }
         ExpenseDTO newExpense = ExpenseDTO.builder()
@@ -88,9 +88,6 @@ public class expenseController {
             return String.format("redirect:/users/expense/list?failedtosave=%s", e.getMessage());
         } catch (AccountingConstraintViolationException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("expenseForm", expenseForm);
-            model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
-            model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
             return "expense/add-expense";
         }
     }
@@ -149,7 +146,7 @@ public class expenseController {
                     .build();
             model.addAttribute("expenseForm", expenseForm);
             model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
-            model.addAttribute("budget", securityUtil.getLoggedInUser().getWallet().getBudgets());
+            model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
             return "expense/expense-update";
         } else {
             return "redirect:/users/expense/list?nolongerupdateable=this expense is no longer updateable";
@@ -163,6 +160,13 @@ public class expenseController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("expenseForm", expenseForm);
             return "expense/expense-update"; //html pass
+        }
+        model.addAttribute("expenseForm", expenseForm);
+        model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
+        model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
+        if(expenseForm.getPrice() <= 0) {
+            model.addAttribute("errorMessage", "price must not be less than or equal to zero");
+            return "expense/expense-update";
         }
         ExpenseDTO expenseDTO = null;
         try {
@@ -185,6 +189,10 @@ public class expenseController {
                 return "expense/expense-update";
             } catch (NoSuchEntityOrNotAuthorized e) {
                 return "redirect:/users/expense/list?nosuchexpenseornauthorized=budget is not found";
+            } catch (BudgetDisabledException e) {
+                return String.format("redirect:/users/expense/%s?budgetdisabled=the budget is disabled", expenseID);
+            } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+                return "redirect:/users/expense/list?nosuchexpenseornauthorized=no such expense type or unauthorized";
             }
             return String.format("redirect:/users/expense/%s", expenseID);
         } else {
@@ -225,6 +233,8 @@ public class expenseController {
             redirectAttributes.addFlashAttribute("errorMessage", "This expense has expired.");
         } catch (NoSuchEntityOrNotAuthorized e) {
             redirectAttributes.addFlashAttribute("errorMessage", "No such budget.");
+        } catch (BudgetDisabledException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Budget Expired");
         }
         return "redirect:/users/expense/list";
     }

@@ -44,16 +44,14 @@ public class IncomeController {
     @PostMapping("/users/income/create")
     public String createIncomeForm(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
                                         BindingResult bindingResult, Model model){
+        model.addAttribute("incomeForm", incomeForm);
+        model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
         if(bindingResult.hasErrors()){
             System.out.println(incomeForm);
-            model.addAttribute("incomeForm", incomeForm);
-            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/add-income";
         }
         if(incomeForm.getAmount() <= 0) {
             model.addAttribute("errorMessage", "Amount must be greater than 0");
-            model.addAttribute("incomeForm", incomeForm);
-            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/add-income";
         }
        IncomeDTO newIncome = IncomeDTO.builder()
@@ -65,13 +63,11 @@ public class IncomeController {
             incomeService.save(newIncome, incomeForm.getIncomeTypeID());
         } catch (AccountingConstraintViolationException e) {
             model.addAttribute("errorMessage", "Amount must be greater than 0");
-            model.addAttribute("incomeForm", incomeForm);
-            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/add-income";
         } catch (NoSuchEntityOrNotAuthorized e) {
             throw new RuntimeException(e);
         }
-        return "redirect:/users/home";
+        return "redirect:/users/income/list";
     }
 
     @GetMapping("/users/income/list")
@@ -133,15 +129,13 @@ public class IncomeController {
     public String updateIncome(@Valid @ModelAttribute("incomeForm") IncomeForm incomeForm,
                                BindingResult bindingResult,
                                @PathVariable("incomeID") long incomeID, Model model) {
+        model.addAttribute("incomeForm", incomeForm);
+        model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
         if(bindingResult.hasErrors()) {
-            model.addAttribute("incomeForm", incomeForm);
-            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/income-update"; //html pass
         }
         if(incomeForm.getAmount() <= 0) {
             model.addAttribute("errorMessage", "Amount must be greater than 0");
-            model.addAttribute("incomeForm", incomeForm);
-            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/income-update";
         }
         IncomeDTO incomeDTO= null;
@@ -161,8 +155,6 @@ public class IncomeController {
                 return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
             }catch (AccountingConstraintViolationException e){
                 model.addAttribute("errorMessage", e.getMessage());
-                model.addAttribute("incomeForm", incomeForm);
-                model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
                 return "income/income-update";
             }
             return String.format("redirect:/users/income/%s", incomeID);
@@ -204,6 +196,8 @@ public class IncomeController {
                 return "redirect:/users/income/list?nosuchincomeorunauthorized=no such income or unauthorized";
             } catch (IncomeExpiredException e) {
                 return "redirect:/users/income/list?nolongerupdateable=from service this income is no longer updatable";
+            } catch (AccountingConstraintViolationException e) {
+                return String.format("redirect:/users/income/%s?nolongerdeleatable=%s", incomeID, e.getMessage());
             }
             return "redirect:/users/income/list?incomedeleted=income successfully deleted";
         } else {

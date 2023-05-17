@@ -19,7 +19,7 @@ IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
 
 boolean isUpdateable(IncomeDTO incomeDto);
     void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException;
-    void deleteIncome(long budgetID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException;
+    void deleteIncome(long budgetID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException;
 
 
 }

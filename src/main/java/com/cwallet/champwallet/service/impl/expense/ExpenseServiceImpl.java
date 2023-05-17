@@ -130,10 +130,14 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
     @Transactional
     @Override
-    public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized, BudgetDisabledException {
+    public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized, BudgetDisabledException, NoSuchExpenseTypeOrNotAuthorized {
         if(expenseDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
         }
+        if(expenseDTO.getPrice() <= 0) {
+            throw new IllegalArgumentException("price must not be less than or equal to 0");
+        }
+        ExpenseType expenseType = mapToExpenseType(expenseTypeService.getExpenseTypeId(expenseDTO.getExpenseType().getId()));
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
         if(expense == null) {
@@ -173,19 +177,31 @@ public class ExpenseServiceImpl implements ExpenseService {
             budgetRepository.save(oldBudget);
         } else {
             // budget changed
-            // whether the price is changed or not is irrelevant, since the new price
+            // whether the price is changed or not is irrelevant
+            // assume that there different the old price is whats debited to the old budget
+            // so it makes sense that the old price would be credited back to the old budget
+            // then the new budget will then be debited to the new budget
+            // this is also the case when they're the same
             //check if the new budget can handle the transaction
             if(newPrice <= newBudget.getBalance()) {
                 // can handle
                 // debit the new price to the new budget
                 newBudget.setBalance(newBudget.getBalance() - newPrice);
+                // credit back the old price to the old budget
+                oldBudget.setBalance(oldBudget.getBalance() + oldPrice);
+                // save the changes to the database
+                budgetRepository.save(newBudget);
+                budgetRepository.save(oldBudget);
             } else {
                 // cant handle
-                throw new AccountingConstraintViolationException(String.format("The price "))
+                throw new AccountingConstraintViolationException(String.format("The price %.2f cant be debited to the new budget with balance of %.2f", newPrice, newBudget.getBalance()));
             }
         }
-
-
+        expense.setDescription(expenseDTO.getDescription());
+        expense.setExpenseType(expenseType);
+        expense.setPrice(newPrice);
+        expense.setBudget(newBudget);
+        expenseRepository.save(expense);
     }
 
 //    @Override
@@ -263,19 +279,22 @@ public class ExpenseServiceImpl implements ExpenseService {
 //    }
 
     @Override
-    public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, NoSuchEntityOrNotAuthorized {
+    public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, NoSuchEntityOrNotAuthorized, BudgetDisabledException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        long budgetID =mapToExpenseDTO(expenseRepository.findById(expenseID)).getBudget().getId();
-        Budget actualBudget = budgetService.getBudget(budgetID);
-       Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
+//        long budgetID = mapToExpenseDTO(expenseRepository.findById(expenseID)).getBudget().getId();
+        Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
         if(expense == null) {
             throw new NoSuchExpenseOrNotAuthorized("No such Expense or unauthorized");
+        }
+        Budget actualBudget = expense.getBudget();
+        if(!actualBudget.isEnabled()) {
+            throw new BudgetDisabledException("Budget used in this expense has been disabled");
         }
         ExpenseDTO expenseDTO = mapToExpenseDTO(expense);
         if(!isUpdateable(expenseDTO)){
             throw new ExpenseExpiredException("Expense no longer updateable");
         }
-     actualBudget.setBalance(actualBudget.getBalance() + expenseDTO.getPrice());
+        actualBudget.setBalance(actualBudget.getBalance() + expenseDTO.getPrice());
         expenseRepository.delete(expense);
     }
-    }
+}

@@ -15,29 +15,38 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1>Income List</h1>
-            <table class="table table-striped">
-                <tr>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Source</th>
-                    <th>Date Recorded</th>
-<!--                    <th>Date Recorded</th>-->
-                </tr>
-
-                <tr th:each="income:${userIncome}">
-                    <td th:if="${income.description.length<= 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" th:text="${income.description}"></a></td>
-                    <td th:if="${income.description.length > 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}"  th:text="${income.description.substring(0, 30) + '...'}"></a></td>
-                    <td th:text="${income.incomeType.name}"></td>
-                    <td th:text="${income.amount}"></td>
-                    <td th:if="${income.source.length<= 20}" th:text="${income.source}"></td>
-                    <td th:if="${income.source.length > 20}" th:text="${income.source.substring(0, 20) + '...'}"></td>
-                    <td th:text="${income.creationTime}"></td>
-                </tr>
+            <table class="table table-striped" id="income-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Source</th>
+                        <th>Date Recorded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="income:${userIncome}">
+                        <td th:if="${income.description.length<= 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" th:text="${income.description}"></a></td>
+                        <td th:if="${income.description.length > 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}"  th:text="${income.description.substring(0, 30) + '...'}"></a></td>
+                        <td th:text="${income.incomeType.name}"></td>
+                        <td th:text="${income.amount}"></td>
+                        <td th:if="${income.source.length<= 20}" th:text="${income.source}"></td>
+                        <td th:if="${income.source.length > 20}" th:text="${income.source.substring(0, 20) + '...'}"></td>
+                        <td th:text="${income.creationTime}"></td>
+                    </tr>
+                </tbody>
             </table>
             <p><b>Total Amount: </b><span th:text="${totalAmount}"></span></p>
             <a th:href="@{/users/income/create}" class="btn btn-success">Add Income</a>
         </div>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+        <script th:inline="javascript">
+            $(document).ready( function () {
+               $('#income-table').DataTable();
+            });
+        </script>
     </section>
 </main>
 </body>

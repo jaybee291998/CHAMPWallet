@@ -45,9 +45,13 @@ public class IncomeTypeController {
                 .name((incomeTypeForm.getName()))
                 .description(incomeTypeForm.getDescription())
                 .build();
-        incomeTypeService.save(newIncomeType);
-
-        return "redirect:/users/income-type/list";
+        boolean success = incomeTypeService.save(newIncomeType);
+        if(success){
+            return "redirect:/users/income-type/list";
+        } else {
+            model.addAttribute("incomeTypeForm", incomeTypeForm);
+            return "redirect:/users/income-type/create?failedtosave=Failed to save. Please Try again";
+        }
     }
 //    LIST
     @GetMapping("/users/income-type/list")
@@ -63,14 +67,14 @@ public class IncomeTypeController {
         try {
             incomeTypeDto = incomeTypeService.getIncomeTypeById(id);
         } catch (NoSuchEntityOrNotAuthorized e){
-            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized= Sorry, the requested entity does not exist or you are not authorized to access it.";
         }
         boolean isExpired = expirableAndOwnedService.isExpired(incomeTypeDto);
         IncomeType incomeType = null;
         try {
             incomeType = incomeTypeService.getIncomeType(id);
         } catch (NoSuchEntityOrNotAuthorized e) {
-            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized=no such income type or unauthorized";
+            return "redirect:/users/income-type/list?NoSuchEntityOrNotAuthorized= Sorry, the requested entity does not exist or you are not authorized to access it.";
         }
         if(isExpired) {
             model.addAttribute("isButtonEnabled", false);

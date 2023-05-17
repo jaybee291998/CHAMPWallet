@@ -11,18 +11,17 @@ import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.income.IncomeService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
 
 //import javax.jws.WebParam;
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -71,12 +70,14 @@ public class IncomeController {
     }
 
     @GetMapping("/users/income/list")
-    public String getUsersIncome(Model model) {
-        List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+    public String getUsersIncome(@RequestParam(value = "specific-month", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")LocalDate specificDate, Model model) {
+        if(specificDate == null) {
+            specificDate = LocalDate.now();
+        }
+        List<IncomeDTO> userIncome = incomeService.getAllUserIncome(specificDate);
         double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
         model.addAttribute("userIncome",userIncome);
-
+        model.addAttribute("entryDate", specificDate);
         model.addAttribute("totalAmount",totalAmount );
         return "income/income-list";
     }

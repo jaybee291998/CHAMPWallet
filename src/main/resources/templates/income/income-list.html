@@ -15,6 +15,10 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1>Income List</h1>
+            <span>date</span>
+            <input type="month" name="specific-month" id="specific-income-month">
+            <button id="submit" class="btn btn-primary" onclick="func()">submit</button>
+            <h3 th:text="${entryDate}"></h3>
             <table class="table table-striped" id="income-table">
                 <thead>
                     <tr>
@@ -43,9 +47,26 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:inline="javascript">
+            const entry_date = /*[[${entryDate}]]*/;
             $(document).ready( function () {
                $('#income-table').DataTable();
+                let date = new Date();
+
+                let month = date.getMonth() + 1;
+                let day = date.getDate();
+                let year = date.getFullYear();
+                if(month < 10)
+                    month = '0' + month.toString();
+
+                let maxDate = year + '-' + month;
+                let selected_month = entry_date.substring(0, 7);
+                $('#specific-income-month')[0].value = selected_month;
+                $('#specific-income-month').attr("max", maxDate);
             });
+            const func = () => {
+                let monthValue = $('#specific-income-month')[0].value;
+                window.location.replace(`/users/income/list?specific-month=${monthValue + "-01"}`);
+            }
         </script>
     </section>
 </main>

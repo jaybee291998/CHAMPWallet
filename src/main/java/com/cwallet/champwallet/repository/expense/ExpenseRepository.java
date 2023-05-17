@@ -6,6 +6,7 @@ import com.cwallet.champwallet.models.income.Income;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findByWalletId(Long walletID);
     @Query(
             value = "SELECT id, creation_time, description, price, budget_id, expense_type_id, wallet_id FROM " +
-                    "expense WHERE creation_time BETWEEN :startDate AND :endDate AND wallet_id=:walletID",
+                    "expense WHERE creation_time BETWEEN :startDate AND :endDate AND wallet_id=:walletID ORDER BY creation_time DESC",
             nativeQuery=true
     )
     List<Expense> getExpensesWithinDateRange(long walletID, LocalDateTime startDate, LocalDateTime endDate);

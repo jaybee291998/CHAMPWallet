@@ -20,6 +20,14 @@
         <p th:text="${param.savesuccess}"></p>
       </div>
       <h1>Expense List</h1>
+      <div>
+        <form role="form" th:action="@{/users/expense/list}" method="GET">
+          <span>date</span>
+          <input type="date" name="specific-date" id="specific-expense-date">
+          <button type="submit" id="submit" class="btn btn-primary">submit</button>
+        </form>
+        <h3 th:text="${entryDate}"></h3>
+      </div>
       <table class="table table-striped" id="expense-table">
         <thead>
           <tr>
@@ -49,6 +57,20 @@
     <script th:inline="javascript">
             $(document).ready( function () {
                $('#expense-table').DataTable();
+            });
+            $(function(){
+                var dtToday = new Date();
+
+                let month = dtToday.getMonth() + 1;
+                let day = dtToday.getDate();
+                let year = dtToday.getFullYear();
+                if(month < 10)
+                    month = '0' + month.toString();
+                if(day < 10)
+                    day = '0' + day.toString();
+
+                let maxDate = year + '-' + month + '-' + day;
+                $('#specific-expense-date').attr('max', maxDate);
             });
         </script>
   </section>

@@ -19,12 +19,16 @@ import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncome;
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncomeDTO;
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 @Service
 public class IncomeServiceImpl implements IncomeService {
@@ -66,9 +70,14 @@ public class IncomeServiceImpl implements IncomeService {
         }
     }
     @Override
-    public List<IncomeDTO> getAllUserIncome() {
+    public List<IncomeDTO> getAllUserIncome(LocalDate specificDate) {
+        if(specificDate == null) {
+            specificDate = LocalDate.now();
+        }
+        LocalDateTime start = specificDate.with(firstDayOfMonth()).atStartOfDay();
+        LocalDateTime end = specificDate.with(lastDayOfMonth()).atStartOfDay();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        List<Income> usersIncome = incomeRepository.findByWalletIdOrderByTimestamp(loggedInUser.getWallet().getId());
+        List<Income> usersIncome = incomeRepository.getIncomesWithinDateRange(loggedInUser.getWallet().getId(), start, end);
         return usersIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
     @Override

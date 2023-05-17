@@ -6,7 +6,7 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Expense Update</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
@@ -16,8 +16,9 @@
             <div th:if="${param.failedtosave}" class="alert alert-danger">
                 <p th:text="${param.failedtosave}"></p>
             </div>
-            <form role="form" method="post" th:action="@{/users/expense/create}" th:object="${expenseForm}">
+            <form role="form" method="post" th:action="@{/users/expense/update/{expenseID}(expenseID=${expenseForm.id})}" th:object="${expenseForm}">
                 <div class="form-group">
+                    <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
                     <textarea
@@ -31,7 +32,9 @@
                     <p th:if="${#fields.hasErrors('description')}"
                        th:errors="*{description}" class="text-danger"></p>
                 </div>
-
+                <!--                <select name="income-type" id="incometype">-->
+                <!--                    <option th:></option>-->
+                <!--                </select>-->
                 <select name="expense-type" id="expensetype" th:field="*{expenseTypeID}">
                     <option th:each="expenseType:${expenseTypes}" th:value="${expenseType.id}" th:text="${expenseType.name}"></option>
                 </select>
@@ -49,17 +52,15 @@
                        th:errors="*{price}" class="text-danger"></p>
 
                 </div>
-                    <select name="budget" id="budget" th:field="*{budgetID}">
-                        <option th:each="budget:${budgets}" th:value="${budget.id}" th:text="${budget.name}"></option>
-                    </select>
-                </div>
-
-                <button type="submit" id="submit" class="btn btn-primary">Add Expense</button>
+                <select name="budget" id="budget" th:field="*{budgetID}">
+                    <option th:each="budget:${budget}" th:value="${budget.id}" th:text="${budget.name}"></option>
+                </select>
+</div>
+                <button type="submit" id="submit" class="btn btn-primary">update expense</button>
             </form>
         </div>
     </section>
 </main>
-
 
 </body>
 </html>

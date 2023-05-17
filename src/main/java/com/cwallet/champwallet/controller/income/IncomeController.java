@@ -190,7 +190,7 @@ model.addAttribute("totalAmount",totalAmount );
 //        List<> dataList = IncomeService.getAllData();
 //        model.addAttribute("dataList", dataList);
 //        return "data";
-//    }
+    }
 
 
-}
+

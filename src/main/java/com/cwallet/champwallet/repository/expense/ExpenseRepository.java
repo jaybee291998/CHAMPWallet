@@ -13,6 +13,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findByBudgetId(long budgetID);
     List<Expense> findByExpenseTypeId(long expenseTypeID);
     Expense findByIdAndWalletId(long expenseID, long walletID);
+    Expense findById(long expenseID);
     List<Expense> findByWalletId(Long walletID);
     @Query(
             value = "SELECT id, creation_time, description, price, budget_id, expense_type_id, wallet_id FROM " +

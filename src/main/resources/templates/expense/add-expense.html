@@ -18,8 +18,6 @@
             </div>
             <form role="form" method="post" th:action="@{/users/expense/create}" th:object="${expenseForm}">
                 <div class="form-group">
-
-                <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
                     <textarea

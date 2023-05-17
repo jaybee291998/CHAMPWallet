@@ -6,20 +6,23 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Update Budget</title>
+    <title>Update Income Type</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
     <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${param.failedtosave}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+            <i class="fa fa-exclamation-circle me-2" th:text="${' Failed to save. Please Try again'}"></i>
+            <p th:text="${param.failedtosave}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <br>
         <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
             <h4>Update Income Types</h4>
-            <div th:if="${param.failedtosave}" class="alert alert-danger">
-                <p th:text="${param.failedtosave}"></p>
-            </div>
             <div>
                 <a th:href="@{/users/income-type/list}" class="btn btn-success mx-1">Back</a>
-                <button type="submit" form="income-type-form" id="submit" class="btn btn-primary">Update Income Type</button>
+                <button type="submit" form="income-type-form" id="submit" class="btn btn-primary">Update</button>
             </div>
         </div>
         <br>
@@ -48,8 +51,8 @@
                                 id="description"
                                 placeholder="Enter Description"
                                 name="description"
-                                th:field="*{description}"
-                        ></textarea>
+                                th:field="*{description}">
+                        </textarea>
                         <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></p>
                     </div>
                 </form>

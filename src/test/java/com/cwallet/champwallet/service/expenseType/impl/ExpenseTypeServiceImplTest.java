@@ -3,6 +3,8 @@ package com.cwallet.champwallet.service.expenseType.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.cwallet.champwallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.champwallet.exception.EntityExpiredException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.expenseType.ExpenseTypeExpiredException;
 import com.cwallet.champwallet.models.expense.Expense;
 import com.cwallet.champwallet.repository.expense.ExpenseRepository;
@@ -14,12 +16,10 @@ import com.cwallet.champwallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.expenseType.ExpenseTypeService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
-import junit.framework.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
@@ -60,7 +60,6 @@ class ExpenseTypeServiceImplTest {
         expenseTypeDto.setEnabled(true);
         expenseTypeDto.setCreationTime(LocalDateTime.now());
         expenseTypeDto.setWallet(new Wallet());
-
 
         UserEntity userEntity = new UserEntity();
         Wallet wallet = new Wallet();
@@ -154,7 +153,12 @@ class ExpenseTypeServiceImplTest {
         expenseType.setName("Expense Type");
         when(expenseTypeRepository.findByIdAndWalletId(id, wallet.getId())).thenReturn(expenseType);
 
-        ExpenseTypeDto result = expenseTypeService.getExpenseTypeId(id);
+        ExpenseTypeDto result = null;
+        try {
+            result = expenseTypeService.getExpenseTypeId(id);
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            throw new RuntimeException(e);
+        }
 
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(expenseTypeRepository, times(1)).findByIdAndWalletId(id, wallet.getId());
@@ -264,7 +268,7 @@ class ExpenseTypeServiceImplTest {
     //<------>
 
     @Test
-    public void deleteExpenseType_ValidExpenseType_DeletesExpenseType() throws NoSuchExpenseTypeOrNotAuthorized, ExpenseTypeExpiredException {
+    public void deleteExpenseType_ValidExpenseType_DeletesExpenseType() throws NoSuchEntityOrNotAuthorized, EntityExpiredException {
 
         long expenseTypeId = 1L;
         UserEntity loggedInUser = new UserEntity();

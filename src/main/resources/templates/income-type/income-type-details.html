@@ -16,8 +16,8 @@
         <h4>Income Type Details</h4>
       </div>
       <div>
-        <a th:href="@{/users/income-type/update/{id}(id=${incomeType.id})}" class="btn btn-success mx-0.5">Update</a>
-        <a th:href="@{/users/income-type/delete/{id}(id=${incomeType.id})}" class="btn btn-success mx-0.5">Delete</a>
+        <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/update/{id}(id=${incomeType.id})}" class="btn btn-success mx-0.5">Update</a>
+        <a th:if="${isButtonEnabled}" th:href="@{/users/income-type/delete/{id}(id=${incomeType.id})}" class="btn btn-success mx-0.5">Delete</a>
         <a th:href="@{/users/income-type/list}" class="btn btn-success mx-0.5">Back</a>
       </div>
     </div>
@@ -27,6 +27,8 @@
         <dl class="row mb-0">
           <dt class="col-sm-4"><strong>Name:</strong></dt>
           <dd class="col-sm-8" th:text="${incomeType.name}"></dd>
+          <dt class="col-sm-4">Date and Time of Creation</dt>
+          <dd class="col-sm-8" th:text="${incomeType.creationTime}"></dd>
           <dt class="col-sm-4">Description:</dt>
           <dd class="col-sm-8" th:text="${incomeType.description}"></dd>
         </dl>

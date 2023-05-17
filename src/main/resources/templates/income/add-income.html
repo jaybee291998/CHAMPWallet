@@ -16,6 +16,9 @@
             <div th:if="${param.failedtosave}" class="alert alert-danger">
                 <p th:text="${param.failedtosave}"></p>
             </div>
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
+            </div>
             <form role="form" method="post" th:action="@{/users/income/create}" th:object="${incomeForm}">
                 <div class="form-group">
                     <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
@@ -53,14 +56,16 @@
                 </select>
                 <div class="form-group">
                     <label for="amount">Amount</label>
-                    <textarea
-                            type="text"
+                    <input
+                            type="number"
+                            min="1"
+                            step="0.01"
                             class="form-control"
                             id="amount"
                             placeholder="Enter Amount"
                             name="amount"
                             th:field="*{amount}"
-                    ></textarea>
+                    >
                     <p th:if="${#fields.hasErrors('amount')}"
                        th:errors="*{amount}" class="text-danger"></p>
 

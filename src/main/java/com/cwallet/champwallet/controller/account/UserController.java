@@ -67,11 +67,11 @@ public class UserController {
             userService.save(newUser);
         } catch (UserNameNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
-            model.addAttribute("usernameError", "username already exist");
+            model.addAttribute("usernameError", "Username already exists");
             return "users-registration";
         } catch (EmailNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
-            model.addAttribute("emailError", "Email Already exist");
+            model.addAttribute("emailError", "Email already exists");
             return "users-registration";
         } catch (EmailNotSentException e) {
             return "redirect:/login?emailnotsent=email not sent";

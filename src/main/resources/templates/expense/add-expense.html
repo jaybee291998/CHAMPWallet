@@ -16,6 +16,9 @@
             <div th:if="${param.failedtosave}" class="alert alert-danger">
                 <p th:text="${param.failedtosave}"></p>
             </div>
+            <div th:if="${errorMessage}" class="alert alert-danger">
+                <p th:text="${errorMessage}"></p>
+            </div>
             <form role="form" method="post" th:action="@{/users/expense/create}" th:object="${expenseForm}">
                 <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
@@ -38,7 +41,9 @@
                 <div class="form-group">
                     <label for="price">Price</label>
                     <textarea
-                            type="text"
+                            type="number"
+                            min="1"
+                            step="0.01"
                             class="form-control"
                             id="price"
                             placeholder="Enter price"

@@ -11,12 +11,24 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div th:if="${param.failedtosave}" class="alert alert-danger">
-                <p th:text="${param.failedtosave}"></p>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${param.failedtosave}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+            <i class="fa fa-exclamation-circle me-2" th:text="${' Failed to save. Please Try again'}"></i>
+            <p th:text="${param.failedtosave}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Update Expense Types</h4>
+            <div>
+                <a th:href="@{/users/expense-type/list}" class="btn btn-success mx-1">Back</a>
+                <button type="submit" form="expenseType-Form" id="submit" class="btn btn-primary">Update</button>
             </div>
-            <form role="form" method="post" th:action="@{/users/expense-type/update/{expenseTypeId}(expenseTypeId=${expenseTypeForm.id})}" th:object="${expenseTypeForm}">
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+            <form id="expenseType-Form" role="form" method="post" th:action="@{/users/expense-type/update/{expenseTypeId}(expenseTypeId=${expenseTypeForm.id})}" th:object="${expenseTypeForm}">
                 <div class="form-group">
                     <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
                     <label for="name">Name</label>
@@ -26,11 +38,10 @@
                             id="name"
                             placeholder="Enter Name"
                             name="name"
-                            th:field="*{name}">
-                    <p th:if="${#fields.hasErrors('name')}"
-                       th:errors="*{name}" class="text-danger"></p>
+                            th:field="*{name}"
+                    >
+                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></p>
                 </div>
-
                 <div class="form-group">
                     <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
                     <label for="description">Description</label>
@@ -40,15 +51,19 @@
                             id="description"
                             placeholder="Enter Description"
                             name="description"
-                            th:field="*{description}"></textarea>
-                    <p th:if="${#fields.hasErrors('description')}"
-                       th:errors="*{description}" class="text-danger"></p>
+                            th:field="*{description}">
+                        </textarea>
+                    <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></p>
                 </div>
-
-
-                <button type="submit" id="submit" class="btn btn-primary">Update Expense Type</button>
             </form>
+            </div>
         </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     </section>
 </main>
 

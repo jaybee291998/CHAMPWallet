@@ -33,6 +33,11 @@
     });
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> master
     // Progress Bar
     $('.pg-bar').waypoint(function () {
         $('.progress .progress-bar').each(function () {

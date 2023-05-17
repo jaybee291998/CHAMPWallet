@@ -137,6 +137,8 @@ public class BudgetController {
                 budgetService.update(budgetDTO, budgetID);
             } catch (NoSuchBudgetOrNotAuthorized e) {
                 return "redirect:/users/budget/list?nosuchbudgetornauthorized=no such budget or unauthorized";
+            } catch (BudgetExpiredException e) {
+                return "redirect:/users/budget/list?nolongerupdateable=this budget is no longer updateable";
             }
             return String.format("redirect:/users/budget/%s", budgetID);
         } else {

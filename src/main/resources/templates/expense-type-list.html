@@ -41,7 +41,7 @@
                         </thead>
                         <tbody>
                         <tr th:each="expenseType : ${usersExpenseType}">
-                            <td th:if="${expenseType.name.length <=  20}" th:text="${expenseType.name}" class="ml-4"></td>
+                            <td th:if="${expenseType.name.length <= 20}" th:text="${expenseType.name}" class="ml-4"></td>
                             <td th:if="${expenseType.name.length >20}" th:text="${expenseType.name.substring(0, 20) + '...'}" class="ml-4"></td>
                             <td th:if="${expenseType.description.length <=30}" th:text="${expenseType.description}"></td>
                             <td th:if="${expenseType.description.length > 30}" th:text="${expenseType.description.substring(0, 30) + '...'}"></td>

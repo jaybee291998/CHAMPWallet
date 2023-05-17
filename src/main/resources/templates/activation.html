@@ -1,29 +1,121 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="https://thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Account Activation</title>
+  <meta charset="utf-8">
+    <title>Account Activation</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="" name="keywords">
+  <meta content="" name="description">
+
+  <!-- Favicon -->
+  <link href="img/favicon.ico" rel="icon" type="image/x-icon">
+  <!--  <link href="img/champ-wallet-logo-bg.png" rel="icon" type="image/x-icon">-->
+  <!-- Google Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@500;700&display=swap"
+        rel="stylesheet">
+
+  <!-- Icon Font Stylesheet -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Libraries Stylesheet -->
+  <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet"/>
+
+  <!-- Customized Bootstrap Stylesheet -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Template Stylesheet -->
+  <link href="css/style.css" rel="stylesheet">
 </head>
-<body class="d-flex flex-column h-100">
-<main class="flex-shrink-0">
-  <!-- Page Content-->
-  <section layout:fragment="body" class="py-5">
-    <div th:if="${errorMessage}">
-      <p th:text="${errorMessage}" class="alert alert-danger"></p>
+
+<body style="background-image: url('/assets/img/wallet-login-bg.jpg'); background-size: cover;">
+<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(13,76,111,0.5);"></div>
+<div class="container-fluid position-relative d-flex p-0">
+
+  <!-- Spinner Start -->
+  <div id="spinner"
+       class="show bg-dark position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+      <span class="sr-only">Loading...</span>
     </div>
-    <div>
-      <h2 th:text="${activation}"></h2>
-      <h2 th:text="${account}"></h2>
-      <h2 th:if="${verificationDTO}" th:text="${verificationDTO.timestamp}"></h2>
-      <h3>Wallet Balance</h3>
+  </div>
+  <!-- Spinner End -->
+
+
+  <!-- Sign In Start -->
+  <div class="container-fluid">
+    <div class="row h-100 align-items-center justify-content-center" style="min-height: 100vh;">
+      <div class="col-12 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+        <div class="bg-secondary rounded p-4 p-sm-5 my-4 mx-3">
+
+          <div style="text-align: center; margin-bottom: 20px;">
+            <img th:src="@{/assets/champ-wallet-logo-bg.png}" width="100" height="100"
+                 alt="ChampWallet Logo">
+          </div>
+
+          <div class="d-flex align-items-center justify-content-center mb-3 ">
+            <!--            <a href="index.html" class="">-->
+            <!--            <a th:href="landing-page.html" class="">-->
+            <h3 class="text-primary">ChampWallet </h3>
+            <!--            </a>-->
+            <div>
+              <!--                            <h3>Sign In</h3>-->
+            </div>
+
+          </div>
+
+          <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" class="alert alert-danger"></p>
+          </div>
+
+          <form role="form" method="post" th:action="@{/request-verification}" th:object="${emailForm}">
+            <div class="form-floating mb-3">
+              <p th:if="${emailError}" th:text="${emailError}" class="alert alert-danger"></p>
+              <div>
+                <h2 th:text="${activation}"></h2>
+                <h2 th:text="${account}"></h2>
+                <h2 th:if="${verificationDTO}" th:text="${verificationDTO.timestamp}"></h2>
+                <h3>Wallet Balance</h3>
+              </div>
+              <input
+                      type="text"
+                      class="form-control"
+                      id="floatingInput"
+                      placeholder="Enter your email"
+                      name="email"
+                      th:field="*{email}">
+
+              <label for="floatingInput">Email</label>
+              <p th:if="${#fields.hasErrors('email')}"
+                 th:text="${#strings.listJoin(#fields.errors('email'), ', ')}" class="text-danger"></p>
+              <small id="contentHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            </div>
+            <button type="submit" class="btn btn-primary py-3 w-100 mb-4">Request Verification Link</button>
+            <p class="text-center mb-0"><a th:href="@{/login}">Click here to Sign In</a></p>
+          </form>
+        </div>
+      </div>
     </div>
-  </section>
-</main>
-<!-- Footer-->
+  </div>
+  <!-- Sign In End -->
+</div>
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="lib/chart/chart.min.js"></script>
+<script src="lib/easing/easing.min.js"></script>
+<script src="lib/waypoints/waypoints.min.js"></script>
+<script src="lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="lib/tempusdominus/js/moment.min.js"></script>
+<script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
+<script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- Template Javascript -->
+<script src="js/main.js"></script>
+
 
 </body>
 </html>

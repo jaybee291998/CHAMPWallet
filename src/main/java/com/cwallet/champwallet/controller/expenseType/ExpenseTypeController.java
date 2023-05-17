@@ -2,8 +2,9 @@ package com.cwallet.champwallet.controller.expenseType;
 
 import com.cwallet.champwallet.bean.expenseType.ExpenseTypeForm;
 import com.cwallet.champwallet.dto.expenseType.ExpenseTypeDto;
+import com.cwallet.champwallet.exception.EntityExpiredException;
 import com.cwallet.champwallet.exception.expenseType.ExpenseTypeExpiredException;
-import com.cwallet.champwallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.repository.expense.ExpenseRepository;
 import com.cwallet.champwallet.repository.expenseType.ExpenseTypeRepository;
 import com.cwallet.champwallet.security.SecurityUtil;
@@ -70,8 +71,8 @@ public class ExpenseTypeController {
         ExpenseTypeDto expenseTypeDto = null;
         try {
             expenseTypeDto = expenseTypeService.getExpenseTypeId(id);
-        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=you are trying to access expense-type that doesn't exist";
         }
         boolean isExpired = expirableAndOwnedService.isExpired(expenseTypeDto);
 
@@ -87,12 +88,12 @@ public class ExpenseTypeController {
 
 
     @GetMapping("users/expense-type/update/{expenseTypeId}")
-    public String getUpdateExpenseTypeForm(@PathVariable("expenseTypeId") long expenseTypeId, Model model) throws NoSuchExpenseTypeOrNotAuthorized {
+    public String getUpdateExpenseTypeForm(@PathVariable("expenseTypeId") long expenseTypeId, Model model) throws NoSuchEntityOrNotAuthorized {
         ExpenseTypeDto expenseTypeDto = null;
         try {
             expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
-        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-            return "redirect:/users/expense-type/list?nosuchexpense-type=you are trying to access expense-type that doesn't exist";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=you are trying to access expense-type that doesn't exist";
         }
 
         if(expenseTypeService.isUpdatable(expenseTypeDto)){
@@ -121,8 +122,8 @@ public class ExpenseTypeController {
 
         try{
             expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
-        } catch (NoSuchExpenseTypeOrNotAuthorized e){
-            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e){
+            return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=no such expense type or unauthorized";
         }
 
         if(expenseTypeService.isUpdatable(expenseTypeDto)){
@@ -131,12 +132,12 @@ public class ExpenseTypeController {
 
             try{
                 expenseTypeService.updateExpenseType(expenseTypeDto, expenseTypeId);
-            } catch (NoSuchExpenseTypeOrNotAuthorized e){
-                return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+            } catch (NoSuchEntityOrNotAuthorized e){
+                return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=no such expense type or unauthorized";
             }
             return String.format("redirect:/users/expense-type/%s", expenseTypeId);
         } else{
-            return "redirect:/users/expense-type/list?noslongerupdatable=no longer updatable";
+            return "redirect:/users/expense-type/list?nolongerupdatable=no longer updatable";
         }
     }
 
@@ -146,8 +147,8 @@ public class ExpenseTypeController {
 
         try {
             expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
-        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=no such expense type or unauthorized";
         }
 
         if(expenseTypeService.isUpdatable(expenseTypeDto)){
@@ -165,16 +166,16 @@ public class ExpenseTypeController {
 
         try {
             expenseTypeDto = expenseTypeService.getExpenseTypeId(expenseTypeId);
-        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-            return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=no such expense type or unauthorized";
         }
 
         if(expenseTypeService.isUpdatable(expenseTypeDto)){
             try {
                 expenseTypeService.deleteExpenseType(expenseTypeId);
-            } catch (NoSuchExpenseTypeOrNotAuthorized e) {
-                return "redirect:/users/expense-type/list?nosuchexpensetypeorauthorized=no such expense type or unauthorized";
-            } catch (ExpenseTypeExpiredException e) {
+            } catch (NoSuchEntityOrNotAuthorized e) {
+                return "redirect:/users/expense-type/list?NoSuchEntityOrNotAuthorized=no such expense type or unauthorized";
+            } catch (EntityExpiredException e) {
                 return "redirect:/users/expense-type/list?nolongerupdatable=this expense type is no longer updatable";
             }
             return "redirect:/users/expense-type/list?expensetypedeleted=expense type deleted successfully";

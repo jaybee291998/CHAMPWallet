@@ -5,9 +5,12 @@ import com.cwallet.champwallet.bean.income.IncomeForm;
 import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.BudgetDisabledException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
+import com.cwallet.champwallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.champwallet.exception.expense.ExpenseExpiredException;
 import com.cwallet.champwallet.exception.expense.NoSuchExpenseOrNotAuthorized;
+import com.cwallet.champwallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -30,6 +33,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 //import javax.jws.WebParam;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class expenseController {
@@ -45,7 +49,7 @@ public class expenseController {
     public String getExpenseForm(Model model) {
         model.addAttribute("expenseForm", new ExpenseForm());
         model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
-        model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets());
+        model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
         return "expense/add-expense";
     }
 
@@ -57,14 +61,38 @@ public class expenseController {
             model.addAttribute("expenseForm", expenseForm);
             return "expense/add-expense";
         }
+        if(expenseForm.getPrice() <= 0) {
+            model.addAttribute("errorMessage", "price must be greater than 0");
+            model.addAttribute("expenseForm", expenseForm);
+            model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
+            model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
+            return "expense/add-expense";
+        }
         ExpenseDTO newExpense = ExpenseDTO.builder()
                 .price(expenseForm.getPrice())
                 .description(expenseForm.getDescription())
                 .build();
-        expenseService.save(newExpense, expenseForm.getExpenseTypeID(), expenseForm.getBudgetID());
-
-
-        return "redirect:/users/home";
+        try {
+            boolean res = expenseService.save(newExpense, expenseForm.getExpenseTypeID(), expenseForm.getBudgetID());
+            if(res) {
+                return String.format("redirect:/users/expense/list?savesuccess=%s", "expense saved successfully");
+            }
+            return String.format("redirect:/users/expense/list?failedtosave=%s", "failed to save expense");
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            return String.format("redirect:/users/expense/list?failedtosave=%s", e.getMessage());
+        } catch (NoSuchBudgetOrNotAuthorized e) {
+            return String.format("redirect:/users/expense/list?failedtosave=%s", e.getMessage());
+        } catch (NoSuchExpenseTypeOrNotAuthorized e) {
+            return String.format("redirect:/users/expense/list?failedtosave=%s", e.getMessage());
+        } catch (BudgetDisabledException e) {
+            return String.format("redirect:/users/expense/list?failedtosave=%s", e.getMessage());
+        } catch (AccountingConstraintViolationException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("expenseForm", expenseForm);
+            model.addAttribute("expenseTypes", securityUtil.getLoggedInUser().getWallet().getExpenseTypes());
+            model.addAttribute("budgets", securityUtil.getLoggedInUser().getWallet().getBudgets().stream().filter(b -> b.isEnabled()).collect(Collectors.toList()));
+            return "expense/add-expense";
+        }
     }
 
     @GetMapping("/users/expense/list")

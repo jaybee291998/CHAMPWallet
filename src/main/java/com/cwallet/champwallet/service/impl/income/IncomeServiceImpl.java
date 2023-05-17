@@ -2,6 +2,7 @@ package com.cwallet.champwallet.service.impl.income;
 
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.models.income.Income;
@@ -40,14 +41,20 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional
-    public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) {
+    public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) throws AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized {
+        if(incomeDTO.getAmount() <= 0) {
+            throw new AccountingConstraintViolationException("Amount must be greater than 0");
+        }
         Long incomeTypeID = incomeType.getId();
-        Optional<IncomeType> incomeTypes = incomeTypeRepository.findById(incomeTypeID);
+        Optional<IncomeType> optionalIncomeType = incomeTypeRepository.findById(incomeTypeID);
+        if(!optionalIncomeType.isPresent()) {
+            throw new NoSuchEntityOrNotAuthorized("Income Type not found");
+        }
+        IncomeType actualIncomeType = optionalIncomeType.get();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
-       Income income = mapToIncome(incomeDTO);
+        Income income = mapToIncome(incomeDTO);
         income.setWallet(wallet);
-//        incomeDTO.setWallet();
-        income.setIncomeType(incomeTypes.get());
+        income.setIncomeType(actualIncomeType);
         wallet.setBalance(wallet.getBalance() + income.getAmount());
         try {
             incomeRepository.save(income);
@@ -84,6 +91,9 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
         if(incomeDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
         }
+        if(incomeDTO.getAmount() <= 0) {
+            throw new IllegalArgumentException("amount must be greater than zero");
+        }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
         if(income == null) {
@@ -104,15 +114,9 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
             // income decrease
             double incomeDecrease = oldIncome - newIncome;
             if(incomeDecrease > wallet.getBalance()){
-                try {
-                    throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
-                } catch (AccountingConstraintViolationException e) {
-                    throw new RuntimeException(e);
-                }
-            }else
-            {
-                wallet.setBalance(wallet.getBalance() - incomeDecrease);
+                throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
             }
+            wallet.setBalance(wallet.getBalance() - incomeDecrease);
         }
         income.setSourceOfIncome(incomeDTO.getSource());
         income.setDescription(incomeDTO.getDescription());
@@ -123,17 +127,7 @@ public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthor
 
     @Override
     public boolean isUpdateable(IncomeDTO incomeDTO){
-//        List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
-//        double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
-        if(expirableAndOwnedService.isExpired(incomeDTO)) {
-            return false;
-        }
-//        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
-//        {
-//            return false;
-//        }
-
-        return true;
+        return !expirableAndOwnedService.isExpired(incomeDTO);
     }
 
     @Override

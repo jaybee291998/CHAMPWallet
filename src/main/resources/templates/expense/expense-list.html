@@ -13,7 +13,13 @@
   <!-- Page Content-->
   <section layout:fragment="body" class="py-5">
     <div class="container">
-      <h1>Income List</h1>
+      <div th:if="${param.failedtosave}" class="alert alert-danger">
+        <p th:text="${param.failedtosave}"></p>
+      </div>
+      <div th:if="${param.savesuccess}" class="alert alert-success">
+        <p th:text="${param.savesuccess}"></p>
+      </div>
+      <h1>Expense List</h1>
       <table class="table table-striped">
         <tr>
           <th>Description</th>

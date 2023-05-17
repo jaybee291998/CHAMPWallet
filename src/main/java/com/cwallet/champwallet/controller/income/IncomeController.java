@@ -3,6 +3,7 @@ package com.cwallet.champwallet.controller.income;
 import com.cwallet.champwallet.bean.income.IncomeForm;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -46,6 +47,13 @@ public class IncomeController {
         if(bindingResult.hasErrors()){
             System.out.println(incomeForm);
             model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
+            return "income/add-income";
+        }
+        if(incomeForm.getAmount() <= 0) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
+            model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/add-income";
         }
        IncomeDTO newIncome = IncomeDTO.builder()
@@ -53,7 +61,16 @@ public class IncomeController {
                .amount(incomeForm.getAmount())
                .description(incomeForm.getDescription())
                                .build();
-        incomeService.save(newIncome, incomeForm.getIncomeTypeID());
+        try {
+            incomeService.save(newIncome, incomeForm.getIncomeTypeID());
+        } catch (AccountingConstraintViolationException e) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
+            model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
+            return "income/add-income";
+        } catch (NoSuchEntityOrNotAuthorized e) {
+            throw new RuntimeException(e);
+        }
         return "redirect:/users/home";
     }
 
@@ -62,12 +79,12 @@ public class IncomeController {
         List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
-model.addAttribute("userIncome",userIncome);
+        model.addAttribute("userIncome",userIncome);
 
-model.addAttribute("totalAmount",totalAmount );
+        model.addAttribute("totalAmount",totalAmount );
         return "income/income-list";
     }
-    @SneakyThrows
+
     @GetMapping("/users/income/{incomeID}")
     public String getSpecificIncome(@PathVariable("incomeID") long incomeID, Model model) {
        IncomeDTO incomeDTO = null;
@@ -118,7 +135,14 @@ model.addAttribute("totalAmount",totalAmount );
                                @PathVariable("incomeID") long incomeID, Model model) {
         if(bindingResult.hasErrors()) {
             model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
             return "income/income-update"; //html pass
+        }
+        if(incomeForm.getAmount() <= 0) {
+            model.addAttribute("errorMessage", "Amount must be greater than 0");
+            model.addAttribute("incomeForm", incomeForm);
+            model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
+            return "income/income-update";
         }
         IncomeDTO incomeDTO= null;
         try {
@@ -137,6 +161,8 @@ model.addAttribute("totalAmount",totalAmount );
                 return "redirect:/users/income/list?nosuchincomeornauthorized=no such income or unauthorized";
             }catch (AccountingConstraintViolationException e){
                 model.addAttribute("errorMessage", e.getMessage());
+                model.addAttribute("incomeForm", incomeForm);
+                model.addAttribute("incomeTypes", securityUtil.getLoggedInUser().getWallet().getIncomeTypes());
                 return "income/income-update";
             }
             return String.format("redirect:/users/income/%s", incomeID);

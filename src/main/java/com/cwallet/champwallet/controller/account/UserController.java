@@ -39,8 +39,8 @@ public class UserController {
             return "redirect:/users/home";
         }
         model.addAttribute("registrationForm", new RegistrationForm());
-//        return "users-registration";
-        return "users-registration1";
+        return "users-registration";
+//        return "users-registration1";
     }
 
     @PostMapping("/register")
@@ -52,14 +52,14 @@ public class UserController {
         System.out.println(registrationForm);
         if(result.hasErrors()){
             model.addAttribute("registrationForm", registrationForm);
-//            return "users-registration";
-            return "users-registration1";
+            return "users-registration";
+//            return "users-registration1";
         }
         if(!registrationForm.getPassword().equals(registrationForm.getConfirmPassword())) {
             model.addAttribute("registrationForm", registrationForm);
             model.addAttribute("passwordError", "Password must match");
-//            return "users-registration";
-            return "users-registration1";
+            return "users-registration";
+//            return "users-registration1";
         }
         UserEntityDTO newUser = UserEntityDTO.builder()
                 .username(registrationForm.getUsername())
@@ -71,8 +71,8 @@ public class UserController {
         } catch (UserNameNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
             model.addAttribute("usernameError", "Username already exists");
-//            return "users-registration";
-            return "users-registration1";
+            return "users-registration";
+//            return "users-registration1";
         } catch (EmailNotUniqueException e) {
             model.addAttribute("registrationFrom", registrationForm);
             model.addAttribute("emailError", "Email already exists");
@@ -84,14 +84,22 @@ public class UserController {
         return "redirect:/login";
     }
 
+    @GetMapping("/")
+    public String adam() {
+        if(securityUtil.getLoggedInUser() != null) {
+            return "redirect:/users/home";
+        } else {
+            return "landing";
+        }
+    }
     @GetMapping("/login")
     public String getLoginForm(Model model) {
         if(securityUtil.getLoggedInUser() != null) {
             return "redirect:/users/home";
         }
         model.addAttribute("loginForm", new RegistrationForm());
-//        return "users-login";
-        return "users-login1";
+        return "users-login";
+//        return "users-login1";
     }
 
     @GetMapping("/users/home")
@@ -109,6 +117,7 @@ public class UserController {
         }
         model.addAttribute("passwordResetForm", new EmailForm());
         return "request-password-reset";
+//        return "request-password-reset1";
     }
 
     @PostMapping("/password-reset")
@@ -120,6 +129,7 @@ public class UserController {
         if(result.hasErrors()){
             model.addAttribute("passwordResetForm", emailForm);
             return "request-password-reset";
+//            return "request-password-reset1";
         }
         try {
             userService.requestPasswordReset(emailForm.getEmail());

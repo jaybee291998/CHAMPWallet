@@ -32,7 +32,6 @@
         return false;
     });
 
-
     // Progress Bar
     $('.pg-bar').waypoint(function () {
         $('.progress .progress-bar').each(function () {

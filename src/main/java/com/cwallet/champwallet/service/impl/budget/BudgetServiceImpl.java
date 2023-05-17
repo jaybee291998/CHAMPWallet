@@ -2,8 +2,7 @@ package com.cwallet.champwallet.service.impl.budget;
 
 import com.cwallet.champwallet.dto.budget.BudgetDTO;
 import com.cwallet.champwallet.dto.budget.BudgetTransferHistoryDTO;
-import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
-import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
+import com.cwallet.champwallet.exception.*;
 import com.cwallet.champwallet.exception.budget.BudgetExpiredException;
 import com.cwallet.champwallet.exception.budget.NoSuchBudgetOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -21,6 +20,7 @@ import com.cwallet.champwallet.service.budget.BudgetTransferHistoryService;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -47,6 +47,8 @@ public class BudgetServiceImpl implements BudgetService {
     private WalletRepository walletRepository;
     @Autowired
     private BudgetTransferHistoryService budgetTransferHistoryService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public boolean save(BudgetDTO budgetDTO) {
         Budget budget = mapToBudget(budgetDTO);
@@ -80,7 +82,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized {
+    public void update(BudgetDTO budgetDTO, long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException {
         if(budgetDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
         }
@@ -88,6 +90,9 @@ public class BudgetServiceImpl implements BudgetService {
         Budget budget = budgetRepository.findByIdAndWalletId(budgetID, loggedInUser.getWallet().getId());
         if(budget == null) {
             throw new NoSuchBudgetOrNotAuthorized("No such budget or unauthorized");
+        }
+        if(!isUpdateable(mapToBudgetDTO(budget))) {
+            throw new BudgetExpiredException("Budget is no longer updateable");
         }
         budget.setName(budgetDTO.getName());
         budget.setDescription(budgetDTO.getDescription());
@@ -97,6 +102,8 @@ public class BudgetServiceImpl implements BudgetService {
     @Override
     public boolean isUpdateable(BudgetDTO budgetDTO){
         if(expirableAndOwnedService.isExpired(budgetDTO)) {
+            return false;
+        } else if(!budgetDTO.isEnabled()) {
             return false;
         } else {
             return expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty();
@@ -137,11 +144,14 @@ public class BudgetServiceImpl implements BudgetService {
     }
     @Transactional
     @Override
-    public void allocateToBudget(@NonNull long budgetID, @NonNull double amount, @NonNull String description, @NonNull boolean isAllocate) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException {
+    public void allocateToBudget(@NonNull long budgetID, @NonNull double amount, @NonNull String description, @NonNull boolean isAllocate) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException, BudgetDisabledException {
         if(amount <= 0) {
             throw new IllegalArgumentException("amount cant be a negative number");
         }
         Budget budget = getBudget(budgetID);
+        if(!budget.isEnabled()) {
+            throw new BudgetDisabledException("This budget is inactive");
+        }
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         if(isAllocate) {
             if(wallet.getBalance() < amount) {
@@ -170,12 +180,15 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Transactional
     @Override
-    public void fundTransferToOtherBudget(long senderBudgetID, long recipientBudgetID, String description, double amount) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException {
+    public void fundTransferToOtherBudget(long senderBudgetID, long recipientBudgetID, String description, double amount) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException, BudgetDisabledException {
         if(description == null || description.equals("")) {
             throw new IllegalArgumentException("description cannot be empty or null");
         }
-        if(amount < 0) {
+        if(amount <= 0) {
             throw new IllegalArgumentException("amount shouldnt be a negative number");
+        }
+        if(senderBudgetID == recipientBudgetID) {
+            throw new IllegalArgumentException("Transfer to itself is not allowed");
         }
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Budget senderBudget = budgetRepository.findByIdAndWalletId(senderBudgetID, wallet.getId());
@@ -183,8 +196,11 @@ public class BudgetServiceImpl implements BudgetService {
         if(senderBudget == null || recipientBudget == null) {
             throw new NoSuchEntityOrNotAuthorized("sending budget or receiving budget does not exist or not authorized");
         }
-        if(senderBudget.getId() == recipientBudget.getId()) {
-            throw new IllegalArgumentException("Transfer to itself is not allowed");
+        if(!senderBudget.isEnabled()) {
+            throw new BudgetDisabledException("This sender budget is inactive");
+        }
+        if(!recipientBudget.isEnabled()) {
+            throw new BudgetDisabledException("This recipient budget is inactive");
         }
         if(amount > senderBudget.getBalance()) {
             throw new AccountingConstraintViolationException(String.format("The amount(%.2f) to be transferred is greater than the balance of the budget(%.2f)", amount, senderBudget.getBalance()));
@@ -205,5 +221,40 @@ public class BudgetServiceImpl implements BudgetService {
         budgetRepository.save(recipientBudget);
         // save the history
         budgetTransferHistoryService.save(budgetTransferHistoryDTO);
+    }
+
+    @Override
+    public void disableFund(long budgetID, String password) throws NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException, IncorrectPasswordException {
+        if(password == null || password.equals("")) {
+            throw new IllegalArgumentException("Password must not be null or empty");
+        }
+        Budget budgetToDisable = getBudget(budgetID);
+        if(!budgetToDisable.isEnabled()) {
+            throw new BudgetAlreadyDisabledException("This budget is already disabled");
+        }
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        String hashedUserPassword = loggedInUser.getPassword();
+        if(!passwordEncoder.matches(password, hashedUserPassword)) {
+            throw new IncorrectPasswordException("The password you provided does not much your account password");
+        }
+        budgetToDisable.setEnabled(false);
+        budgetRepository.save(budgetToDisable);
+    }
+    @Override
+    public void enableFund(long budgetID, String password) throws NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException, IncorrectPasswordException {
+        if(password == null || password.equals("")) {
+            throw new IllegalArgumentException("Password must not be null or empty");
+        }
+        Budget budgetToEnable = getBudget(budgetID);
+        if(budgetToEnable.isEnabled()) {
+            throw new BudgetAlreadyEnabledException("This budget is already enabled");
+        }
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        String hashedUserPassword = loggedInUser.getPassword();
+        if(!passwordEncoder.matches(password, hashedUserPassword)) {
+            throw new IncorrectPasswordException("The password you provided does not much your account password");
+        }
+        budgetToEnable.setEnabled(true);
+        budgetRepository.save(budgetToEnable);
     }
 }

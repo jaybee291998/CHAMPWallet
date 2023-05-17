@@ -79,6 +79,8 @@
         </div>
         <!-- <script th:src="@{/js/custom.js}"></script> -->
         <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <script th:src="@{/js/modal.js}"></script>
         <script th:src="@{/js/api.js}"></script>
@@ -97,17 +99,17 @@
             let isOnOutgoing = true;
             let outgoingInterval = 0;
             let incomingInterval = 0;
-            function $(e){
-                return document.getElementById(e);
-            }
+            // function $(e){
+            //     return document.getElementById(e);
+            // }
             function updateModalContent(row_data){
                 const {description, amount, senderBudget, recipientBudget, creationTime} = row_data;
                 console.log(row_data);
-                $('description-data').textContent = description;
-                $('amount-data').textContent = amount;
-                $('sender-data').textContent = senderBudget;
-                $('recipient-data').textContent = recipientBudget;
-                $('date-data').textContent = creationTime;
+                $('#description-data')[0].textContent = description;
+                $('#amount-data')[0].textContent = amount;
+                $('#sender-data')[0].textContent = senderBudget;
+                $('#recipient-data')[0].textContent = recipientBudget;
+                $('#date-data')[0].textContent = creationTime;
             }
             // initialize all the budgets that sent fund to the current budget
             async function init_sender_budgets(interval=7) {
@@ -155,17 +157,17 @@
                 let possibleBudgetsOption = {...budget_names}
                 console.log(budget_names[budgetID]);
                 delete possibleBudgetsOption[parseInt(budgetID)];
-                populateSelectControl($('outgoing-select-interval') ,interval_obj, () => {let interval = $('outgoing-select-interval').value;init_recipient_budgets(interval);});
-                populateSelectControl($('incoming-select-interval'), interval_obj, () => {let interval = $('incoming-select-interval').value;init_sender_budgets(interval);});
-                populateSelectControl($('recipient-budget-select'), possibleBudgetsOption, filterRecipientBudgets);
-                populateSelectControl($('sender-budget-select'), possibleBudgetsOption, filterSenderBudgets);
+                populateSelectControl($('#outgoing-select-interval')[0] ,interval_obj, () => {let interval = $('#outgoing-select-interval')[0].value;init_recipient_budgets(interval);});
+                populateSelectControl($('#incoming-select-interval')[0], interval_obj, () => {let interval = $('#incoming-select-interval')[0].value;init_sender_budgets(interval);});
+                populateSelectControl($('#recipient-budget-select')[0], possibleBudgetsOption, filterRecipientBudgets);
+                populateSelectControl($('#sender-budget-select')[0], possibleBudgetsOption, filterSenderBudgets);
                 // populateSelectControl($('recipient-budget-select'), budget_names, ()=>{});
                 // populateSelectControl($('sender-budget-select'), budget_names, ()=>{});
 
 
                 // upon load only display the outgoing-div
-                $('outgoing-div').style.display = "block";
-                $('incoming-div').style.display = "none";
+                $('#outgoing-div')[0].style.display = "block";
+                $('#incoming-div')[0].style.display = "none";
             }
 
             const populateSelectControl = (select_object, key_value_dict, func) => {
@@ -215,28 +217,28 @@
                 });
             }
             const filterSenderBudgets = () =>{
-                let selectedIndex = $('sender-budget-select').value;
+                let selectedIndex = $('#sender-budget-select')[0].value;
                 if(selectedIndex == -1){
                     // display all
-                    displayTable(sender_budgets, $('sender-table-div'));
+                    displayTable(sender_budgets, $('#sender-table-div')[0]);
                     return;
                 }
                 let selectedBudget = budget_names[selectedIndex];
                 let filtered_data = sender_budgets.filter((obj)=>obj['senderBudget']==selectedBudget);
-                displayTable(filtered_data, $('sender-table-div'), sender_row_selection_func);
+                displayTable(filtered_data, $('#sender-table-div')[0], sender_row_selection_func);
                 console.log({filtered_data});
             }
 
             const filterRecipientBudgets = () =>{
-                let selectedIndex = $('recipient-budget-select').value;
+                let selectedIndex = $('#recipient-budget-select')[0].value;
                 if(selectedIndex == -1){
                     // display all
-                    displayTable(recipient_budgets, $('recipient-table-div'));
+                    displayTable(recipient_budgets, $('#recipient-table-div')[0]);
                     return;
                 }
                 let selectedBudget = budget_names[selectedIndex];
                 let filtered_data = recipient_budgets.filter((obj)=>obj['recipientBudget']==selectedBudget);
-                displayTable(filtered_data, $('recipient-table-div'), recipient_row_selection_func);
+                displayTable(filtered_data, $('#recipient-table-div')[0], recipient_row_selection_func);
                 console.log({filtered_data});
             }
 
@@ -247,16 +249,19 @@
                     let table = createTable(table_data, ['description', 'amount', 'senderBudget', 'recipientBudget', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Amount', 'From', 'To', 'Date']);
                     table.setAttribute('id', 'tbl_exporttable_to_xls');
                     table_div.appendChild(table);
+                    $(document).ready( function () {
+                        $('#tbl_exporttable_to_xls').DataTable();
+                    });
                 }
             }
 
             function getSelectedRecipientBudget() {
-                let selectedIndex = $('recipient-budget-select').value;
+                let selectedIndex = $('#recipient-budget-select')[0].value;
                 return budget_names[selectedIndex];
             }
 
             function getSelectedSenderBudget() {
-                let selectedIndex = $('sender-budget-select').value;
+                let selectedIndex = $('#sender-budget-select')[0].value;
                 return budget_names[selectedIndex];
             }
 
@@ -276,15 +281,15 @@
             }
             init_data();
 
-            $('outgoing-btn').onclick = () => {
-                $('outgoing-div').style.display = "block";
-                $('incoming-div').style.display = "none";
+            $('#outgoing-btn')[0].onclick = () => {
+                $('#outgoing-div')[0].style.display = "block";
+                $('#incoming-div')[0].style.display = "none";
                 isOnOutgoing = true;
             }
 
-            $('incoming-btn').onclick = () => {
-                $('outgoing-div').style.display = "none";
-                $('incoming-div').style.display = "block";
+            $('#incoming-btn')[0].onclick = () => {
+                $('#outgoing-div')[0].style.display = "none";
+                $('#incoming-div')[0].style.display = "block";
                 isOnOutgoing = false;
             }
 

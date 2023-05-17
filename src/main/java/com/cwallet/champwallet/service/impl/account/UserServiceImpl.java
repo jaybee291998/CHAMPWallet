@@ -33,15 +33,15 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     private InetAddress IP= null;
-    @Autowired
     private WalletRepository walletRepository;
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder,
-                           VerificationService verificationService, EmailService emailService){
+                           VerificationService verificationService, EmailService emailService, WalletRepository walletRepository){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.verificationService = verificationService;
+        this.walletRepository = walletRepository;
         this.emailService = emailService;
         try {
             IP = InetAddress.getLocalHost();

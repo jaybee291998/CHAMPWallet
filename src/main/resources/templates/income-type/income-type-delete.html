@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="https://thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+>
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Income Type</title>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-5 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <div class="alert alert-primary alert-dismissible fade show col-12" role="alert" >
+                <i class="fa fa-exclamation-circle me-2" th:text="${' Are you sure you want to delete ' + incomeType.name + '? '}"></i>
+
+                    <a th:href="@{/users/income-type/delete/confirmed/{id}(id=${incomeType.id})}" class="btn btn-success mx-1">Yes</a>
+                    <a th:href="@{/users/income-type/{id}(id=${incomeType.id})}" class="btn btn-primary">No</a>
+
+
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

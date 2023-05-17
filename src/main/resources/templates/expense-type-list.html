@@ -13,8 +13,8 @@
     <section layout:fragment="body" class="py-5">
         <div class="container">
             <h1>Expense Type List</h1>
-            <div th:if="${param.nosuchexpensetypeorauthorized}" class="alert alert-danger">
-                <p th:text="${param.nosuchexpensetypeorauthorized}"></p>
+            <div th:if="${param.NoSuchEntityOrNotAuthorized}" class="alert alert-danger">
+                <p th:text="${param.NoSuchEntityOrNotAuthorized}"></p>
             </div>
 <!--            <p><b>Name: </b><span th:text="${expenseTypeNames}"></span></p>-->
 <!--            <p><b>Description: </b><span th:text="${expenseTypeDescriptions}"></span></p>-->

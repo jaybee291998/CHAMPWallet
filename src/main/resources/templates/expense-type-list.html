@@ -24,34 +24,40 @@
         <div class="col-12">
             <div class="bg-secondary rounded h-100 p-3">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="expense-type-table">
                         <thead>
-                        <tr>
-                            <th>
-                                <h6><strong>Name</strong></h6>
-                            </th>
-                            <th>
-                                <h6><strong>Description</strong></h6>
-                            </th>
-                            <th class="text-center">
-                                <h6><strong>Action</strong></h6>
-                            </th>
-                            <!-- Header for the action column -->
-                        </tr>
+                            <tr>
+                                <th>
+                                    <h6><strong>Name</strong></h6>
+                                </th>
+                                <th>
+                                    <h6><strong>Description</strong></h6>
+                                </th>
+                                <th class="text-center">
+                                    <h6><strong>Action</strong></h6>
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="expenseType : ${usersExpenseType}">
-                            <td th:if="${expenseType.name.length <= 20}" th:text="${expenseType.name}" class="ml-4"></td>
-                            <td th:if="${expenseType.name.length >20}" th:text="${expenseType.name.substring(0, 20) + '...'}" class="ml-4"></td>
-                            <td th:if="${expenseType.description.length <=30}" th:text="${expenseType.description}"></td>
-                            <td th:if="${expenseType.description.length > 30}" th:text="${expenseType.description.substring(0, 30) + '...'}"></td>
-                            <td class="text-center">
-                                <a th:href="@{/users/expense-type/{expenseTypeId}(expenseTypeId=${expenseType.id})}" class="btn btn-primary btn-sm">Details</a>
-                            </td>
-                        </tr>
+                            <tr th:each="expenseType : ${usersExpenseType}">
+                                <td th:if="${expenseType.name.length <=  20}" th:text="${expenseType.name}" class="ml-4"></td>
+                                <td th:if="${expenseType.name.length >20}" th:text="${expenseType.name.substring(0, 20) + '...'}" class="ml-4"></td>
+                                <td th:if="${expenseType.description.length <=30}" th:text="${expenseType.description}"></td>
+                                <td th:if="${expenseType.description.length > 30}" th:text="${expenseType.description.substring(0, 30) + '...'}"></td>
+                                <td class="text-center">
+                                    <a th:href="@{/users/expense-type/{expenseTypeId}(expenseTypeId=${expenseType.id})}" class="btn btn-primary btn-sm">Details</a>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
+                <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+                <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+                <script th:inline="javascript">
+                    $(document).ready( function () {
+                       $('#expense-type-table').DataTable();
+                    });
+                </script>
             </div>
         </div>
         <br><br><br><br><br><br><br><br><br><br>

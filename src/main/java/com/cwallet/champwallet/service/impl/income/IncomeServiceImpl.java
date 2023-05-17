@@ -2,6 +2,7 @@ package com.cwallet.champwallet.service.impl.income;
 
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.models.income.Income;
@@ -41,14 +42,20 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional
-    public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) {
+    public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) throws AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized {
+        if(incomeDTO.getAmount() <= 0) {
+            throw new AccountingConstraintViolationException("Amount must be greater than 0");
+        }
         Long incomeTypeID = incomeType.getId();
-        Optional<IncomeType> incomeTypes = incomeTypeRepository.findById(incomeTypeID);
+        Optional<IncomeType> optionalIncomeType = incomeTypeRepository.findById(incomeTypeID);
+        if(!optionalIncomeType.isPresent()) {
+            throw new NoSuchEntityOrNotAuthorized("Income Type not found");
+        }
+        IncomeType actualIncomeType = optionalIncomeType.get();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Income income = mapToIncome(incomeDTO);
         income.setWallet(wallet);
-//        incomeDTO.setWallet();
-        income.setIncomeType(incomeTypes.get());
+        income.setIncomeType(actualIncomeType);
         wallet.setBalance(wallet.getBalance() + income.getAmount());
         try {
             incomeRepository.save(income);
@@ -58,16 +65,12 @@ public class IncomeServiceImpl implements IncomeService {
             return false;
         }
     }
-
-
     @Override
     public List<IncomeDTO> getAllUserIncome() {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        List<Income> usersIncome = incomeRepository.findByWalletId(loggedInUser.getWallet().getId());
+        List<Income> usersIncome = incomeRepository.findByWalletIdOrderByTimestamp(loggedInUser.getWallet().getId());
         return usersIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
-
-
     @Override
     public IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
@@ -83,6 +86,9 @@ public class IncomeServiceImpl implements IncomeService {
     public void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
         if (incomeDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
+        }
+        if(incomeDTO.getAmount() <= 0) {
+            throw new IllegalArgumentException("amount must be greater than zero");
         }
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
@@ -103,15 +109,10 @@ public class IncomeServiceImpl implements IncomeService {
         } else {
             // income decrease
             double incomeDecrease = oldIncome - newIncome;
-            if (incomeDecrease > wallet.getBalance()) {
-                try {
-                    throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
-                } catch (AccountingConstraintViolationException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                wallet.setBalance(wallet.getBalance() - incomeDecrease);
+            if(incomeDecrease > wallet.getBalance()){
+                throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
             }
+            wallet.setBalance(wallet.getBalance() - incomeDecrease);
         }
         income.setSourceOfIncome(incomeDTO.getSource());
         income.setDescription(incomeDTO.getDescription());
@@ -121,22 +122,12 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public boolean isUpdateable(IncomeDTO incomeDTO) {
-//        List<IncomeDTO> userIncome = incomeService.getAllUserIncome();
-//        double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
-        if (expirableAndOwnedService.isExpired(incomeDTO)) {
-            return false;
-        }
-//        if(incomeDTO.getAmount() < (totalAmount-(securityUtil.getLoggedInUser().getWallet().getBalance())))
-//        {
-//            return false;
-//        }
-
-        return true;
+    public boolean isUpdateable(IncomeDTO incomeDTO){
+        return !expirableAndOwnedService.isExpired(incomeDTO);
     }
-
+    @Transactional
     @Override
-    public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException {
+    public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         Income income = incomeRepository.findByIdAndWalletId(incomeID, loggedInUser.getWallet().getId());
@@ -147,7 +138,12 @@ public class IncomeServiceImpl implements IncomeService {
         if (!isUpdateable(incomeDTO)) {
             throw new IncomeExpiredException("Income no longer updateable");
         }
-        wallet.setBalance(wallet.getBalance() - incomeDTO.getAmount());
+        double incomeToDeduct = incomeDTO.getAmount();
+        if(incomeToDeduct > wallet.getBalance()) {
+            throw new AccountingConstraintViolationException(String.format("You can no longer delete this income as the amount to be debited to the balance is %.2f while the balance is %.2f", incomeToDeduct, wallet.getBalance()));
+        }
+        wallet.setBalance(wallet.getBalance() - incomeToDeduct);
         incomeRepository.delete(income);
+        walletRepository.save(wallet);
     }
 }

@@ -17,6 +17,7 @@
                 <p th:text="${errorMessage}"></p>
             </div>
             <form role="form" method="post" th:action="@{/users/income/update/{incomeID}(incomeID=${incomeForm.id})}" th:object="${incomeForm}">
+                <input type="hidden" th:field="*{id}">
                 <div class="form-group">
                     <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
                     <label for="source"></label>

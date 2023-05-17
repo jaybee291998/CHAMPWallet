@@ -54,11 +54,6 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional
     public boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType, Budget budget) {
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println(expenseType);
-        System.out.println(budget);
-        System.out.println(expenseDTO);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         Long expenseTypeID = expenseType.getId();
         Long budgetID = budget.getId();
         Optional<Budget> optionalBudgets = budgetRepository.findById(budgetID);

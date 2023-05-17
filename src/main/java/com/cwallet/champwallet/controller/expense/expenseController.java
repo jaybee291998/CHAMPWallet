@@ -71,10 +71,10 @@ public class expenseController {
     public String getUsersExpense(Model model) {
         List<ExpenseDTO> userExpense = expenseService.getAllUserExpense();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        double totalAmount = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
+        double totalExpense = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
         model.addAttribute("userExpense", userExpense);
 
-        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("totalExpense", totalExpense);
         return "expense/expense-list";
     }
 

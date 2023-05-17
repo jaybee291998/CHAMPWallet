@@ -5,25 +5,37 @@
       layout:decorate="~{layout}">
 <head>
   <meta charset="UTF-8">
-  <title>Expense Type List</title>
+  <title>Expense Type Details</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
   <!-- Page Content-->
 
-  <section layout:fragment="body" class="py-5">
-    <div class="container">
-      <p><b>Name: </b><span th:text="${expenseType.name}"></span></p>
-      <p><b>Description: </b><span th:text="${expenseType.description}"></span></p>
-      <p><b>Creation Time: </b><span th:text="${expenseType.creationTime}"></span></p>
-      <hr>
-      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/update/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-success">Update</a>
-      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/delete/{expenseTypeID}(expenseTypeID=${expenseType.id})}" class="btn btn-danger">Delete</a>
-      <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/list}" class="btn btn-info">Go Back</a>
-
+  <section layout:fragment="body" class="py-4 px-4">
+    <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+      <div>
+        <h4>Expense Type Details</h4>
+      </div>
+      <div>
+        <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/update/{expenseTypeId}(expenseTypeId=${expenseType.id})}" class="btn btn-success mx-0.5">Update</a>
+        <a th:if="${buttonEnabled}" th:href="@{/users/expense-type/delete/{expenseTypeId}(expenseTypeId=${expenseType.id})}" class="btn btn-success mx-0.5">Delete</a>
+        <a th:href="@{/users/expense-type/list}" class="btn btn-success mx-0.5">Back</a>
+      </div>
+    </div>
+    <br>
+    <div class="col-12">
+      <div class="bg-secondary rounded h-100 p-4">
+        <dl class="row mb-0">
+          <dt class="col-sm-4"><strong>Name:</strong></dt>
+          <dd class="col-sm-8" th:text="${expenseType.name}"></dd>
+          <dt class="col-sm-4">Date and Time of Creation</dt>
+          <dd class="col-sm-8" th:text="${expenseType.creationTime}"></dd>
+          <dt class="col-sm-4">Description:</dt>
+          <dd class="col-sm-8" th:text="${expenseType.description}"></dd>
+        </dl>
+      </div>
     </div>
   </section>
 </main>
-
 </body>
 </html>

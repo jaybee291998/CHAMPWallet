@@ -12,13 +12,17 @@
 <main class="flex-shrink-0">
     <!-- Page Content-->
     <section layout:fragment="body" class="py-4 px-4 ">
+        <div th:if="${param.NoSuchEntityOrNotAuthorized}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+            <p th:text="${param.NoSuchEntityOrNotAuthorized}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <br>
         <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
             <h4>List of Income Types</h4>
             <div>
                 <a th:href="@{/users/income-type/create}" class="btn btn-success">Add Income Type</a>
             </div>
         </div>
-
         <br>
         <div class="col-12">
             <div class="bg-secondary rounded h-100 p-3 ">

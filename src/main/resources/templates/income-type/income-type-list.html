@@ -11,6 +11,7 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
+
     <section layout:fragment="body" class="py-4 px-4 ">
         <div th:if="${param.NoSuchEntityOrNotAuthorized}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
             <p th:text="${param.NoSuchEntityOrNotAuthorized}"></p>
@@ -37,8 +38,8 @@
                         </thead>
                         <tbody>
                         <tr th:each="incomeType : ${incomeTypeList}">
-                            <td th:if="${incomeType.name.length<= 20}" th:text="${incomeType.name}" class="ml-4"></td>
-                            <td th:if="${incomeType.name.length> 20}" th:text="${incomeType.name.substring(0, 20) + '...'}" class="ml-4"></td>
+                            <td th:if="${incomeType.name.length<= 20}" th:text="${incomeType.name}"></td>
+                            <td th:if="${incomeType.name.length> 20}" th:text="${incomeType.name.substring(0, 20) + '...'}"></td>
                             <td th:if="${incomeType.description.length<= 30}" th:text="${incomeType.description}"></td>
                             <td th:if="${incomeType.description.length > 30}" th:text="${incomeType.description.substring(0, 30) + '...'}"></td>
                             <td class="text-center"><a th:href="@{/users/income-type/{incomeTypeID}(incomeTypeID=${incomeType.id})}" class="btn btn-primary btn-sm">Details</a></td> <!-- Details button -->

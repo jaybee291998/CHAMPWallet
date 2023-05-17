@@ -149,9 +149,5 @@ public class IncomeServiceImpl implements IncomeService {
         }
         wallet.setBalance(wallet.getBalance() - incomeDTO.getAmount());
         incomeRepository.delete(income);
-<<<<<<< HEAD
-
-=======
->>>>>>> master
     }
 }

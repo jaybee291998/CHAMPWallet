@@ -4,10 +4,17 @@ import com.cwallet.champwallet.bean.account.EmailForm;
 import com.cwallet.champwallet.bean.account.PasswordResetForm;
 import com.cwallet.champwallet.bean.account.RegistrationForm;
 import com.cwallet.champwallet.dto.account.UserEntityDTO;
+import com.cwallet.champwallet.dto.budget.BudgetDTO;
+import com.cwallet.champwallet.dto.expense.ExpenseDTO;
+import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.account.*;
+import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.security.SecurityUtil;
 import com.cwallet.champwallet.service.account.UserService;
 import com.cwallet.champwallet.service.account.VerificationService;
+import com.cwallet.champwallet.service.budget.BudgetService;
+import com.cwallet.champwallet.service.expense.ExpenseService;
+import com.cwallet.champwallet.service.income.IncomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,14 +27,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 //import javax.jws.WebParam;
 import javax.mail.SendFailedException;
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 public class UserController {
+    @Autowired
+    private BudgetService budgetService;
     private UserService userService;
     @Autowired
     private VerificationService verificationService;
     @Autowired
     private SecurityUtil securityUtil;
+    @Autowired
+    private IncomeService incomeService;
+    @Autowired
+    private ExpenseService expenseService;
     @Autowired
     public UserController(UserService userService){
         this.userService = userService;
@@ -99,8 +113,20 @@ public class UserController {
     @GetMapping("/users/home")
     public String home(Model model) {
         String user = SecurityUtil.getSessionUser();
+        List<BudgetDTO> userBudgets = budgetService.getAllUserBudget();
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        List<IncomeDTO> userIncome = incomeService.getAllUserIncomeAll();
+        List<ExpenseDTO> userExpense = expenseService.getAllUserExpenseAll();
+        double totalExpense = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
+        double allocatedBalance = userBudgets.stream().reduce(0D, (subtotal, element) -> subtotal + element.getBalance(), Double::sum);
+        double unallocatedBalance = loggedInUser.getWallet().getBalance();
+        double totalAmount = userIncome.stream().reduce(0D, (subtotal, element) -> subtotal + element.getAmount(), Double::sum);
         model.addAttribute("user", user);
         model.addAttribute("walletBalance", securityUtil.getLoggedInUser().getWallet().getBalance());
+        model.addAttribute("unallocatedBalance", unallocatedBalance);
+        model.addAttribute("allocatedBalance", allocatedBalance);
+        model.addAttribute("totalAmount",totalAmount );
+        model.addAttribute("totalExpense", totalExpense);
         return "home";
     }
 

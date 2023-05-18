@@ -6,61 +6,74 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Add Expense</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div th:if="${param.failedtosave}" class="alert alert-danger">
-                <p th:text="${param.failedtosave}"></p>
-            </div>
-            <div th:if="${errorMessage}" class="alert alert-danger">
-                <p th:text="${errorMessage}"></p>
-            </div>
-            <form role="form" method="post" th:action="@{/users/expense/create}" th:object="${expenseForm}">
-                <div class="form-group">
-                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
-                    <label for="description">Description</label>
-                    <textarea
-                            type="text"
-                            class="form-control"
-                            id="description"
-                            placeholder="Enter Description"
-                            name="description"
-                            th:field="*{description}"
-                    ></textarea>
-                    <p th:if="${#fields.hasErrors('description')}"
-                       th:errors="*{description}" class="text-danger"></p>
-                </div>
-
-                <select name="expense-type" id="expensetype" th:field="*{expenseTypeID}">
-                    <option th:each="expenseType:${expenseTypes}" th:value="${expenseType.id}" th:text="${expenseType.name}"></option>
-                </select>
-                <div class="form-group">
-                    <label for="price">Price</label>
-                    <textarea
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            class="form-control"
-                            id="price"
-                            placeholder="Enter price"
-                            name="price"
-                            th:field="*{price}"
-                    ></textarea>
-                    <p th:if="${#fields.hasErrors('price')}"
-                       th:errors="*{price}" class="text-danger"></p>
-
-                </div>
-                    <select name="budget" id="budget" th:field="*{budgetID}">
-                        <option th:each="budget:${budgets}" th:value="${budget.id}" th:text="${budget.name}"></option>
-                    </select>
-                </div>
-
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${param.failedtosave}" class="alert alert-danger">
+            <p th:text="${param.failedtosave}"></p>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <p th:text="${errorMessage}"></p>
+        </div>
+        <br>
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Create Expense</h4>
+            <div>
                 <button type="submit" id="submit" class="btn btn-primary">Add Expense</button>
+                <a th:href="@{/users/expense/list}" class="btn btn-success mx-1">Back</a>
+            </div>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <form id="expenseForm" role="form" method="post" th:action="@{/users/expense/create}" th:object="${expenseForm}">
+                    <div class="form-group">
+                        <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                        <label for="description">Description</label>
+                        <textarea
+                                type="text"
+                                class="form-control"
+                                id="description"
+                                placeholder="Enter Description"
+                                name="description"
+                                th:field="*{description}"
+                        ></textarea>
+                        <p th:if="${#fields.hasErrors('description')}"
+                           th:errors="*{description}" class="text-danger"></p>
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Expense type</label>
+                        <select class="form-select" th:field="*{expenseTypeID}" id="expensetype" name="expense-type" aria-label=".form-select-sm example">
+                            <option th:each="expenseType:${expenseTypes}" th:value="${expenseType.id}" th:text="${expenseType.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <textarea
+                                type="number"
+                                min="1"
+                                step="0.01"
+                                class="form-control"
+                                id="price"
+                                placeholder="Enter price"
+                                name="price"
+                                th:field="*{price}"
+                        ></textarea>
+                        <p th:if="${#fields.hasErrors('price')}"
+                           th:errors="*{price}" class="text-danger"></p>
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Select Budget</label>
+                        <select class="form-select" th:field="*{budgetID}" id="budget" name="expense-type" aria-label=".form-select-sm example">
+                            <option th:each="budget:${budgets}" th:value="${budget.id}" th:text="${budget.name}"></option>
+                        </select>
+                    </div>
             </form>
+            </div>
         </div>
     </section>
 </main>

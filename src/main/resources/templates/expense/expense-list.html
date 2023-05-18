@@ -10,51 +10,74 @@
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
-  <!-- Page Content-->
-  <section layout:fragment="body" class="py-5">
-    <div class="container">
-      <div th:if="${param.failedtosave}" class="alert alert-danger">
-        <p th:text="${param.failedtosave}"></p>
-      </div>
-      <div th:if="${param.savesuccess}" class="alert alert-success">
-        <p th:text="${param.savesuccess}"></p>
-      </div>
-      <h1>Expense List</h1>
-      <div>
-        <form role="form" th:action="@{/users/expense/list}" method="GET">
-          <span>date</span>
-          <input type="date" name="specific-date" id="specific-expense-date">
-          <button type="submit" id="submit" class="btn btn-primary">submit</button>
-        </form>
-        <h3 th:text="${entryDate}"></h3>
-      </div>
-      <table class="table table-striped" id="expense-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Budget</th>
-            <th>Date Recorded</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="expense:${userExpense}">
-            <td th:if="${expense.description.length<= 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" th:text="${expense.description}"></a></td>
-            <td th:if="${expense.description.length > 30}"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}"  th:text="${expense.description.substring(0, 30) + '...'}"></a></td>
-            <td th:text="${expense.expenseType.name}"></td>
-            <td th:text="${expense.price}"></td>
-            <td th:text="${expense.budget.name}"></td>
-            <td th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
-          </tr>
-        </tbody>
-      </table>
-      <p><b>Total Amount: </b><span th:text="${totalExpense}"></span></p>
-      <a th:href="@{/users/expense/create}" class="btn btn-success">Add Expense</a>
-    </div>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-    <script th:inline="javascript">
+    <!-- Page Content-->
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${param.failedtosave}" class="alert alert-danger">
+            <p th:text="${param.failedtosave}"></p>
+        </div>
+        <div th:if="${param.savesuccess}" class="alert alert-success">
+            <p th:text="${param.savesuccess}"></p>
+        </div>
+        <br>
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Expense List</h4>
+            <div>
+                <a th:href="@{/users/expense/create}" class="btn btn-success">Add Expense</a>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-sm-6 col-xl-2">
+                <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-2">
+                    <i class="fa fa-chart-bar fa-3x text-primary"></i>
+                    <div class="ms-1">
+                        <p class="mb-1"><strong>Total Amount</strong></p>
+                        <h6 class="mb-0 text-warning" th:text="${totalExpense}"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-2">
+                    <form role="form" method="GET" th:action="@{/users/expense/list}">
+                        <input type="date" name="specific-date" id="specific-expense-date">
+                        <button id="submit" class="btn btn-primary">submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="expense-table">
+                        <thead>
+                        <tr>
+                            <th><h6><strong>Description</strong></h6></th>
+                            <th><h6><strong>Category</strong></h6></th>
+                            <th><h6><strong>Price</strong></h6></th>
+                            <th><h6><strong>Budget</strong></h6></th>
+                            <th><h6><strong>Date Recorded</strong></h6></th>
+                            <th class="text-center"><h6><strong>Action</strong></h6></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                <tr th:each="expense:${userExpense}">
+
+                    <td th:if="${expense.description.length<= 30}" th:text="${expense.description}"></td>
+                    <td th:if="${expense.description.length > 30}" th:text="${expense.description.substring(0, 30) + '...'}"></td>
+                    <td th:text="${expense.expenseType.name}"></td>
+                    <td th:text="${expense.price}"></td>
+                    <td th:text="${expense.budget.name}"></td>
+                    <td th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
+                    <td class="text-center"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" class="btn btn-primary btn-sm">Details</a></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+        <script th:inline="javascript">
             $(document).ready( function () {
                $('#expense-table').DataTable();
             });
@@ -72,8 +95,11 @@
                 let maxDate = year + '-' + month + '-' + day;
                 $('#specific-expense-date').attr('max', maxDate);
             });
+
         </script>
-  </section>
+            </div>
+        </div>
+    </section>
 </main>
 </body>
 </html>

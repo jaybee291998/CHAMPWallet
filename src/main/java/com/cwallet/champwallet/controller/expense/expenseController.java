@@ -92,9 +92,9 @@ public class expenseController {
         }
     }
 
-   @GetMapping("/users/expense/list")
+//   @GetMapping("/users/expense/list")
 //
-//    public String getUsersExpense(Model model) {
+//    public String getUsersExpenseAll(Model model) {
 //        List<ExpenseDTO> userExpense = expenseService.getAllUserExpense();
 //        UserEntity loggedInUser = securityUtil.getLoggedInUser();
 //        double totalExpense = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
@@ -103,12 +103,12 @@ public class expenseController {
 //        model.addAttribute("totalExpense", totalExpense);
 //        return "income/expense-list";
 //    }
-
+   @GetMapping("/users/expense/list")
     public String getUsersExpense(@RequestParam(value = "specific-date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate specificDate, Model model) {
         List<ExpenseDTO> userExpense = expenseService.getAllUserExpense(specificDate);
-        double totalAmount = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
+        double totalExpense = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
         model.addAttribute("userExpense", userExpense);
-        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("totalExpense", totalExpense);
         if(specificDate == null) {
             specificDate = LocalDate.now();
         }

@@ -1,10 +1,12 @@
 package com.cwallet.champwallet.service.impl.income;
 
+import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
+import com.cwallet.champwallet.models.expense.Expense;
 import com.cwallet.champwallet.models.income.Income;
 import com.cwallet.champwallet.models.income.IncomeType;
 import com.cwallet.champwallet.repository.account.WalletRepository;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.mapToExpenseDTO;
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncome;
 import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncomeDTO;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
@@ -68,6 +71,12 @@ public class IncomeServiceImpl implements IncomeService {
         } catch (Exception e) {
             return false;
         }
+    }
+    @Override
+    public List<IncomeDTO> getAllUserIncomeAll() {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        List<Income>userIncome = incomeRepository.findByWalletId(loggedInUser.getWallet().getId());
+        return userIncome.stream().map((income) -> mapToIncomeDTO(income)).collect(Collectors.toList());
     }
     @Override
     public List<IncomeDTO> getAllUserIncome(LocalDate specificDate) {

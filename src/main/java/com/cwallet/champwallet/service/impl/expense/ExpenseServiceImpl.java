@@ -12,12 +12,15 @@ import com.cwallet.champwallet.exception.expense.NoSuchExpenseOrNotAuthorized;
 import com.cwallet.champwallet.exception.expenseType.NoSuchExpenseTypeOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
+import com.cwallet.champwallet.mappers.expense.ExpenseMapper;
+import com.cwallet.champwallet.mappers.incomeType.IncomeTypeMapper;
 import com.cwallet.champwallet.models.account.UserEntity;
 import com.cwallet.champwallet.models.account.Wallet;
 import com.cwallet.champwallet.models.budget.Budget;
 import com.cwallet.champwallet.models.expense.ExpenseType;
 import com.cwallet.champwallet.models.expense.Expense;
 import com.cwallet.champwallet.models.income.Income;
+import com.cwallet.champwallet.models.income.IncomeType;
 import com.cwallet.champwallet.repository.account.WalletRepository;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
 import com.cwallet.champwallet.repository.expense.ExpenseRepository;
@@ -107,6 +110,13 @@ public class ExpenseServiceImpl implements ExpenseService {
         LocalDateTime endDate = startDate.plusHours(24);
         List<Expense> usersExpense = expenseRepository.getExpensesWithinDateRange(loggedInUser.getWallet().getId(), startDate, endDate);
         return usersExpense.stream().map((expense) -> mapToExpenseDTO(expense)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ExpenseDTO> getAllUserExpenseAll() {
+        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+        List<Expense>userExpense = expenseRepository.findByWalletId(loggedInUser.getWallet().getId());
+        return userExpense.stream().map((expense) -> mapToExpenseDTO(expense)).collect(Collectors.toList());
     }
 
     @Override

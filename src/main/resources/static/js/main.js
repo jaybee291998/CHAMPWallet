@@ -32,6 +32,7 @@
         return false;
     });
 
+
     // Progress Bar
     $('.pg-bar').waypoint(function () {
         $('.progress .progress-bar').each(function () {
@@ -65,23 +66,26 @@
 
     // Worldwide Sales Chart
     var ctx1 = $("#worldwide-sales").get(0).getContext("2d");
+    var totalExpense =document.getElementById("totalExpense").textContent;
+    var allocatedBalance =document.getElementById("allocatedBalance").textContent;
+    var unallocatedBalance =document.getElementById("unallocatedBalance").textContent;
     var myChart1 = new Chart(ctx1, {
         type: "bar",
         data: {
-            labels: ["2016", "2017", "2018", "2019", "2020", "2021", "2022"],
+            labels: ["May"],
             datasets: [{
-                    label: "Budget",
-                    data: [15, 30, 55, 65, 60, 80, 95],
+                    label: "Expences",
+                    data: [totalExpense],
                     backgroundColor: "rgba(235, 22, 22, .7)"
                 },
                 {
-                    label: "Income",
-                    data: [8, 35, 40, 60, 70, 55, 75],
+                    label: "Allocated",
+                    data: [allocatedBalance],
                     backgroundColor: "rgba(235, 22, 22, .5)"
                 },
                 {
-                    label: "Expense",
-                    data: [12, 25, 45, 55, 65, 70, 60],
+                    label: "UnAllocated",
+                    data: [unallocatedBalance],
                     backgroundColor: "rgba(235, 22, 22, .3)"
                 }
             ]

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,4 +19,10 @@ public class ExpenseControllerRest {
     List<ExpenseJson> expenseStats(@RequestParam int interval) {
         return expenseService.getExpensesWithinInterval(interval);
     }
+
+    @GetMapping("/users/api/expense/statsmonth")
+    List<ExpenseJson> expenseStatus() {
+        return expenseStats(30);
+    }
+
 }

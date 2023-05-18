@@ -1,45 +1,41 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="https://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
-    <title>Disable Budget</title>
+    <title>Enable Budget</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div th:if="${errorMessage}" class="aler alert-warning">
-                <p th:text="${errorMessage}"></p>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${errorMessage}" class="aler alert-warning">
+            <p th:text="${errorMessage}"></p>
+        </div>
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Enable Budget</h4>
+            <div>
+                <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-success mx-1">No</a>
+                <button type="submit" form="budgetDisableForm" class="btn btn-success mx-1">Submit</button>
             </div>
-            <div class="alert alert-success">
-                <h2 th:text="${'Are you sure you want to enable ' + budget.name + '? '}"></h2>
-            </div>
-            <form role="form" method="post" th:action="@{/users/budget/enable/{budgetID}(budgetID=${budget.id})}" th:object="${passwordForm}">
-                <div class="form-group">
-                    <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
-                    <label for="password">Password</label>
-                    <input
-                            class="form-control"
-                            id="password"
-                            placeholder="Enter password"
-                            name="password"
-                            type="password"
-                            th:field="*{password}"
-                    />
-                    <p th:if="${#fields.hasErrors('password')}"
-                       th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <div class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+                    <i class="fa fa-exclamation-circle me-2" th:text="${'Are you sure you want to enable ' + budget.name + '? '}"></i>
                 </div>
-                <button type="submit" class="btn btn-success">Enable Budget</button>
-                <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="alert alert-dark">No</a>
-            </form>
+                <hr>
+                <form id="budgetDisableForm" role="form" method="post" th:action="@{/users/budget/enable/{budgetID}(budgetID=${budget.id})}" th:object="${passwordForm}">
+                    <div class="form-group">
+                        <p th:if="${passwordError}" th:text="${passwordError}" class="alert alert-danger"></p>
+                        <label for="password">Password</label>
+                        <input class="form-control" id="password" placeholder="Enter password" name="password" type="password" th:field="*{password}"/>
+                        <p th:if="${#fields.hasErrors('password')}" th:text="${#strings.listJoin(#fields.errors('password'), ', ')}" class="text-danger"></p>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
 </main>
-
 </body>
 </html>

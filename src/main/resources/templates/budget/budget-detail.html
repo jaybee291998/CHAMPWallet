@@ -11,35 +11,49 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div th:if="${param.nolongerdeleteable}" class="alert alert-danger">
-                <p th:text="${param.nolongerdeleteable}"></p>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <div th:if="${param.nolongerdeleatable}" class="alert alert-warning">
+                <p th:text="${param.nolongerdeleatable}"></p>
             </div>
             <div th:if="${param.budgetdisabled}" class="alert alert-danger">
                 <p th:text="${param.budgetdisabled}"></p>
             </div>
             <div>
-                <p><b>Name:</b><span th:text="${budget.name}"></span></p>
-                <p><b>Description:</b><span th:text="${budget.description}"></span></p>
-                <p><b>Creation Time:</b><span th:text="${budget.creationTime}"></span></p>
-                <p><b>Balance:</b><span th:text="${budget.balance}"></span></p>
-                <p><b>Status:</b><span th:text="${budget.isEnabled?'Active':'Inactive'}"></span></p>
+                <h4>Budget Details</h4>
+            </div>
+            <div>
+                <a th:if="${buttonEnabled}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
+                <a th:if="${buttonEnabled}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
+                <a th:if="${enableTransactionButtons}" th:href="@{/users/budget/allocation/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Allocate</a>
+                <a th:if="${enableTransactionButtons}" th:href="@{/users/budget/fund-transfer/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Transfer</a>
+                <a th:if="${budget.isEnabled}" th:href="@{/users/budget/disable/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Disable budget</a>
+                <a th:if="${!budget.isEnabled}" th:href="@{/users/budget/enable/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Enable budget</a>
+                <a href="/users/budget/list" class="btn btn-success">Go back</a>
+            </div>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4"><strong>Name: </strong></dt>
+                    <dd class="col-sm-8" th:text="${budget.name}"></dd>
+                    <dt class="col-sm-4">Description: </dt>
+                    <dd class="col-sm-8" th:text="${budget.description}"></dd>
+                    <dt class="col-sm-4">Creation Time: </dt>
+                    <dd class="col-sm-8" th:text="${budget.creationTime}"></dd>
+                    <dt class="col-sm-4">Balance: </dt>
+                    <dd class="col-sm-8" th:text="${budget.balance}"></dd>
+                    <dt class="col-sm-4">Status: </dt>
+                    <dd class="col-sm-8" th:text="${budget.isEnabled?'Active':'Inactive'}"></dd>
+                </dl>
             </div>
 
-            <hr>
-            <a th:if="${buttonEnabled}" th:href="@{/users/budget/update/{budgetID}(budgetID=${budget.id})}" class="btn btn-success">Update</a>
-            <a th:if="${buttonEnabled}" th:href="@{/users/budget/delete/{budgetID}(budgetID=${budget.id})}" class="btn btn-danger">Delete</a>
-            <a th:if="${enableTransactionButtons}" th:href="@{/users/budget/allocation/{budgetID}(budgetID=${budget.id})}" class="btn btn-info">Allocate</a>
-            <a th:href="@{/users/budget/allocation-history/{budgetID}(budgetID=${budget.id})}" class="btn btn-dark">Allocation History</a>
-            <a th:if="${enableTransactionButtons}" th:href="@{/users/budget/fund-transfer/{budgetID}(budgetID=${budget.id})}" class="btn btn-warning">Transfer</a>
-            <a th:href="@{/users/budget/transfer-history/{budgetID}(budgetID=${budget.id})}" class="btn btn-warning">Transfer History</a>
-            <a th:if="${budget.isEnabled}" th:href="@{/users/budget/disable/{budgetID}(budgetID=${budget.id})}" class="btn btn-warning">Disable budget</a>
-            <a th:if="${!budget.isEnabled}" th:href="@{/users/budget/enable/{budgetID}(budgetID=${budget.id})}" class="btn btn-warning">Enable budget</a>
-            <a href="/users/budget/list" class="btn btn-secondary">Go back</a>
         </div>
+
     </section>
 </main>
 
 </body>
 </html>
+

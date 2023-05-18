@@ -54,7 +54,7 @@
                             <td th:text="${income.incomeType.name}"></td>
                             <td th:text="${income.amount}"></td>
                             <td th:text="${income.source.length <= 20 ? income.source : income.source.substring(0, 20) + '...'}"></td>
-                            <td th:text="${income.creationTime}"></td>
+                            <td th:text="${#temporals.format(income.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
                             <td class="text-center"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" class="btn btn-primary btn-sm">Details</a></td>
                         </tr>
                         </tbody>

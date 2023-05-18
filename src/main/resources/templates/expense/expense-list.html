@@ -45,7 +45,7 @@
             <td th:text="${expense.expenseType.name}"></td>
             <td th:text="${expense.price}"></td>
             <td th:text="${expense.budget.name}"></td>
-            <td th:text="${expense.creationTime}"></td>
+            <td th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
           </tr>
         </tbody>
       </table>

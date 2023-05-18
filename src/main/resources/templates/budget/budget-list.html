@@ -74,7 +74,12 @@
                             <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
                             <td th:text="${budget.isEnabled}"></td>
                             <td th:text="${budget.balance}"></td>
-                            <td class="text-center"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-primary btn-sm">Details</a></td> <!-- Details button -->
+                            <td class="text-center">
+                                <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-primary btn-sm">Details</a>
+                                <a th:href="@{/users/budget/transfer-history/{budgetID}(budgetID=${budget.id})}" class="btn btn-success btn-sm">Transfer History</a>
+                                <a th:href="@{/users/budget/allocation-history/{budgetID}(budgetID=${budget.id})}"  class="btn btn-info btn-sm">Allocation History</a>
+                            </td>
+
                         </tr>
                         </tbody>
                     </table>

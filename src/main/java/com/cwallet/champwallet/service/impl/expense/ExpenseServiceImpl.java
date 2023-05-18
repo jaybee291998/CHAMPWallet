@@ -31,7 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -94,9 +96,12 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<ExpenseDTO> getAllUserExpense() {
+    public List<ExpenseDTO> getAllUserExpense(LocalDate specificDate) {
+        if(specificDate == null) specificDate = LocalDate.now();
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
-        List<Expense> usersExpense = expenseRepository.findByWalletIdOrderByCreationTime(loggedInUser.getWallet().getId());
+        LocalDateTime startDate = specificDate.atStartOfDay();
+        LocalDateTime endDate = startDate.plusHours(24);
+        List<Expense> usersExpense = expenseRepository.getExpensesWithinDateRange(loggedInUser.getWallet().getId(), startDate, endDate);
         return usersExpense.stream().map((expense) -> mapToExpenseDTO(expense)).collect(Collectors.toList());
     }
 

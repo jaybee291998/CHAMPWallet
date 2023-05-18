@@ -2,7 +2,7 @@
 <html lang="en"
       xmlns:th="https://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
+      layout:decorate="~{layout-chart}"
 >
 <head>
     <meta charset="UTF-8">
@@ -11,25 +11,15 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
+    <section layout:fragment="body-chart" class="py-5">
         <div class="container">
             <h1 class="center-text">Fund Allocation History</h1>
             <h2 th:text="${budget.name}"></h2>
-            <!-- <dl class="row">
-                <dt class="col-sm-3">Total Allocation: </dt>
-                <dd class="col-sm-1" id="total-allocation"></dd>
-                <dt class="col-sm-3">Total Deallocation: </dt>
-                <dd class="col-sm-1" id="total-deallocation"></dd>
-            </dl> -->
             <label for="interval-select">Interval</label>
             <select name="interval-select" id="interval-select"></select>
             <div id="table-div">
 
             </div>
-
-            <!-- <div id="table-div-hidden">
-
-            </div> -->
             <button onclick="exp()" class="btn btn-primary">Download Excel</button>
             <div id="myModal" class="modal">
                 <div class="modal-content">

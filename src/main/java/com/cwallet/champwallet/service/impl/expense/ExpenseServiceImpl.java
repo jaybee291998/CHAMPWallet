@@ -316,4 +316,5 @@ public class ExpenseServiceImpl implements ExpenseService {
         actualBudget.setBalance(actualBudget.getBalance() + expenseDTO.getPrice());
         expenseRepository.delete(expense);
     }
+
 }

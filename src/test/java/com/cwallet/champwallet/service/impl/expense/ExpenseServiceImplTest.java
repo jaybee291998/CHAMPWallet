@@ -254,7 +254,7 @@ class ExpenseServiceImplTest {
 //        ExpenseDTO updatedExpenseDTO = new ExpenseDTO();
 //        updatedExpenseDTO.setDescription("Updated Description");
 //        updatedExpenseDTO.setPrice(200.0);
-//        updatedExpenseDTO.setExpenseType(new ExpenseType());
+////        updatedExpenseDTO.setExpenseType(new ExpenseType());
 //        updatedExpenseDTO.setBudget(new Budget());
 //
 //        assertDoesNotThrow(() -> expenseServiceImpl.update(updatedExpenseDTO, 1L));

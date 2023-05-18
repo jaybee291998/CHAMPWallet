@@ -1,3 +1,34 @@
+            // process the data from the server 
+            // to return a dictionary than can be used for makeChart
+            const process_chart_data = (array_1, array_2) => {
+                let chart_data = {chartData:[], labels:[]}
+                let i = 0;
+                while(i < array_2.length){
+                    let cur_val = array_2[i];
+                    let count = count_consec_occur(array_2, i, cur_val);
+                    let sum = sum_fr_to(array_1, i, i+count);
+                    chart_data["chartData"].push(sum);
+                    chart_data["labels"].push(cur_val)
+                    i += count;
+                } 
+                return chart_data;
+            }
+            const count_consec_occur = (array, start_index, element) => {
+                let occurence_count = 0;
+                for(let i = start_index; i < array.length; i++){
+                   var cur_val = array[i];
+                    if(cur_val == element){ occurence_count++ }
+                    else{ break; }
+                }
+                return occurence_count;
+            }
+            const sum_fr_to = (array, start_index, end_index) => {
+                let mySum = 0;
+                for(let i = start_index; i < end_index; i++){
+                    mySum += array[i];
+                }
+                return mySum
+            }
 (function ($) {
     "use strict";
 
@@ -97,29 +128,68 @@
 
 
     // Salse & Revenue Chart
-    var ctx2 = $("#salse-revenue").get(0).getContext("2d");
-    var myChart2 = new Chart(ctx2, {
-        type: "line",
-        data: {
-            labels: ["2016", "2017", "2018", "2019", "2020", "2021", "2022"],
-            datasets: [{
-                    label: "Salse",
-                    data: [15, 30, 55, 45, 70, 65, 85],
-                    backgroundColor: "rgba(235, 22, 22, .7)",
-                    fill: true
-                },
-                {
-                    label: "Revenue",
-                    data: [99, 135, 170, 130, 190, 180, 270],
-                    backgroundColor: "rgba(235, 22, 22, .5)",
-                    fill: true
-                }
+//
+var ctx2 = $("#salse-revenue").get(0).getContext("2d");
+let expenseData = [];
+let incomeData = [];
+
+fetch('/users/api/expense/statsmonth')
+  .then(response => response.json())
+  .then(rawExpenses => {
+    console.log(rawExpenses);
+    let { chartData: actualData, labels } = process_chart_data(
+      rawExpenses.map(data => data.price),
+      rawExpenses.map(data => data.creationTime.slice(5, 10))
+    );
+    console.log(actualData);
+    console.log(labels);
+    console.log(rawExpenses.map(data => data.price));
+
+    fetch('/users/api/income/statsmonth')
+      .then(response => response.json())
+      .then(rawIncome => {
+        console.log(rawIncome);
+        let { chartData: actualData2, labels2 } = process_chart_data(
+          rawIncome.map(data => data.amount),
+          rawIncome.map(data => data.creationTime.slice(5, 10))
+        );
+        console.log(actualData2);
+        console.log(labels2);
+        console.log(rawIncome.map(data => data.Income));
+
+        var myChart2 = new Chart(ctx2, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Expenses",
+                data: actualData,
+                backgroundColor: "rgba(235, 22, 22, .7)",
+                fill: true
+              },
+              {
+                label: "Income",
+                data: actualData2,
+                backgroundColor: "rgba(235, 22, 22, .5)",
+                fill: true
+              }
             ]
-            },
-        options: {
+          },
+          options: {
             responsive: true
-        }
-    });
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        // Handle error if necessary
+      });
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    // Handle error if necessary
+  });
     
 
 

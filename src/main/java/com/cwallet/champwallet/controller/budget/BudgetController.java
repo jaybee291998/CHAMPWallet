@@ -73,7 +73,7 @@ public class BudgetController {
         model.addAttribute("allocatedBalance", allocatedBalance);
         model.addAttribute("totalBalance", allocatedBalance + unallocatedBalance);
 
-        return "budget/budget-list, home";
+        return "budget/budget-list";
     }
 
     @GetMapping("/users/budget/{budgetID}")

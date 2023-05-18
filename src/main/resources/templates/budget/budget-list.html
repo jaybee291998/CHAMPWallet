@@ -1,49 +1,85 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="https://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
     <title>Budget List</title>
 </head>
+
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
-    <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <h1>Budget List</h1>
-            <div th:if="${param.nosuchbudgetornauthorized}" class="alert alert-danger">
-                <p th:text="${param.nosuchbudgetornauthorized}"></p>
+    <!-- Page Content -->
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${param.nosuchbudgetornauthorized}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+            <p th:text="${param.nosuchbudgetornauthorized}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.nolongerupdateable}" class="alert alert-danger">
+            <p th:text="${param.nolongerupdateable}"></p>
+        </div>
+        <br>
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>List of Budget</h4>
+            <div>
+                <a th:href="@{/users/budget/create}" class="btn btn-success">Create Budget</a>
             </div>
-            <div th:if="${param.nolongerupdateable}" class="alert alert-danger">
-                <p th:text="${param.nolongerupdateable}"></p>
+        </div>
+            <br>
+        <div>
+            <div class="row g-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
+                        <div class="ms-3">
+                            <p class="mb-2"><strong>Unallocated Balance</strong></p>
+                            <h6 class="mb-0 text-warning" th:text="${unallocatedBalance}"></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
+                        <div class="ms-3">
+                            <p class="mb-2"><strong>Allocated Balance</strong></p>
+                            <h6 class="mb-0 text-warning" th:text="${allocatedBalance}"></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
+                        <div class="ms-3">
+                            <p class="mb-2"><strong>Total Balance</strong></p>
+                            <h6 class="mb-0 text-warning" th:text="${totalBalance}"></h6>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p><b>Unallocated Balance: </b><span th:text="${unallocatedBalance}"></span></p>
-            <p><b>Allocated Balance: </b><span th:text="${allocatedBalance}"></span></p>
-            <p><b>Total Balance: </b><span th:text="${totalBalance}"></span></p>
-            <table class="table table-striped" id="budget-table">
-                <thead>
-                    <tr>
-                        <th>name</th>
-                        <th>description</th>
-                        <th>enabled</th>
-                        <th>balance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="budget:${userBudgets}">
-                        <td th:if="${budget.name.length<= 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name}"></a></td>
-                        <td th:if="${budget.name.length > 20}"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" th:text="${budget.name.substring(0, 20) + '...'}"></a></td>
-                        <td th:if="${budget.description.length<= 30}" th:text="${budget.description}"></td>
-                        <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
-                        <td th:text="${budget.isEnabled}"></td>
-                        <td th:text="${budget.balance}"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <a th:href="@{/users/budget/create}" class="btn btn-success">Create Budget</a>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="budget-table">
+                        <thead>
+                        <tr>
+                            <th><h6><strong>Name</strong></h6></th>
+                            <th><h6><strong>Description</strong></h6></th>
+                            <th><h6><strong>Enabled</strong></h6></th>
+                            <th><h6><strong>Balance</strong></h6></th>
+                            <th class="text-center"><h6><strong>Action</strong></h6></th> <!-- Header for the action column -->
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="budget:${userBudgets}">
+                            <td th:if="${budget.name.length<= 20}" th:text="${budget.name}"></td>
+                            <td th:if="${budget.name.length > 20}" th:text="${budget.name.substring(0, 20) + '...'}"></td>
+                            <td th:if="${budget.description.length<= 30}" th:text="${budget.description}"></td>
+                            <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
+                            <td th:text="${budget.isEnabled}"></td>
+                            <td th:text="${budget.balance}"></td>
+                            <td class="text-center"><a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-primary btn-sm">Details</a></td> <!-- Details button -->
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
@@ -54,6 +90,5 @@
         </script>
     </section>
 </main>
-
 </body>
 </html>

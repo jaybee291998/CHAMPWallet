@@ -1,7 +1,7 @@
 package com.cwallet.champwallet.service.income;
 
-import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
+import com.cwallet.champwallet.dto.income.IncomeJson;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
@@ -24,4 +24,5 @@ boolean isUpdateable(IncomeDTO incomeDto);
     void deleteIncome(long budgetID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException;
 
 
+    List<IncomeJson> getIncomeWithinInterval(int interval);
 }

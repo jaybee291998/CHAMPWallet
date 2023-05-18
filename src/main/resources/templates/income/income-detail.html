@@ -12,24 +12,37 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
+    <section layout:fragment="body" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
             <div th:if="${param.nolongerdeleatable}" class="alert alert-warning">
                 <p th:text="${param.nolongerdeleatable}"></p>
             </div>
             <div>
-<!--                <p><b>Name:</b><span th:text="${budget.name}"></span></p>-->
-                <p><b>Description:</b><span th:text="${income.description}"></span></p>
-                <p><b>Category:</b><span th:text="${income.incomeType.name}"></span></p>
-                <p><b>Amount:</b><span th:text="${income.amount}"></span></p>
-                <p><b>Source:</b><span th:text="${income.source}"></span></p>
-                <p><b>Creation Time:</b><span th:text="${income.creationTime}"></span></p>
+                <h4>Income Details</h4>
+            </div>
+            <div>
+                <a th:if="${buttonEnabled}" th:href="@{/users/income/update/{incomeID}(incomeID=${income.id})}" class="btn btn-success">Update</a>
+                <a th:if="${buttonEnabled}" th:href="@{/users/income/delete/{incomeID}(incomeID=${income.id})}" class="btn btn-danger">Delete</a>
+                <a th:href="@{/users/income/list}" class="btn btn-success mx-0.5">Back</a>
+            </div>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4"><strong>Description: </strong></dt>
+                    <dd class="col-sm-8" th:text="${income.description}"></dd>
+                    <dt class="col-sm-4">Category: </dt>
+                    <dd class="col-sm-8" th:text="${income.incomeType.name}"></dd>
+                    <dt class="col-sm-4">Amount: </dt>
+                    <dd class="col-sm-8" th:text="${income.amount}"></dd>
+                    <dt class="col-sm-4">Source: </dt>
+                    <dd class="col-sm-8" th:text="${income.source}"></dd>
+                    <dt class="col-sm-4">Creation Time: </dt>
+                    <dd class="col-sm-8" th:text="${income.creationTime}"></dd>
+                </dl>
             </div>
 
-            <hr>
-            <a th:if="${buttonEnabled}" th:href="@{/users/income/update/{incomeID}(incomeID=${income.id})}" class="btn btn-success">Update</a>
-            <a th:if="${buttonEnabled}" th:href="@{/users/income/delete/{incomeID}(incomeID=${income.id})}" class="btn btn-danger">Delete</a>
-            <a href="/users/income/list" class="btn btn-secondary">Go back</a>
         </div>
     </section>
 </main>

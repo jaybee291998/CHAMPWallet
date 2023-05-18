@@ -1,73 +1,89 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="https://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
     <title>Income List</title>
 </head>
-
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <h1>Income List</h1>
-            <span>date</span>
-            <input type="month" name="specific-month" id="specific-income-month">
-            <button id="submit" class="btn btn-primary" onclick="func()">submit</button>
-            <h3 th:text="${entryDate}"></h3>
-            <table class="table table-striped" id="income-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Source</th>
-                        <th>Date Recorded</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="income:${userIncome}">
-                        <td th:if="${income.description.length<= 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" th:text="${income.description}"></a></td>
-                        <td th:if="${income.description.length > 30}"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}"  th:text="${income.description.substring(0, 30) + '...'}"></a></td>
-                        <td th:text="${income.incomeType.name}"></td>
-                        <td th:text="${income.amount}"></td>
-                        <td th:if="${income.source.length<= 20}" th:text="${income.source}"></td>
-                        <td th:if="${income.source.length > 20}" th:text="${income.source.substring(0, 20) + '...'}"></td>
-                        <td th:text="${income.creationTime}"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <p><b>Total Amount: </b><span th:text="${totalAmount}"></span></p>
-            <a th:href="@{/users/income/create}" class="btn btn-success">Add Income</a>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>List of Incomes</h4>
+            <div>
+                <a th:href="@{/users/income/create}" class="btn btn-success">Add Income</a>
+            </div>
         </div>
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-        <script th:inline="javascript">
-            const entry_date = /*[[${entryDate}]]*/;
-            $(document).ready( function () {
-               $('#income-table').DataTable();
-                let date = new Date();
+        <br>
+        <div class="row">
+            <div class="col-sm-6 col-xl-2">
+                <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-2">
+                    <i class="fa fa-chart-bar fa-2x text-primary"></i>
+                    <div class="ms-1">
+                        <p class="mb-1">Total Amount</p>
+                        <h6 class="mb-0" th:text="${totalAmount}"></h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-2">
+                    <input type="month" name="specific-month" id="specific-income-month">
+                    <button id="submit" class="btn btn-primary" onclick="func()">submit</button>
+                </div>
+            </div>
+        </div>
 
-                let month = date.getMonth() + 1;
-                let day = date.getDate();
-                let year = date.getFullYear();
-                if(month < 10)
-                    month = '0' + month.toString();
-
-                let maxDate = year + '-' + month;
-                let selected_month = entry_date.substring(0, 7);
-                $('#specific-income-month')[0].value = selected_month;
-                $('#specific-income-month').attr("max", maxDate);
-            });
-            const func = () => {
-                let monthValue = $('#specific-income-month')[0].value;
-                window.location.replace(`/users/income/list?specific-month=${monthValue + "-01"}`);
-            }
-        </script>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="income-table">
+                        <thead>
+                        <tr>
+                            <th><h6><strong>Description</strong></h6></th>
+                            <th><h6><strong>Category</strong></h6></th>
+                            <th><h6><strong>Amount</strong></h6></th>
+                            <th><h6><strong>Source</strong></h6></th>
+                            <th><h6><strong>Date Recorded</strong></h6></th>
+                            <th class="text-center"><h6><strong>Action</strong></h6></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="income : ${userIncome}">
+                            <td th:text="${income.description.length <= 30 ? income.description : income.description.substring(0, 30) + '...'}"></td>
+                            <td th:text="${income.incomeType.name}"></td>
+                            <td th:text="${income.amount}"></td>
+                            <td th:text="${income.source.length <= 20 ? income.source : income.source.substring(0, 20) + '...'}"></td>
+                            <td th:text="${income.creationTime}"></td>
+                            <td class="text-center"><a th:href="@{/users/income/{incomeID}(incomeID=${income.id})}" class="btn btn-primary btn-sm">Details</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
+                <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+                <script th:inline="javascript">
+                        const entry_date = /*[[${entryDate}]]*/;
+                        $(document).ready( function () {
+                            $('#income-table').DataTable();
+                            let date = new Date();
+                            let month = date.getMonth() + 1;
+                            let day = date.getDate();
+                            let year = date.getFullYear();
+                            if (month < 10)
+                                month = '0' + month.toString();
+                            let maxDate = year + '-' + month;
+                            let selected_month = entry_date.substring(0, 7);
+                            $('#specific-income-month')[0].value = selected_month;
+                            $('#specific-income-month').attr("max", maxDate);
+                        });
+                        const func = () => {
+                            let monthValue = $('#specific-income-month')[0].value;
+                            window.location.replace(`/users/income/list?specific-month=${monthValue + "-01"}`);
+                        }
+                    </script>
+            </div>
+        </div>
     </section>
 </main>
 </body>

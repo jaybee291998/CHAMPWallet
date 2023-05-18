@@ -2,6 +2,7 @@ package com.cwallet.champwallet.service.impl.income;
 
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
+import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.security.core.userdetails.User;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -76,7 +78,7 @@ class IncomeServiceImplTest {
         incomeService = incomeServiceImpl;
     }
     @Test
-    public void testSaveIncome() {
+    public void testSaveIncome() throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException {
         IncomeDTO incomeDTO = new IncomeDTO();
         incomeDTO.setId(1L);
         incomeDTO.setSource("Save Source");
@@ -135,7 +137,7 @@ class IncomeServiceImplTest {
         when(securityUtil.getLoggedInUser()).thenReturn(userEntity);
         when(incomeRepository.findByWalletId(wallet.getId())).thenReturn(usersIncome);
 
-        List<IncomeDTO> result = incomeServiceImpl.getAllUserIncome();
+        List<IncomeDTO> result = incomeServiceImpl.getAllUserIncome(LocalDate.now());
 
         verify(securityUtil, times(1)).getLoggedInUser();
         verify(incomeRepository, times(1)).findByWalletId(wallet.getId());
@@ -340,7 +342,7 @@ class IncomeServiceImplTest {
     }
 
     @Test
-    public void deleteIncomeTest() throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException {
+    public void deleteIncomeTest() throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
 
         long incomeId = 1L;
         UserEntity userEntity = new UserEntity();

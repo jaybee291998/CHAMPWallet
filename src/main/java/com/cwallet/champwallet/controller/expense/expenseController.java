@@ -19,20 +19,20 @@ import com.cwallet.champwallet.service.expense.ExpenseService;
 
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import com.cwallet.champwallet.repository.budget.BudgetRepository;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 //import javax.jws.WebParam;
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -93,17 +93,33 @@ public class expenseController {
     }
 
     @GetMapping("/users/expense/list")
-    public String getUsersExpense(Model model) {
-        List<ExpenseDTO> userExpense = expenseService.getAllUserExpense();
-        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+    public String getUsersExpense(@RequestParam(value = "specific-date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate specificDate, Model model) {
+        List<ExpenseDTO> userExpense = expenseService.getAllUserExpense(specificDate);
         double totalAmount = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
         model.addAttribute("userExpense", userExpense);
-
         model.addAttribute("totalAmount", totalAmount);
+        if(specificDate == null) {
+            specificDate = LocalDate.now();
+        }
+        model.addAttribute("entryDate", specificDate);
         return "expense/expense-list";
     }
 
-
+//    @GetMapping("/users/expense/list")
+//    public String getUsersExpense(@RequestParam("specific-date") Optional<LocalDate> specificDate, Model model) {
+//        if(specificDate.isPresent()) {
+//            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```");
+//            System.out.println(specificDate.get());
+//            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~```");
+//        }
+//        List<ExpenseDTO> userExpense = expenseService.getAllUserExpense();
+//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
+//        double totalAmount = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
+//        model.addAttribute("userExpense", userExpense);
+//
+//        model.addAttribute("totalAmount", totalAmount);
+//        return "expense/expense-list";
+//    }
     @SneakyThrows
     @GetMapping("/users/expense/{expenseID}")
     public String getSpecificExpense(@PathVariable("expenseID") long expenseID, Model model) {

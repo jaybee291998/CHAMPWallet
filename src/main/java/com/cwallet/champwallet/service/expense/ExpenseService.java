@@ -12,12 +12,12 @@ import com.cwallet.champwallet.models.expense.ExpenseType;
 import com.cwallet.champwallet.models.budget.Budget;
 
 
-
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ExpenseService {
     boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType,Budget budget) throws NoSuchEntityOrNotAuthorized, NoSuchBudgetOrNotAuthorized, NoSuchExpenseTypeOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException;
-    List<ExpenseDTO> getAllUserExpense();
+    List<ExpenseDTO> getAllUserExpense(LocalDate specificDate);
     List<ExpenseJson> getExpensesWithinInterval(int intervalInDays);
 
      ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized;

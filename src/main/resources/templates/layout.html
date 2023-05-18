@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Option 1: Include in HTML -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
@@ -47,6 +47,16 @@
         <nav class="navbar bg-secondary navbar-dark">
             <a class="navbar-brand" th:href="@{/users/home}">
                 <h3 class="text-primary">ChampWAllet</h3>
+                <div class="d-flex align-items-center ms-4 mb-4">
+                    <div class="position-relative">
+                        <img class="rounded-circle" th:src="@{/img/champwalletlogo(1).png}" alt="" style="width: 40px; height: 40px;">
+                        <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0" th:text="${user}"></h6>
+                        <span>Online</span>
+                    </div>
+                </div>
             </a>
             <div class="navbar-nav w-100">
                 <a th:href="@{/users/home}" class="nav-item nav-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
@@ -93,8 +103,8 @@
             <div class="navbar-nav align-items-center ms-auto">
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                        <img class="rounded-circle me-lg-2">
-                        <span class="d-none d-lg-inline-flex">User</span>
+                        <img class="rounded-circle me-lg-2" th:src="@{/img/champwalletlogo(1).png}">
+                        <span class="d-none d-lg-inline-flex" th:text="${user}"></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
                         <a href="#" class="dropdown-item">My Profile</a>
@@ -124,7 +134,19 @@
             </div>
         </div>
 </footer>
+<!--        <script  src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+<!--        <script src="@{https://code.jquery.com/jquery-3.4.1.min.js}"></script>-->
+<!--        <script type="text/javascript" th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js}"></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/chart/chart.min.js}" defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/easing/easing.min.js}"defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/waypoints/waypoints.min.js}"defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/owlcarousel/owl.carousel.min.js}"defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/tempusdominus/js/moment.min.js}"defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/tempusdominus/js/moment-timezone.min.js}"defer></script>-->
+<!--        <script type="text/javascript" th:src="@{static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js}"></script>-->
 
+<!--        &lt;!&ndash; Template Javascript &ndash;&gt;-->
+<!--        <script type="text/javascript" th:src="@{/js/main.js}"defer></script>-->
 
     <!-- Footer End -->
 
@@ -133,21 +155,22 @@
 
 </div>
 </div>
-</html>
 
-<!-- Custom Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../static/lib/chart/chart.min.js"></script>
-<script src="../static/lib/easing/easing.min.js"></script>
-<script src="../static/lib/waypoints/waypoints.min.js"></script>
-<script src="../static/lib/owlcarousel/owl.carousel.min.js"></script>
-<script src="../static/lib/tempusdominus/js/moment.min.js"></script>
-<script src="../static/lib/tempusdominus/js/moment-timezone.min.js"></script>
-<script src="../static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+
+ Custom Scripts
+<script th:src="@{https://cdn.jsdelivr.net/npm/chart.js}"defer></script>
+<script th:src="@{https://code.jquery.com/jquery-3.4.1.min.js}"></script>
+<script th:src="@{https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js}"></script>
+<script type="text/javascript" th:src="@{static/lib/chart/chart.min.js}" defer></script>
+<script type="text/javascript" th:src="@{static/lib/easing/easing.min.js}"defer></script>
+<script type="text/javascript" th:src="@{static/lib/waypoints/waypoints.min.js}"defer></script>
+<script type="text/javascript" th:src="@{static/lib/owlcarousel/owl.carousel.min.js}"defer></script>
+<script type="text/javascript" th:src="@{static/lib/tempusdominus/js/moment.min.js}"defer></script>
+<script type="text/javascript" th:src="@{static/lib/tempusdominus/js/moment-timezone.min.js}"defer></script>
+<script type="text/javascript" th:src="@{static/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js}"></script>
 
 <!-- Template Javascript -->
-<script src="../static/js/main.js"></script>
-
+<script type="text/javascript" th:src="@{/js/main.js}"defer></script><script th:src="@{../static/js/main.js}"></script>
+</html>
 
 

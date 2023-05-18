@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="https://thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+<html lang="en" xmlns:th="https://thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
     <title>Update Income</title>
@@ -11,67 +7,53 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div th:if="${errorMessage}" class="alert alert-danger">
-                <p th:text="${errorMessage}"></p>
+    <section layout:fragment="body" class="py-4 px-4">
+        <div th:if="${errorMessage}" class="alert alert-primary alert-dismissible fade show col-12" role="alert">
+            <i class="fa fa-exclamation-circle me-2"></i>
+            <p th:text="${errorMessage}"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <br>
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Update Income</h4>
+            <div>
+                <a th:href="@{/users/income/list}" class="btn btn-success mx-1">Back</a>
+                <button type="submit" form="incomeForm" id="submit" class="btn btn-primary">Update</button>
             </div>
-            <form role="form" method="post" th:action="@{/users/income/update/{incomeID}(incomeID=${incomeForm.id})}" th:object="${incomeForm}">
-                <input type="hidden" th:field="*{id}">
-                <div class="form-group">
-                    <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
-                    <label for="source"></label>
-                    <input
-                            type="text"
-                            class="form-control"
-                            id="source"
-                            placeholder="Enter Source"
-                            name="source"
-                            th:field="*{source}"
-                    >
-                    <p th:if="${#fields.hasErrors('source')}"
-                       th:errors="*{source}" class="text-danger"></p>
-                </div>
-                <div class="form-group">
-                    <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
-                    <label for="description">Description</label>
-                    <textarea
-                            type="text"
-                            class="form-control"
-                            id="description"
-                            placeholder="Enter Description"
-                            name="description"
-                            th:field="*{description}"
-                    ></textarea>
-                    <p th:if="${#fields.hasErrors('description')}"
-                       th:errors="*{description}" class="text-danger"></p>
-                </div>
-                <!--                <select name="income-type" id="incometype">-->
-                <!--                    <option th:></option>-->
-                <!--                </select>-->
-                <select name="income-type" id="incometype" th:field="*{incomeTypeID}">
-                    <option th:each="incomeType:${incomeTypes}" th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
-                </select>
-                <div class="form-group">
-                    <label for="amount">Amount</label>
-                    <textarea
-                            type="text"
-                            class="form-control"
-                            id="amount"
-                            placeholder="Enter Amount"
-                            name="amount"
-                            th:field="*{amount}"
-                    ></textarea>
-                    <p th:if="${#fields.hasErrors('amount')}"
-                       th:errors="*{amount}" class="text-danger"></p>
-
-                </div>
-
-                <button type="submit" id="submit" class="btn btn-primary">update budget</button>
-            </form>
+        </div>
+        <br>
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <form id="incomeForm" role="form" method="post" th:action="@{/users/income/update/{incomeID}(incomeID=${incomeForm.id})}" th:object="${incomeForm}">
+                    <input type="hidden" th:field="*{id}">
+                    <div class="form-group">
+                        <p th:if="${nameError}" th:text="${nameError}" class="alert alert-danger"></p>
+                        <label for="source">Source</label>
+                        <p th:if="${sourceError}" th:text="${sourceError}" class="alert alert-danger"></p>
+                        <input type="text" class="form-control" id="source" placeholder="Enter Source" name="source" th:field="*{source}">
+                        <p th:if="${#fields.hasErrors('source')}" th:errors="*{source}" class="text-danger"></p>
+                    </div>
+                    <div class="form-group">
+                        <p th:if="${descriptionError}" th:text="${descriptionError}" class="alert alert-danger"></p>
+                        <label for="description">Description</label>
+                        <textarea type="text" class="form-control" id="description" placeholder="Enter Description" name="description" th:field="*{description}"></textarea>
+                        <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></p>
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Income type</label>
+                        <select class="form-select" th:field="*{incomeTypeID}" id="incometype" name="income-type" aria-label=".form-select-sm example">
+                            <option th:each="incomeType:${incomeTypes}" th:value="${incomeType.id}" th:text="${incomeType.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <textarea type="text" class="form-control" id="amount" placeholder="Enter Amount" name="amount" th:field="*{amount}"></textarea>
+                        <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}" class="text-danger"></p>
+                    </div>
+                </form>
+            </div>
         </div>
     </section>
 </main>
-
 </body>
 </html>

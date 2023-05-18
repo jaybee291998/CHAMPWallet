@@ -1,5 +1,6 @@
 package com.cwallet.champwallet.service.income;
 
+import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
@@ -15,7 +16,7 @@ public interface IncomeService {
 
     boolean save(IncomeDTO incomeDTO, IncomeType incomeType) throws AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized;
     List<IncomeDTO> getAllUserIncome(LocalDate specificDate);
-
+    List<IncomeDTO> getAllUserIncomeAll();
 IncomeDTO getSpecificIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized;
 
 boolean isUpdateable(IncomeDTO incomeDto);

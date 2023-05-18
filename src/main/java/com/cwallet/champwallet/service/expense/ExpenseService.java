@@ -18,6 +18,7 @@ import java.util.List;
 public interface ExpenseService {
     boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType,Budget budget) throws NoSuchEntityOrNotAuthorized, NoSuchBudgetOrNotAuthorized, NoSuchExpenseTypeOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException;
     List<ExpenseDTO> getAllUserExpense(LocalDate specificDate);
+    List<ExpenseDTO> getAllUserExpenseAll();
     List<ExpenseJson> getExpensesWithinInterval(int intervalInDays);
 
      ExpenseDTO getSpecificExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized;

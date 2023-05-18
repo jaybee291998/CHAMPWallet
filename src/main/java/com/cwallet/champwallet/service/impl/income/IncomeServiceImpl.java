@@ -2,6 +2,7 @@ package com.cwallet.champwallet.service.impl.income;
 
 import com.cwallet.champwallet.dto.expense.ExpenseDTO;
 import com.cwallet.champwallet.dto.income.IncomeDTO;
+import com.cwallet.champwallet.dto.income.IncomeJson;
 import com.cwallet.champwallet.exception.AccountingConstraintViolationException;
 import com.cwallet.champwallet.exception.NoSuchEntityOrNotAuthorized;
 import com.cwallet.champwallet.models.account.UserEntity;
@@ -28,8 +29,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.mapToExpenseDTO;
-import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncome;
-import static com.cwallet.champwallet.mappers.income.IncomeMapper.mapToIncomeDTO;
+import static com.cwallet.champwallet.mappers.expense.ExpenseMapper.mapToExpenseJson;
+import static com.cwallet.champwallet.mappers.income.IncomeMapper.*;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
@@ -163,5 +164,16 @@ public class IncomeServiceImpl implements IncomeService {
         wallet.setBalance(wallet.getBalance() - incomeToDeduct);
         incomeRepository.delete(income);
         walletRepository.save(wallet);
+    }
+
+    @Override
+    public List<IncomeJson> getIncomeWithinInterval(int intervalInDays) {
+        if(intervalInDays <= 0) {
+            throw new IllegalArgumentException("interval must not be less than or equal to zero");
+        }
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusDays(intervalInDays);
+        Wallet wallet = securityUtil.getLoggedInUser().getWallet();
+        return incomeRepository.getIncomesWithinDateRange(wallet.getId(), start, end).stream().map(e -> mapToIncomeJson(e)).collect(Collectors.toList());
     }
 }

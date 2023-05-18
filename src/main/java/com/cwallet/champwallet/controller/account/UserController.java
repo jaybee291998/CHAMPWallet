@@ -16,6 +16,7 @@ import com.cwallet.champwallet.service.budget.BudgetService;
 import com.cwallet.champwallet.service.expense.ExpenseService;
 import com.cwallet.champwallet.service.income.IncomeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,7 +28,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 //import javax.jws.WebParam;
 import javax.mail.SendFailedException;
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -117,6 +121,13 @@ public class UserController {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         List<IncomeDTO> userIncome = incomeService.getAllUserIncomeAll();
         List<ExpenseDTO> userExpense = expenseService.getAllUserExpenseAll();
+        List<ExpenseDTO> userExpenseSpecific = expenseService.getAllUserExpense(null);
+        List<ExpenseDTO> sortedExpenses = userExpenseSpecific.stream()
+                .sorted(Comparator.comparing(ExpenseDTO::getCreationTime).reversed())
+                .collect(Collectors.toList());
+        List<ExpenseDTO> latestExpenses = sortedExpenses.stream()
+                .limit(5)
+                .collect(Collectors.toList());
         double totalExpense = userExpense.stream().reduce(0D, (subtotal, element) -> subtotal + element.getPrice(), Double::sum);
         double allocatedBalance = userBudgets.stream().reduce(0D, (subtotal, element) -> subtotal + element.getBalance(), Double::sum);
         double unallocatedBalance = loggedInUser.getWallet().getBalance();
@@ -127,6 +138,7 @@ public class UserController {
         model.addAttribute("allocatedBalance", allocatedBalance);
         model.addAttribute("totalAmount",totalAmount );
         model.addAttribute("totalExpense", totalExpense);
+        model.addAttribute("latestExpenses", latestExpenses);
         return "home";
     }
 

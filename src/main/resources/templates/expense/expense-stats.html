@@ -2,7 +2,7 @@
 <html lang="en"
       xmlns:th="https://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
+      layout:decorate="~{layout-chart}"
 >
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
+    <section layout:fragment="body-chart" class="py-5">
         <div class="container">
             <h1>Expense Statistics</h1>
             <label for="interval-select">Interval</label>
@@ -27,17 +27,6 @@
             <div id="button-div">
             </div>
             <div id="control-div">
-                <!-- <label for="budget-select">Budget</label>
-                <select name="budget-select" id="budget-select"></select>
-    
-                <label for="category-select">Category</label>
-                <select name="category-select" id="category-select"></select>
-
-                <label for="start-date-select">Start Date</label>
-                <select name="start-date-select" id="start-date-select"></select>
-
-                <label for="end-date-select">End Date</label>
-                <select name="end-date-select" id="end-date-select"></select> -->
             </div>
             <div id="canvas-div">
             </div>
@@ -50,7 +39,6 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
-        <!-- <script th:src="@{/js/modal.js}"></script> -->
         <script th:src="@{/js/api.js}"></script>
         <script th:inline="javascript" defer>
             let raw_expense_data = [];
@@ -76,7 +64,7 @@
                 console.log(category_names);
                 console.log(raw_expense_data);
                 let interval_obj = {1:"1 day", 7:"1 week", 14:"2 weeks", 30:"1 month", 90:"3 months", 180:"6 months"};
-                populateSelectControl($('#interval-select')[0], interval_obj, () => {let interval = $('#interval-select')[0].value; init_expense_data(interval)});
+                populateSelectControl($('#interval-select')[0], interval_obj, async () => {let interval = $('#interval-select')[0].value; await init_expense_data(interval); updateChartAndTable();});
                 createControls();
                 updateChartAndTable();
             }
@@ -154,14 +142,15 @@
                 let start_date_select = $('#start-date-select')[0];
                 let end_date_select = $('#end-date-select')[0];
                 let expenses = raw_expense_data;
+                console.log(expenses);
 
                 console.log(budget_select.value);
                 // if the fund selected is not all
                 // fiter the data to the selected fund
-                if(budget_select.value != -1) expenses = expenses.filter((expense) => expense['budget'] == budget_names[budget_select.value]);
+                if(budget_select.value != -1) expenses = expenses.filter((expense) => expense['budget'] == budget_select.value);
                 // if category is not all
                 // filter the data based on the value of category
-                if(category_select.value != -1) expenses = expenses.filter((expense) => expense['category'] == category_names[category_select.value]);
+                if(category_select.value != -1) expenses = expenses.filter((expense) => expense['category'] == category_select.value);
                 if(start_date_select.value != -1 && end_date_select.value != -1){
                     if(start_date_select.value < end_date_select.value){
                         expenses = expenses.filter((expense) => (start_date_select.value <= expense.creationTime.slice(0,10) && expense.creationTime.slice(0,10) <= end_date_select.value));

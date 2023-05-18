@@ -2,7 +2,7 @@
 <html lang="en"
       xmlns:th="https://thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
+      layout:decorate="~{layout-chart}"
 >
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body" class="py-5">
+    <section layout:fragment="body-chart" class="py-5">
         <div class="container">
             <h1 class="center-text">Budget Transfer History</h1>
             <h2 th:text="${budget.name}"></h2>
@@ -210,7 +210,7 @@
             function normalizeDescription(raw_data, len){
                 return raw_data.map((fah, i)=>{
                     let new_fah = {...fah}
-                    if(new_fah.description.length > len){
+                    if(new_fah.description != null && new_fah.description.length > len){
                         new_fah.description = `${new_fah.description.slice(0, len-2)}...`
                     }
                     return new_fah;

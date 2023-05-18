@@ -61,23 +61,25 @@
                         </tr>
                         </thead>
                         <tbody>
-                <tr th:each="expense:${userExpense}">
+                        <tr th:each="expense:${userExpense}">
 
-                    <td th:if="${expense.description.length<= 30}" th:text="${expense.description}"></td>
-                    <td th:if="${expense.description.length > 30}" th:text="${expense.description.substring(0, 30) + '...'}"></td>
-                    <td th:text="${expense.expenseType.name}"></td>
-                    <td th:text="${expense.price}"></td>
-                    <td th:text="${expense.budget.name}"></td>
-                    <td th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
-                    <td class="text-center"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}" class="btn btn-primary btn-sm">Details</a></td>
-                </tr>
-                </tbody>
-            </table>
+                            <td th:if="${expense.description.length<= 30}" th:text="${expense.description}"></td>
+                            <td th:if="${expense.description.length > 30}"
+                                th:text="${expense.description.substring(0, 30) + '...'}"></td>
+                            <td th:text="${expense.expenseType.name}"></td>
+                            <td th:text="${expense.price}"></td>
+                            <td th:text="${expense.budget.name}"></td>
+                            <td th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></td>
+                            <td class="text-center"><a th:href="@{/users/expense/{expenseID}(expenseID=${expense.id})}"
+                                                       class="btn btn-primary btn-sm">Details</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-        </div>
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
-        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-        <script th:inline="javascript">
+                </div>
+                <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
+                <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+                <script th:inline="javascript">
             $(document).ready( function () {
                $('#expense-table').DataTable();
             });
@@ -96,10 +98,14 @@
                 $('#specific-expense-date').attr('max', maxDate);
             });
 
-        </script>
+
+
+                </script>
             </div>
         </div>
     </section>
+
+
 </main>
 </body>
 </html>

@@ -65,13 +65,11 @@ public class IncomeServiceImpl implements IncomeService {
         income.setWallet(wallet);
         income.setIncomeType(actualIncomeType);
         wallet.setBalance(wallet.getBalance() + income.getAmount());
-        try {
+
             incomeRepository.save(income);
             walletRepository.save(wallet);
             return true;
-        } catch (Exception e) {
-            return false;
-        }
+
     }
     @Override
     public List<IncomeDTO> getAllUserIncomeAll() {

@@ -6,52 +6,64 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Create Budget</title>
+    <title>Transfer History</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
     <!-- Page Content-->
-    <section layout:fragment="body-chart" class="py-5">
-        <div class="container">
-            <h1 class="center-text">Budget Transfer History</h1>
-            <h2 th:text="${budget.name}"></h2>
-            <ul>
-                <li><button id="outgoing-btn" class="btn btn-primary btn-big">outgoing</button></li>
-                <li><button id="incoming-btn" class="btn btn-success btn-big">incoming</button></li>
-            </ul>
+
+    <section layout:fragment="body-chart" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4 class="center-text">Budget Transfer History</h4>
+            <div>
+                <button onclick="exp()" class="btn btn-primary">Download Excel</button>
+                <a href="/users/budget/list" class="btn btn-success">Go back</a>
+            </div>
+        </div>
+
+        <br>
+        <div class="bg-secondary rounded h-100 p-4 ">
+            <div class="col-12 d-flex justify-content-between">
+                <h4 th:text="${#strings.toUpperCase(budget.name)}"></h4>
+
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="btnradio" id="outgoing-btn" autocomplete="off"
+                           checked>
+                    <label class="btn btn-outline-primary" for="outgoing-btn">Outgoing</label>
+
+                    <input type="radio" class="btn-check" name="btnradio" id="incoming-btn" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="incoming-btn">Incoming</label>
+                </div>
+            </div>
+            <hr>
             <div id="outgoing-div">
-                <h2>Transferred Budget</h2>
-                <!-- <dl class="row">
-                    <dt class="col-sm-3">Total Transfered: </dt>
-                    <dd class="col-sm-1" id="total-transferred"></dd>
-                </dl> -->
-                <label for="outgoing-select">Interval</label>
+                <h4>Transferred Budget</h4>
+
+                <label>Interval</label>
                 <select name="outgoing-select" id="outgoing-select-interval"></select>
                 <br>
                 <label for="recipient-budget-select">Recipient</label>
                 <select name="recipient-budget-select" id="recipient-budget-select"></select>
                 <div id="recipient-table-div">
-            
+
                 </div>
             </div>
             <div id="incoming-div">
-                <h2>Received Budgets</h2>
-                <!-- <dl class="row">
-                    <dt class="col-sm-3">Total Received: </dt>
-                    <dd class="col-sm-1" id="total-received"></dd>
-                </dl> -->
-                <label for="incoming-select">Interval</label>
+                <h4>Received Budgets</h4>
+
+                <label>Interval</label>
                 <select name="incoming-select" id="incoming-select-interval"></select>
                 <br>
                 <label for="recipient-budget-select">Sender</label>
                 <select name="sender-budget-select" id="sender-budget-select"></select>
                 <div id="sender-table-div">
-            
+
                 </div>
             </div>
-            <button onclick="exp()" class="btn btn-primary">Download Excel</button>
+        </div>
+        <div class="col-12">
             <div id="myModal" class="modal">
-                <div class="modal-content">
+                <div class="modal-content bg-secondary">
                     <span class="close">&times;</span>
                     <div class="my-container">
                         <div class="card-header">
@@ -60,16 +72,16 @@
                         <div class="card">
                             <div class="card-body">
                                 <dl class="row">
-                                    <dt class="col-sm-3">Description</dt>
-                                    <dd class="col-sm-9" id="description-data">putang inang bola yan napaka mahal</dd>
-                                    <dt class="col-sm-3">Amount</dt>
-                                    <dd class="col-sm-9" id="amount-data">100</dd>
-                                    <dt class="col-sm-3">From</dt>
-                                    <dd class="col-sm-9" id="sender-data">pang grocery</dd>
-                                    <dt class="col-sm-3">To</dt>
-                                    <dd class="col-sm-9" id="recipient-data">pang grocery</dd>
-                                    <dt class="col-sm-3">Date</dt>
-                                    <dd class="col-sm-9" id="date-data">April 09, 2022 8:33:12 PM</dd>
+                                    <dt class="col-sm-3"><strong>Description</strong></dt>
+                                    <dd class="col-sm-9" id="description-data"></dd>
+                                    <dt class="col-sm-3"><strong>Amount</strong></dt>
+                                    <dd class="col-sm-9" id="amount-data"></dd>
+                                    <dt class="col-sm-3"><strong>From</strong></dt>
+                                    <dd class="col-sm-9" id="sender-data"></dd>
+                                    <dt class="col-sm-3"><strong>To</strong></dt>
+                                    <dd class="col-sm-9" id="recipient-data"></dd>
+                                    <dt class="col-sm-3"><strong>Date</strong></dt>
+                                    <dd class="col-sm-9" id="date-data"></dd>
                                 </dl>
                             </div>
                         </div>
@@ -77,9 +89,8 @@
                 </div>
             </div>
         </div>
-        <!-- <script th:src="@{/js/custom.js}"></script> -->
         <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <script th:src="@{/js/modal.js}"></script>
@@ -315,6 +326,8 @@
             }
 
             const exp = () => {export_to_excel('xlsx'); console.log("export clicked");};
+
+
         </script>
     </section>
 </main>

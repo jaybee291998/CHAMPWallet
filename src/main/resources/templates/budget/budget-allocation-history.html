@@ -6,41 +6,50 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Create Budget</title>
+    <title>Allocation History</title>
 </head>
 <body class="d-flex flex-column h-100">
 <main class="flex-shrink-0">
-    <!-- Page Content-->
-    <section layout:fragment="body-chart" class="py-5">
-        <div class="container">
-            <h1 class="center-text">Fund Allocation History</h1>
-            <h2 th:text="${budget.name}"></h2>
+
+    <section layout:fragment="body-chart" class="py-4 px-4">
+        <div class="bg-secondary rounded h-100 p-3 d-flex justify-content-between">
+            <h4>Fund Allocation History</h4>
+            <div>
+                <button onclick="exp()" class="btn btn-primary">Download Excel</button>
+                <a href="/users/budget/list" class="btn btn-success">Go back</a>
+            </div>
+        </div>
+        <br>
+        <div class="bg-secondary rounded h-100 p-4">
+            <h4 th:text="${#strings.toUpperCase(budget.name)}"></h4>
+            <hr>
             <label for="interval-select">Interval</label>
             <select name="interval-select" id="interval-select"></select>
-            <div id="table-div">
+            <div class="table-responsive" id="table-div"></div>
+        </div>
+        <br>
+        <div class="col-12">
 
-            </div>
-            <button onclick="exp()" class="btn btn-primary">Download Excel</button>
-            <div id="myModal" class="modal">
-                <div class="modal-content">
+            <div id="myModal" class="modal ">
+                <div class="modal-content bg-secondary">
                     <span class="close">&times;</span>
-                    <div class="my-container">
+                    <div class="my-container ">
                         <div class="card-header">
-                            <h5 class="card-title">Fund Allocation History Detail</h5>
+                            <h4 class="card-title">Fund Allocation History Detail</h4>
                         </div>
                         <div class="card">
                             <div class="card-body">
                                 <dl class="row">
-                                    <dt class="col-sm-3">Description</dt>
-                                    <dd class="col-sm-9" id="description-data">putang inang bola yan napaka mahal</dd>
-                                    <dt class="col-sm-3">Budget</dt>
-                                    <dd class="col-sm-9" id="budget-data">pang grocery</dd>
-                                    <dt class="col-sm-3">Amount</dt>
-                                    <dd class="col-sm-9" id="amount-data">100</dd>
-                                    <dt class="col-sm-3">Type</dt>
-                                    <dd class="col-sm-9" id="type-data">Allocate</dd>
-                                    <dt class="col-sm-3">Date</dt>
-                                    <dd class="col-sm-9" id="date-data">April 09, 2022 8:33:12 PM</dd>
+                                    <dt class="col-sm-3"><strong>Description</strong></dt>
+                                    <dd class="col-sm-9" id="description-data"></dd>
+                                    <dt class="col-sm-3"><strong>Budget</strong></dt>
+                                    <dd class="col-sm-9" id="budget-data"></dd>
+                                    <dt class="col-sm-3"><strong>Amount</strong></dt>
+                                    <dd class="col-sm-9" id="amount-data"></dd>
+                                    <dt class="col-sm-3"><strong>Type</strong></dt>
+                                    <dd class="col-sm-9" id="type-data"></dd>
+                                    <dt class="col-sm-3"><strong>Date</strong></dt>
+                                    <dd class="col-sm-9" id="date-data"></dd>
                                 </dl>
                             </div>
                         </div>
@@ -48,9 +57,8 @@
                 </div>
             </div>
         </div>
-        <!-- <script th:src="@{/js/custom.js}"></script> -->
         <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css"/>
         <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
         <script th:src="@{/js/ui.js}"></script>
         <script th:src="@{/js/modal.js}"></script>
@@ -145,8 +153,8 @@
                     updateModalContent(budget_allocation_history.filter(bah => bah.id == e.srcElement.parentNode.id)[0]);
                 }
 
-                let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
-                // let hiddenTable = createTable(budget_allocation_history, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-striped', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
+                let table = createTable(table_data, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-hover', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
+                // let hiddenTable = createTable(budget_allocation_history, ['description', 'budget', 'amount', 'type', 'creationTime'], row_selection_func, 'table table-hover', ['Description', 'Budget', 'Amount', 'Type', 'Date']);
                 table.setAttribute("id", "tbl_exporttable_to_xls");
                 $('#table-div')[0].innerHTML = "";
                 $('#table-div')[0].appendChild(table);
@@ -173,6 +181,7 @@
             }
 
             const exp = () => {export_to_excel('xlsx'); console.log("export clicked");};
+
         </script>
     </section>
 </main>

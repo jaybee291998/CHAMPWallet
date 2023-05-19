@@ -29,7 +29,7 @@
           <dt class="col-sm-4"><strong>Name:</strong></dt>
           <dd class="col-sm-8" th:text="${expenseType.name}"></dd>
           <dt class="col-sm-4">Date and Time of Creation</dt>
-          <dd class="col-sm-8" th:text="${expenseType.creationTime}"></dd>
+          <dd class="col-sm-8" th:text="${#temporals.format(expenseType.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></dd>
           <dt class="col-sm-4">Description:</dt>
           <dd class="col-sm-8" th:text="${expenseType.description}"></dd>
         </dl>

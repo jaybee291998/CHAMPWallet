@@ -41,7 +41,7 @@
                     <dt class="col-sm-4">Description: </dt>
                     <dd class="col-sm-8" th:text="${budget.description}"></dd>
                     <dt class="col-sm-4">Creation Time: </dt>
-                    <dd class="col-sm-8" th:text="${budget.creationTime}"></dd>
+                    <dd class="col-sm-8" th:text="${#temporals.format(budget.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></dd>
                     <dt class="col-sm-4">Balance: </dt>
                     <dd class="col-sm-8" th:text="${budget.balance}"></dd>
                     <dt class="col-sm-4">Status: </dt>

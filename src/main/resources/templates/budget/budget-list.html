@@ -61,7 +61,7 @@
                         <tr>
                             <th><h6><strong>Name</strong></h6></th>
                             <th><h6><strong>Description</strong></h6></th>
-                            <th><h6><strong>Enabled</strong></h6></th>
+                            <th><h6><strong>Status</strong></h6></th>
                             <th><h6><strong>Balance</strong></h6></th>
                             <th class="text-center"><h6><strong>Action</strong></h6></th> <!-- Header for the action column -->
                         </tr>
@@ -72,7 +72,7 @@
                             <td th:if="${budget.name.length > 20}" th:text="${budget.name.substring(0, 20) + '...'}"></td>
                             <td th:if="${budget.description.length<= 30}" th:text="${budget.description}"></td>
                             <td th:if="${budget.description.length > 30}" th:text="${budget.description.substring(0, 30) + '...'}"></td>
-                            <td th:text="${budget.isEnabled}"></td>
+                            <td th:text="${budget.isEnabled?'Active':'Inactive'}"></td>
                             <td th:text="${budget.balance}"></td>
                             <td class="text-center">
                                 <a th:href="@{/users/budget/{budgetID}(budgetID=${budget.id})}" class="btn btn-primary btn-sm">Details</a>
@@ -93,6 +93,7 @@
                $('#budget-table').DataTable();
             });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     </section>
 </main>
 </body>

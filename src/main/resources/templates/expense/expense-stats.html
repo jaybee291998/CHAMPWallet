@@ -32,6 +32,21 @@
             </div>
             <div id="table-div">
             </div>	
+            <div>
+                <h4>Statistics</h4>
+                <div id="daily-stat-div">
+                    <p>Average Daily Expense:<span id="average-daily"></span></p>
+                    <p>Minimum Daily Expense:<span id="min-daily"></span></p>
+                    <p>Maximum Daily Expense:<span id="max-daily"></span></p>
+                </div>
+                <hr>
+                <div id="daily-stat-div">
+                    <p>Average Expense:<span id="average"></span></p>
+                    <p>Minimum Expense:<span id="min"></span></p>
+                    <p>Maximum Expense:<span id="max"></span></p>
+                    <p>Total Expenses:<span id="total"></span></p>
+                </div>
+            </div>
             <button onclick="exp()" class="btn btn-primary">Download Excel</button>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.5.1/chart.min.js" integrity="sha512-Wt1bJGtlnMtGP0dqNFH1xlkLBNpEodaiQ8ZN5JLA5wpc1sUlk/O5uuOMNgvzddzkpvZ9GLyYNa8w2s7rqiTk5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -55,6 +70,43 @@
             // function $(e){
             //     return document.getElementById(e);
             // }
+
+            const getStats = (numeric_data, label_data) => {
+                if(numeric_data.length != label_data.length) throw "numeric and label are not the same length";
+                let average = 0;
+                let total = 0;
+                let min_index = 0;
+                let min_value = 9999999999999999;
+                let max_index = 0;
+                let max_value = -9999999999999999;
+                for(let i = 0; i < numeric_data.length; i++) {
+                    let current_numeric_val = numeric_data[i];
+                    if(current_numeric_val > max_value) {
+                        max_value = current_numeric_val;
+                        max_index = i;
+                    } 
+                    if(current_numeric_val < min_value) {
+                        min_value = current_numeric_val;
+                        min_index = i;
+                    }
+                    total += current_numeric_val;
+                }
+                average = total / numeric_data.length;
+                return {average:average, total:total, min:{label:label_data[min_index], value:min_value}, max:{label:label_data[max_index], value:max_value}};
+            }
+
+            const setDailyStats = stat_data => {
+                $('#average-daily')[0].innerHTML = `${stat_data["average"].toFixed(2)}`;
+                $('#min-daily')[0].innerHTML = ` <b>${stat_data["min"]["value"].toFixed(2)}</b> on <b>${stat_data["min"]["label"]}</b>`;
+                $('#max-daily')[0].innerHTML = ` <b>${stat_data["max"]["value"].toFixed(2)}</b> on <b>${stat_data["max"]["label"]}</b>`;
+            }
+
+            const setStats = stat_data => {
+                $('#average')[0].innerHTML = `${stat_data["average"].toFixed(2)}`;
+                $('#min')[0].innerHTML = ` <b>${stat_data["min"]["value"].toFixed(2)}</b> on <b>${processDateStr(stat_data["min"]["label"])}</b>`;
+                $('#max')[0].innerHTML = ` <b>${stat_data["max"]["value"].toFixed(2)}</b> on <b>${processDateStr(stat_data["max"]["label"])}</b>`;
+                $('#total')[0].innerHTML = ` <b>${stat_data["total"].toFixed(2)}`;                
+            }
 
             async function init_data() {
                 await init_budget_names();
@@ -176,6 +228,7 @@
                 filtered_expense_data = filterData();
                 updateChart();
                 displayTable(filtered_expense_data, $('#table-div')[0], e => console.log("clicked"));
+                setStats(getStats(filtered_expense_data.map(e => e.price), filtered_expense_data.map(e => e.creationTime)));
             }
 
             const populateSelectControl = (select_object, key_value_dict, func) => {
@@ -276,8 +329,12 @@
             // make a expense chart
             const make_expense_chart = async() =>{
                 let expense_data = filtered_expense_data;
-                var chart_data = process_chart_data(expense_data.map((data) => data.price), expense_data.map((data) => data.creationTime.slice(5, 10)));
+                let expense_prices = expense_data.map((data) => data.price);
+                let expense_timestamps = expense_data.map((data) => data.creationTime.slice(5, 10));
+                let chart_data = process_chart_data(expense_prices, expense_timestamps);
                 make_chart(chart_data, "expenses", $('#canvas-div')[0], $('#graph-type')[0].value);
+                setDailyStats(getStats(chart_data["data"], chart_data["labels"]));
+                console.log(chart_data["data"]);
             }
             // make a chart for fund and category
             const make_fund_chart = () => {

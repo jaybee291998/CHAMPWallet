@@ -39,7 +39,7 @@
                     <dt class="col-sm-4">Source: </dt>
                     <dd class="col-sm-8" th:text="${income.source}"></dd>
                     <dt class="col-sm-4">Creation Time: </dt>
-                    <dd class="col-sm-8" th:text="${income.creationTime}"></dd>
+                    <dd class="col-sm-8" th:text="${#temporals.format(income.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></dd>
                 </dl>
             </div>
 

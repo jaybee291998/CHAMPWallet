@@ -15,11 +15,11 @@
         <div class="container">
             <div>
                 <!--                <p><b>Name:</b><span th:text="${budget.name}"></span></p>-->
-                <p><b>Description:</b><span th:text="${expense.description}"></span></p>
-                <p><b>Category:</b><span th:text="${expense.expenseType.name}"></span></p>
-                <p><b>Amount:</b><span th:text="${expense.price}"></span></p>
-                <p><b>Budget:</b><span th:text="${expense.budget.name}"></span></p>
-                <p><b>Creation Time:</b><span th:text="${expense.creationTime}"></span></p>
+                <p><b>Description: </b><span th:text="${expense.description}"></span></p>
+                <p><b>Category: </b><span th:text="${expense.expenseType.name}"></span></p>
+                <p><b>Amount: </b><span th:text="${expense.price}"></span></p>
+                <p><b>Budget: </b><span th:text="${expense.budget.name}"></span></p>
+                <p><b>Creation Time: </b><span th:text="${#temporals.format(expense.creationTime , 'MMMM-dd-yyyy hh:mm:a')}"></span></p>
             </div>
 
             <hr>

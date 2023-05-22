@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.SendFailedException;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;

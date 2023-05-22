@@ -21,7 +21,8 @@ import com.cwallet.champwallet.exception.income.NoSuchIncomeOrNotAuthorized;
 import com.cwallet.champwallet.exception.income.IncomeExpiredException;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +50,7 @@ public class IncomeServiceImpl implements IncomeService {
 
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean save(IncomeDTO incomeDTO, IncomeType incomeType) throws AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized {
         if(incomeDTO.getAmount() <= 0) {
             throw new AccountingConstraintViolationException("Amount must be greater than 0");
@@ -65,11 +66,9 @@ public class IncomeServiceImpl implements IncomeService {
         income.setWallet(wallet);
         income.setIncomeType(actualIncomeType);
         wallet.setBalance(wallet.getBalance() + income.getAmount());
-
-            incomeRepository.save(income);
-            walletRepository.save(wallet);
-            return true;
-
+        incomeRepository.save(income);
+        walletRepository.save(wallet);
+        return true;
     }
     @Override
     public List<IncomeDTO> getAllUserIncomeAll() {
@@ -100,6 +99,7 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void update(IncomeDTO incomeDTO, long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
         if (incomeDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
@@ -142,8 +142,8 @@ public class IncomeServiceImpl implements IncomeService {
     public boolean isUpdateable(IncomeDTO incomeDTO){
         return !expirableAndOwnedService.isExpired(incomeDTO);
     }
-    @Transactional
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteIncome(long incomeID) throws NoSuchIncomeOrNotAuthorized, IncomeExpiredException, AccountingConstraintViolationException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();

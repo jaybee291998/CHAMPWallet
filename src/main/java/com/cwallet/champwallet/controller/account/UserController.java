@@ -166,7 +166,7 @@ public class UserController {
         } catch (NoSuchAccountException e) {
             model.addAttribute("errorMessage", "No such account exist");
             model.addAttribute("passwordResetForm", emailForm);
-            return "password-reset";
+            return "redirect:/password-reset?nosuchaccount=no such account";
         } catch (SendFailedException e) {
             model.addAttribute("errorMessage", "Failed to send reset link");
             model.addAttribute("passwordResetForm", emailForm);

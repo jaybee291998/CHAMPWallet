@@ -33,7 +33,8 @@ import com.cwallet.champwallet.utils.ExpirableAndOwnedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,10 +67,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Autowired
     private ExpenseTypeService expenseTypeService;
     @Override
-    @Transactional
-
-
-
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean save(ExpenseDTO expenseDTO, ExpenseType expenseType, Budget budget) throws NoSuchEntityOrNotAuthorized, NoSuchBudgetOrNotAuthorized, NoSuchExpenseTypeOrNotAuthorized, BudgetDisabledException, AccountingConstraintViolationException {
         if(expenseDTO.getPrice() <= 0) {
             throw new IllegalArgumentException("price must not be less than or equal to zero");
@@ -147,8 +145,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         Wallet wallet = securityUtil.getLoggedInUser().getWallet();
         return expenseRepository.getExpensesWithinDateRange(wallet.getId(), start, end).stream().map(e -> mapToExpenseJson(e)).collect(Collectors.toList());
     }
-    @Transactional
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized, BudgetDisabledException, NoSuchExpenseTypeOrNotAuthorized {
         if(expenseDTO == null) {
             throw new IllegalArgumentException("budget dto must not be null");
@@ -222,82 +220,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setBudget(newBudget);
         expenseRepository.save(expense);
     }
-
-//    @Override
-//    public void update(ExpenseDTO expenseDTO, long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, AccountingConstraintViolationException, NoSuchEntityOrNotAuthorized {
-//        if(expenseDTO == null) {
-//            throw new IllegalArgumentException("budget dto must not be null");
-//        }
-//        UserEntity loggedInUser = securityUtil.getLoggedInUser();
-//        Expense expense = expenseRepository.findByIdAndWalletId(expenseID, loggedInUser.getWallet().getId());
-//        if(expense == null) {
-//            throw new NoSuchExpenseOrNotAuthorized("No such income or unauthorized");
-//        }
-//        if(!isUpdateable(expenseDTO)){
-//            throw new ExpenseExpiredException("Expense no longer updateable");
-//        }
-//        long budgetID=expenseDTO.getBudget().getId();
-//        double oldExpense = expense.getPrice();
-//        double newExpense = expenseDTO.getPrice();
-//        Budget actualBudget = budgetService.getBudget(budgetID);
-//
-//
-//        if(actualBudget.getBalance() >= expenseDTO.getBudget().getBalance()){
-//
-//        if(oldExpense < newExpense) {
-//            double expenseIncrease = newExpense - oldExpense;
-//           actualBudget.setBalance(actualBudget.getBalance() - expenseIncrease);
-//
-//        } else {
-//
-//            double expenseDecrease = oldExpense - newExpense;
-//            if(expenseDecrease > actualBudget.getBalance()){
-//                try {
-//                    throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
-//                } catch (AccountingConstraintViolationException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//
-//                else
-//            {
-//                actualBudget.setBalance(actualBudget.getBalance() + expenseDecrease);
-//            }
-//        }
-//
-//        }
-//        else if(actualBudget.getBalance() < expenseDTO.getBudget().getBalance()){
-//            if(oldExpense < newExpense) {
-//
-//                actualBudget.setBalance(expenseDTO.getBudget().getBalance() - newExpense);
-//
-//            } else {
-//
-//
-//                if(newExpense > expenseDTO.getBudget().getBalance()){
-//                    try {
-//                        throw new AccountingConstraintViolationException(String.format("The Amount is lower the total balance"));
-//                    } catch (AccountingConstraintViolationException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//
-//                else
-//                {
-//                    actualBudget.setBalance(expenseDTO.getBudget().getBalance() - oldExpense);
-//                }
-//            }
-//        }
-//
-//        expense.setDescription(expenseDTO.getDescription());
-//        expense.setExpenseType(expenseDTO.getExpenseType());
-//        expense.setPrice(expenseDTO.getPrice());
-//        expense.setBudget(expenseDTO.getBudget());
-//        expenseRepository.save(expense);
-//        budgetRepository.save(actualBudget);
-//    }
-
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteExpense(long expenseID) throws NoSuchExpenseOrNotAuthorized, ExpenseExpiredException, NoSuchEntityOrNotAuthorized, BudgetDisabledException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
 //        long budgetID = mapToExpenseDTO(expenseRepository.findById(expenseID)).getBudget().getId();

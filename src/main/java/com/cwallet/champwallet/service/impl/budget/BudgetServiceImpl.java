@@ -23,7 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -109,8 +110,9 @@ public class BudgetServiceImpl implements BudgetService {
             return expenseRepository.findByBudgetId(budgetDTO.getId()).isEmpty();
         }
     }
-    @Transactional
+
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteBudget(long budgetID) throws NoSuchBudgetOrNotAuthorized, BudgetExpiredException, AccountingConstraintViolationException {
         UserEntity loggedInUser = securityUtil.getLoggedInUser();
         Wallet wallet = loggedInUser.getWallet();
@@ -142,8 +144,8 @@ public class BudgetServiceImpl implements BudgetService {
         }
         return budget;
     }
-    @Transactional
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void allocateToBudget(@NonNull long budgetID, @NonNull double amount, @NonNull String description, @NonNull boolean isAllocate) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException, BudgetDisabledException {
         if(amount <= 0) {
             throw new IllegalArgumentException("amount cant be a negative number");
@@ -178,8 +180,8 @@ public class BudgetServiceImpl implements BudgetService {
         budgetRepository.save(budget);
     }
 
-    @Transactional
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void fundTransferToOtherBudget(long senderBudgetID, long recipientBudgetID, String description, double amount) throws NoSuchEntityOrNotAuthorized, AccountingConstraintViolationException, BudgetDisabledException {
         if(description == null || description.equals("")) {
             throw new IllegalArgumentException("description cannot be empty or null");
@@ -224,6 +226,7 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void disableFund(long budgetID, String password) throws NoSuchEntityOrNotAuthorized, BudgetAlreadyDisabledException, IncorrectPasswordException {
         if(password == null || password.equals("")) {
             throw new IllegalArgumentException("Password must not be null or empty");
@@ -241,6 +244,7 @@ public class BudgetServiceImpl implements BudgetService {
         budgetRepository.save(budgetToDisable);
     }
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void enableFund(long budgetID, String password) throws NoSuchEntityOrNotAuthorized, BudgetAlreadyEnabledException, IncorrectPasswordException {
         if(password == null || password.equals("")) {
             throw new IllegalArgumentException("Password must not be null or empty");

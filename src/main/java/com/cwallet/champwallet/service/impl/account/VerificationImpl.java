@@ -15,6 +15,8 @@ import com.cwallet.champwallet.service.account.VerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.cwallet.champwallet.mappers.account.VerificationMapper.mapToVerification;
 import static com.cwallet.champwallet.mappers.account.VerificationMapper.mapToVerificationDTO;
@@ -54,6 +56,7 @@ public class VerificationImpl implements VerificationService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean validateAccount(String code, long account_id) throws NoSuchAccountException, AccountAlreadyActivatedException, VerificationAlreadyUsedException {
         Optional<UserEntity> optionalUser = userRepository.findById(account_id);
         if(!optionalUser.isPresent()) throw new NoSuchAccountException("Account not found: " + account_id);
@@ -71,6 +74,7 @@ public class VerificationImpl implements VerificationService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean resetPassword(String code, long account_id, String newPassword) throws NoSuchAccountException, VerificationAlreadyUsedException {
         if(code == null || code.equals("")) throw new IllegalArgumentException("Code must not be null or empty");
         if(newPassword == null || newPassword.equals("")) throw new IllegalArgumentException("Password must not be null or empty");
